@@ -10,8 +10,9 @@ Requirements for the initial release (MVP). Each maps to a corresponding roadmap
 ### Authentication & Tenant System (SYS)
 
 - [ ] **SYS-01**: Support multi-tenancy with strict data isolation between tenant organizations.
-- [ ] **SYS-02**: Support users belonging to a tenant, with explicit roles (`employee`, `manager`, `hr_head`, `ceo`).
-- [ ] **SYS-03**: Support direct reporting manager relationships for users to enable relative approval assignments (e.g., `approve_by: manager`).
+- [ ] **SYS-02**: Support users belonging to a tenant, with dynamic roles configured as database records (e.g. receptionist, monk, CEO) rather than static code enums.
+- [ ] **SYS-03**: Support direct reporting supervisor links on users to dynamically resolve relative hierarchy paths (e.g. reports to manager) during approval generation.
+- [ ] **SYS-04**: Support registering dynamic Roles per tenant in the database, decoupling role configurations from platform code.
 
 ### Policy Management (POL)
 
@@ -42,6 +43,7 @@ Requirements for the initial release (MVP). Each maps to a corresponding roadmap
 
 - [ ] **AUD-01**: Create immutable audit log records when policies are published, activated, or rolled back.
 - [ ] **AUD-02**: Create audit log records tracking the exact decision path of policy evaluations and individual approval decisions.
+- [ ] **AUD-03**: Establish foundational AuditLog schema and domain entities in Phase 1 to lay the groundwork for governance tracking.
 
 ### User Interface (UI)
 
@@ -84,6 +86,8 @@ Acknowledged but deferred to future milestones.
 | SYS-01 | Phase 1 (Tenant & Core Setup) | Pending |
 | SYS-02 | Phase 1 (Tenant & Core Setup) | Pending |
 | SYS-03 | Phase 1 (Tenant & Core Setup) | Pending |
+| SYS-04 | Phase 1 (Tenant & Core Setup) | Pending |
+| AUD-03 | Phase 1 (Tenant & Core Setup) | Pending |
 | DSL-01 | Phase 2 (DSL Interpreter) | Pending |
 | DSL-02 | Phase 2 (DSL Interpreter) | Pending |
 | DSL-03 | Phase 2 (DSL Interpreter) | Pending |

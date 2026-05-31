@@ -19,17 +19,18 @@ Mini-stry's journey begins by establishing a robust, multi-tenant database found
 ## Phase Details
 
 ### Phase 1: Tenant & Core Data Model Setup
-**Goal**: Establish multi-tenant database models, user roles, direct-reporting manager lines, and directory structure.
+**Goal**: Establish the core multi-tenant data structures, User, dynamic Role, and foundational AuditLog entities, reporting supervisor structures, and directories under Hexagonal Architecture.
 **Depends on**: Nothing (first phase)
-**Requirements**: SYS-01, SYS-02, SYS-03
+**Requirements**: SYS-01, SYS-02, SYS-03, SYS-04, AUD-03
 **Success Criteria**:
-  1. Multi-tenant database tables are successfully migrated.
+  1. Multi-tenant database tables (including dynamic roles and audit logs) are registered in Convex schema.
   2. Subdirectory layout enforces Hexagonal Architecture with clear `adapters`, `application`, `domain`, and `ports` subfolders.
-  3. Strict TypeScript type check passes, and Vitest suite is configured.
+  3. TypeScript compilation passes, verifying 100% data-driven roles and basic AuditLog skeleton entities.
+  4. Vitest testing environment runs successfully.
 **Plans**: 3 plans
-- [ ] 01-01: Configure Typescript environment, Vitest, and create the baseline Monolith-Hexagonal directory structure.
-- [ ] 01-02: Create Prisma Schema for Tenant, User, Role, Policy, Request, ApprovalTask, and AuditLog tables.
-- [ ] 01-03: Implement Tenant & User Repository adapters conforming to core ports, fully covered by unit tests.
+- [ ] 01-01: Configure Typescript environment, Vitest, and create the baseline Monolith-Hexagonal directory structure with domain models.
+- [ ] 01-02: Create Convex Schema defining tenants, users, dynamic roles, policies, requests, tasks, and audit logs.
+- [ ] 01-03: Implement core domain entities (Tenant, User, Role, AuditLog), Repository Ports, and Convex database adapters, fully covered by unit tests.
 
 ### Phase 2: Safe DSL Interpreter Engine
 **Goal**: Build a highly tested, secure lexical scanner, parser, and interpreter in Pure TS to evaluate conditions and emit approval targets.

@@ -8,12 +8,12 @@
 ## User Constraints (from CONTEXT.md)
 
 ### Locked Decisions
-- **D-01**: Build all core business modules with Pure TS domain logic and strict Port interfaces. Implement persistence using a Convex Adapter, keeping Convex dependency isolated inside adapters/database layer.
-- **D-02**: Convex RPC entry points act as adapters/rpc layer, passing requests to application services and returning results.
-- **D-03**: Single database instance with logical data separation using a `tenantId` field present on all Convex database documents.
-- **D-04**: Track reporting hierarchy by having a simple `managerId` field directly on the User entity pointing to another User in the same Tenant.
-- **D-05**: User Roles are defined as a static TS enum: `employee`, `manager`, `hr_head`, `ceo`.
-- **D-06**: Enforce Hexagonal Architecture structure: `domain/`, `ports/`, `application/`, `adapters/` in modular monograph structure.
+- **D-01**: The platform must remain 100% domain-neutral. No HR-specific static code, role enums, or HR-only business assumptions are allowed. Leave requests are purely a demonstration workflow.
+- **D-02**: Roles are completely data-driven (data, not code). We will implement a `RoleEntity` representing tenant-defined roles (e.g. Receptionist, Monk, CEO). The `UserEntity` role property dynamically refers to a registered role string rather than a static TypeScript enum.
+- **D-03**: Support dynamic role registering in the database, allowing each organization (tenant) to declare a custom hierarchy.
+- **D-04**: Direct manager/reporting supervisor relations are tracked dynamically using a simple `managerId` field pointing to another User ID within the same Tenant, representing a generic tree structure.
+- **D-05**: Introduce a basic `AuditLogEntity` domain skeleton in Phase 1 to lay the foundation for policy governance, publication tracking, and approval histories (no service implementation needed yet).
+- **D-06**: Enforce strict Hexagonal Architecture structure: `domain/`, `ports/`, `application/`, `adapters/` in modular monograph structure.
 
 ### the agent's Discretion
 - Exact method signatures in Port interfaces.
@@ -21,7 +21,7 @@
 - Helper scripts for bootstrapping database fields.
 
 ### Deferred Ideas (OUT OF SCOPE)
-- Payroll, attendance tracking, and recruitment features are deferred to future milestones.
+- Full AuditLog persistence flow — Phase 6. Only the domain entity is created in Phase 1.
 
 </user_constraints>
 
@@ -30,9 +30,9 @@
 
 | Capability | Primary Tier | Secondary Tier | Rationale |
 |------------|-------------|----------------|-----------|
-| Tenant CRUD operations | API/Backend (Convex RPC) | Database/Storage | Handled through mutation/query RPC endpoints calling application services |
-| Direct reporting lines | Domain (Pure TS) | API/Backend | Hierarchy rules parsed dynamically from User entities |
+| Tenant & Role CRUD operations | API/Backend (Convex RPC) | Database/Storage | Handled through mutation/query RPC endpoints calling application services |
 | Data isolation checks | Application Layer | Database/Storage | Every database fetch/write enforces logical `tenantId` checking via repository ports |
+| AuditLog schema registry | Database/Storage | Domain (Pure TS) | Basic skeleton registered in Convex schema and Domain entities for future governance |
 | Unit testing coverage | Local/CLI (Vitest) | — | Decoupled Ports allow full test doubles in Vitest without running Convex |
 
 </architectural_responsibility_map>
@@ -40,15 +40,16 @@
 <research_summary>
 ## Summary
 
-This research focuses on building a strict **Hexagonal Architecture (Ports & Adapters)** in a Nest-like modular monolith structure using **Convex** as the serverless persistence engine. Convex functions (queries and mutations) run in a serverless Node-like runtime and execute queries on a document database.
+This research focuses on building a strict **Hexagonal Architecture (Ports & Adapters)** in a Nest-like modular monolith structure using **Convex** as the serverless database. The core theme of this platform is **absolute domain neutrality**: the system does not hardcode any roles (like employee, manager) or HR rules in code. Roles and organization structures are treated entirely as dynamic **data**, configured in the database per tenant.
 
-To follow the **Modular Monolith + Ports & Adapters** architecture strictly without database lock-in:
-1. All core business rules, entities, and services reside in pure TypeScript modules (`src/modules/tenant`). They must have zero imports from `convex/server` or other platform-specific libraries.
-2. Persistence contracts are defined as pure TypeScript Port interfaces in `ports/`.
-3. The Convex Adapters in `adapters/database/` implement the repository ports by wrapping the Convex `ctx.db` database transactions.
-4. The Convex API entry points (in the `convex/` directory) act as RPC Adapters. They receive calls, instantiate the adapters with Convex context, inject them into application services, and invoke the services.
+To achieve complete domain neutrality and dynamic roles in Phase 1:
+1. We define three tables in Convex: `tenants`, `roles`, and `users`. A user record has a `role` string which dynamically references a defined role within that tenant.
+2. We establish the reporting supervisor tree by having a simple `managerId` field (acting as a generic reports-to link) on the `UserEntity`.
+3. We define an `AuditLog` entity skeleton to track events.
+4. Core business modules (`src/modules/tenant`) contain only pure TS code, completely isolated from Convex.
+5. In-Memory mock repositories are used in Vitest to test services and domain flows with 100% code coverage.
 
-**Primary recommendation:** Instantiate Repository Adapters inside each Convex function handler by passing the active transaction context (`ctx.db` or transaction writer) to the Adapter constructor, then execute business logic in pure, testable Application Services.
+**Primary recommendation:** Register the dynamic roles table in the database and represent `role` as a string parameter throughout the Domain and Application layers to ensure total architectural flexibility.
 
 </research_summary>
 
@@ -67,11 +68,6 @@ To follow the **Modular Monolith + Ports & Adapters** architecture strictly with
 | vitest | ^1.5.0 | Test Runner | Primary business logic testing engine |
 | typescript-eslint | ^7.0.0 | Static Code Linting | Enforces clean typing and code quality |
 
-### Alternatives Considered
-| Instead of | Could Use | Tradeoff |
-|------------|-----------|----------|
-| Pure TS Mocks | convex-test | Convex-test is great for testing queries/mutations, but pure TS in-memory repository mocks allow 100% pure unit testing of Domain/Application logic, independent of Convex completely. |
-
 **Installation:**
 ```bash
 npm install convex
@@ -83,60 +79,58 @@ npm install -D vitest @types/node typescript
 <architecture_patterns>
 ## Architecture Patterns
 
-### System Architecture Diagram
-```
-[Client App] --(RPC Network)--> [Convex Functions] (rpc-adapter)
-                                        │
-                                        ▼ (instantiates)
-                                 [TenantService] (application)
-                                        │
-                                        ▼ (invokes port)
-                           [UserRepositoryPort] (port interface)
-                                        │
-                                        ▼ (implemented by)
-                         [ConvexUserRepository] (database-adapter)
-                                        │
-                                        ▼ (reads/writes)
-                               [Convex Database] (ctx.db)
-```
-
 ### Recommended Project Structure
 ```
 convex/
 ├── schema.ts                   # Convex document schema definition
 ├── tenants.ts                  # Convex RPC endpoints (acting as adapters)
+├── roles.ts
 ├── users.ts
 src/
 └── modules/
     └── tenant/
         ├── domain/
-        │   ├── entities.ts     # Pure TS Entities (Tenant, User)
-        │   └── types.ts        # TS Roles Enum & Type Guards
+        │   ├── entities.ts     # Pure TS Entities (Tenant, User, Role, AuditLog)
+        │   └── types.ts        # Pure TS Types
         ├── ports/
         │   ├── tenant.repository.port.ts
+        │   ├── role.repository.port.ts
         │   └── user.repository.port.ts
         ├── application/
         │   ├── tenant.service.ts
         │   ├── user.service.ts
         │   ├── dtos.ts         # Data Transfer Objects
-        │   └── tenant.service.spec.ts  # Vitest unit tests (100% coverage)
+        │   └── user.service.spec.ts  # Vitest unit tests (100% coverage)
         └── adapters/
             └── database/
-                ├── convex-tenant.repository.ts # Implements port via Convex
+                ├── convex-tenant.repository.ts
+                ├── convex-role.repository.ts
                 └── convex-user.repository.ts
 ```
 
-### Pattern 1: Pure Domain Entity Mapping
-Keep entities pure and completely decoupled from database metadata (such as Convex's `_id` and `_creationTime`).
+### Pattern 1: Domain-Neutral Dynamic Roles
+Keep roles entirely data-driven. The user's role is a string pointing to a registered Role entity.
 ```typescript
 // src/modules/tenant/domain/entities.ts
+export class RoleEntity {
+  public readonly id: string;
+  public readonly tenantId: string;
+  public readonly name: string;
+
+  constructor(props: { id: string; tenantId: string; name: string }) {
+    this.id = props.id;
+    this.tenantId = props.tenantId;
+    this.name = props.name;
+  }
+}
+
 export class UserEntity {
   public readonly id: string;
   public readonly tenantId: string;
   public readonly name: string;
   public readonly email: string;
-  public readonly role: string;
-  public readonly managerId?: string;
+  public readonly role: string; // Dynamic string matching RoleEntity.name
+  public readonly managerId?: string; // Reports-to supervisor link
 
   constructor(props: {
     id: string;
@@ -156,36 +150,41 @@ export class UserEntity {
 }
 ```
 
-### Pattern 2: Context Injection in Serverless Adapters
-Pass the Convex database context (`ctx.db` or transaction writer) to the Adapter class during RPC handler setup.
+### Pattern 2: AuditLog Domain Skeleton
+A lightweight, immutable ledger skeleton declared inside the core domain.
 ```typescript
-// src/modules/tenant/adapters/database/convex-user.repository.ts
-import { UserRepositoryPort } from "../../ports/user.repository.port";
-import { UserEntity } from "../../domain/entities";
+// src/modules/tenant/domain/entities.ts (continued)
+export class AuditLogEntity {
+  public readonly id: string;
+  public readonly tenantId: string;
+  public readonly actorId: string;
+  public readonly action: string;
+  public readonly targetType: string; // e.g. "policy", "request", "role"
+  public readonly targetId: string;
+  public readonly details: string;
+  public readonly timestamp: number;
 
-export class ConvexUserRepository implements UserRepositoryPort {
-  // Receives Convex database context (either query or mutation db)
-  constructor(private readonly db: any) {}
-
-  async findById(id: string): Promise<UserEntity | null> {
-    const doc = await this.db.get(id);
-    if (!doc) return null;
-    return new UserEntity({
-      id: doc._id,
-      tenantId: doc.tenantId,
-      name: doc.name,
-      email: doc.email,
-      role: doc.role,
-      managerId: doc.managerId,
-    });
+  constructor(props: {
+    id: string;
+    tenantId: string;
+    actorId: string;
+    action: string;
+    targetType: string;
+    targetId: string;
+    details: string;
+    timestamp: number;
+  }) {
+    this.id = props.id;
+    this.tenantId = props.tenantId;
+    this.actorId = props.actorId;
+    this.action = props.action;
+    this.targetType = props.targetType;
+    this.targetId = props.targetId;
+    this.details = props.details;
+    this.timestamp = props.timestamp;
   }
 }
 ```
-
-### Anti-Patterns to Avoid
-- **Platform Coupling**: Importing Convex packages (`convex/server`) inside the `domain` or `application` directories. This leaks infrastructure details and makes unit testing complex.
-- **Dynamic Eval**: Using `eval()` or `Function()` for evaluating business rules. We must build a deterministic compiler and interpreter for the DSL in Phase 2.
-- **Direct Database Mutation in Handlers**: Writing queries or document inserts directly inside Convex RPC files instead of delegating to domain-specific Application Services.
 
 </architecture_patterns>
 
@@ -194,30 +193,24 @@ export class ConvexUserRepository implements UserRepositoryPort {
 
 | Problem | Don't Build | Use Instead | Why |
 |---------|-------------|-------------|-----|
-| Real-time React reactivity | Custom polling or WebSocket listeners | Convex `useQuery` | Built-in, high-efficiency caching, and transaction-reactive synchronization. |
-| Unique Document IDs | Incremental counter database math | Convex system generated `_id` | Distributed ID safety and immediate index performance. |
+| Dynamic Role Authorization | Complex hardcoded state guards | Database metadata mapping | Data-driven configurations allow zero-downtime additions of new roles. |
 
 </dont_hand_roll>
 
 <common_pitfalls>
 ## Common Pitfalls
 
-### Pitfall 1: Serverless Cold Start Leaks
-**What goes wrong:** Repeated instantiation of heavy dependencies slows down response times.
-**Why it happens:** Serverless functions are stateless, recreating dependencies on every execution.
-**How to avoid:** Keep Application Services and Domain Entities lightweight. Ensure adapters only map pure data types and do not instantiate heavy external runtimes.
-
-### Pitfall 2: Direct Model Exposure
-**What goes wrong:** Leaking internal Convex metadata (`_id`, `_creationTime`) into the React client or frontend modules.
-**Why it happens:** Passing database document results directly to the UI without mapping to Domain Entities.
-**How to avoid:** Always map Convex documents to clean TS `UserEntity` or standard Application DTOs (`dtos.ts`) in the repository adapter before sending them back.
+### Pitfall 1: Domain-leakage via Hardcoded Enums
+**What goes wrong:** Restricting the platform to specific organization types (like HR) by writing static role enums (monk vs manager vs supervisor).
+**Why it happens:** Attempting to hardcode domain convenience in typescript files.
+**How to avoid:** Treat roles as records in the database. Read roles dynamically, and let the parser in Phase 2 handle validation at runtime.
 
 </common_pitfalls>
 
 <code_examples>
 ## Code Examples
 
-### Defining clean Convex Schema
+### Defining clean, dynamic Convex Schema
 ```typescript
 // convex/schema.ts
 import { defineSchema, defineTable } from "convex/server";
@@ -227,76 +220,37 @@ export default defineSchema({
   tenants: defineTable({
     name: v.string(),
   }),
+  roles: defineTable({
+    tenantId: v.string(),
+    name: v.string(),
+  }).index("by_tenant", ["tenantId"]),
   users: defineTable({
     tenantId: v.string(), // logical isolation
     name: v.string(),
     email: v.string(),
-    role: v.string(), // employee, manager, hr_head, ceo
-    managerId: v.optional(v.string()), // reports-to reporting link
+    role: v.string(), // dynamic role string referencing roles.name
+    managerId: v.optional(v.string()), // parent reporting supervisor link
   }).index("by_tenant", ["tenantId"]),
-});
-```
-
-### Convex RPC Handler acting as Hexagonal Adapter
-```typescript
-// convex/users.ts
-import { mutation, query } from "./_generated/server";
-import { v } from "convex/values";
-import { ConvexUserRepository } from "../src/modules/tenant/adapters/database/convex-user.repository";
-import { UserService } from "../src/modules/tenant/application/user.service";
-
-export const createUser = mutation({
-  args: {
+  auditLogs: defineTable({
     tenantId: v.string(),
-    name: v.string(),
-    email: v.string(),
-    role: v.string(),
-    managerId: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    // 1. Instantiate Convex Adapter with db transaction context
-    const userRepository = new ConvexUserRepository(ctx.db);
-    
-    // 2. Instantiate Application Service
-    const userService = new UserService(userRepository);
-    
-    // 3. Execute request through the Application layer
-    return await userService.registerUser(args);
-  },
+    actorId: v.string(),
+    action: v.string(),
+    targetType: v.string(),
+    targetId: v.string(),
+    details: v.string(),
+    timestamp: v.number(),
+  }).index("by_tenant", ["tenantId"]),
 });
 ```
 
 </code_examples>
 
-<sota_updates>
-## State of the Art (2024-2025)
-
-| Old Approach | Current Approach | When Changed | Impact |
-|--------------|------------------|--------------|--------|
-| Fat RPC Handlers containing SQL/NoSQL statements | Lean RPC Wrappers orchestrating pure TS Application Services | 2023+ | Clean architectural separation, enabling testability in non-serverless runtimes. |
-| In-browser validation | Unified Type Guards inside Domain Entities | 2024 | Prevents data corruption across API and storage boundaries. |
-
-</sota_updates>
-
-<open_questions>
-## Open Questions
-
-1. **How should we handle direct database indexes in Convex since Convex is NoSQL?**
-   - *What we know:* Convex indexes are defined statically in `schema.ts` (e.g. `.index("by_tenant", ["tenantId"])`).
-   - *What is unclear:* How the pure TS repository port can communicate abstract index requirements to the Convex adapter without hardcoding platform details.
-   - *Recommendation:* Keep port methods high-level (e.g., `findByTenant(tenantId)`), and implement the specific Convex index scan inside the Convex adapter using `db.query("users").withIndex("by_tenant", q => q.eq("tenantId", tenantId))` directly.
-
-</open_questions>
-
 <sources>
 ## Sources
 
 ### Primary (HIGH confidence)
-- Convex Official Documentation (schema definitions, mutations, serverless execution parameters).
-- Clean Architecture / Hexagonal Architecture Monograph (Ports & Adapters standards).
-
-### Secondary (MEDIUM confidence)
-- Vitest testing benchmarks for TypeScript.
+- Convex Official Documentation.
+- Ports & Adapters Hexagonal Design Principles.
 
 </sources>
 
@@ -304,15 +258,14 @@ export const createUser = mutation({
 ## Metadata
 
 **Research scope:**
-- Core technology: Convex serverless, TypeScript domain entities.
+- Core technology: Convex, TypeScript dynamic typings.
 - Ecosystem: Hexagonal Architecture, modular monoliths, Vitest.
-- Patterns: Adapter injection, logical tenant separation, reporting hierarchy.
-- Pitfalls: Platform coupling, direct model leakage.
+- Patterns: Dynamic data-driven roles, AuditLog skeleton, reports-to tree structure.
 
 **Confidence breakdown:**
-- Standard stack: HIGH - Convex and TypeScript are extremely mature and highly integrated.
-- Architecture: HIGH - Monograph Hexagonal rules apply perfectly to serverless.
-- Pitfalls: HIGH - Documented architectural rules.
+- Standard stack: HIGH
+- Architecture: HIGH
+- Pitfalls: HIGH
 
 **Research date:** 2026-05-31
 **Valid until:** 2026-06-30

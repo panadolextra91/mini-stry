@@ -5,19 +5,19 @@
 
 **Date:** 2026-05-31
 **Phase:** 01-tenant-core-setup
-**Areas discussed:** Database & ORM Adapter, Multi-Tenancy Isolation, Reporting Lines
+**Areas discussed:** Domain Neutrality & Decoupled Roles, Multi-Tenancy Isolation, Reporting Lines, Audit Log Foundation
 
 ---
 
-## Database & ORM Adapter
+## Domain Neutrality & Decoupled Roles
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| Hexagonal Ports with Prisma Adapter | Standard relational databases (PostgreSQL/MySQL) using Prisma ORM. | |
-| Hexagonal Ports with Convex Adapter | Real-time serverless document database (Convex) specified in the original brief. | ✓ |
+| Static Role Enum | Hardcode employee, manager, hr_head, ceo roles as a code enum. | |
+| Dynamic Data-Driven Roles | Create `RoleEntity` and `Role` schema to represent dynamic, tenant-configured roles (e.g. receptionist, supervisor, monk). | ✓ |
 
-**User's choice:** Hexagonal Ports with Convex Adapter.
-**Notes:** Decoupled Hexagonal structure allows core logic to stay pure TS, making database adapters interchangeable.
+**User's choice:** Dynamic Data-Driven Roles (data, not code).
+**Notes:** Decouples core platform from HR-specific limitations, allowing multi-domain compatibility (hotels, temples, contractors).
 
 ---
 
@@ -41,7 +41,19 @@
 | Dedicated Reporting Table | Dedicated table mapping hierarchy and history. | |
 
 **User's choice:** Simple reporting link.
-**Notes:** Keep it simple for the MVP to avoid complex org-graph database query overhead.
+**Notes:** Simple, dynamic supervisor tree structure is highly domain-neutral.
+
+---
+
+## Audit Log Foundation
+
+| Option | Description | Selected |
+|--------|-------------|----------|
+| Postponed | Defer all AuditLog work to Phase 6. | |
+| Foundational Skeleton | Introduce `AuditLogEntity` domain model skeleton and schema in Phase 1 without service implementation. | ✓ |
+
+**User's choice:** Foundational Skeleton in Phase 1.
+**Notes:** Essential for governance tracing, establishing the database entity layout early.
 
 ---
 
@@ -53,7 +65,7 @@
 
 ## Deferred Ideas
 
-- None — discussion stayed within phase scope.
+- Full AuditLog persistence flow — Phase 6.
 
 ---
 

@@ -6,26 +6,26 @@
 <domain>
 ## Phase Boundary
 
-Establish the core multi-tenant directory, user profiles, reporting structures, and database schema using Hexagonal Architecture (Modular Monolith style). Decouple using Repository Ports and write Convex database adapters.
+Establish the core multi-tenant directory, user profiles, dynamic role structures, reporting supervisors, and basic AuditLog skeleton entities, structured under Modular Monolith + Hexagonal Architecture rules. Persistence is decoupled via clean TypeScript Ports and implemented using a serverless Convex database adapter.
 
 </domain>
 
 <decisions>
 ## Implementation Decisions
 
-### Database & ORM
-- **D-01**: Build all core business modules with Pure TS domain logic and strict Port interfaces. Implement persistence using a Convex Adapter, keeping Convex dependency isolated inside adapters/database layer.
-- **D-02**: Convex RPC entry points act as adapters/http (or adapters/rpc) layer, passing requests to application services and returning results.
+### Domain Neutrality & Decoupled Roles
+- **D-01**: The platform must remain 100% domain-neutral. No HR-specific static code, role enums, or HR-only business assumptions are allowed. Leave requests are purely a demonstration workflow.
+- **D-02**: Roles are completely data-driven (data, not code). We will implement a `RoleEntity` representing tenant-defined roles (e.g. Receptionist, Monk, CEO). The `UserEntity` role property dynamically refers to a registered role string rather than a static TypeScript enum.
+- **D-03**: Support dynamic role registering in the database, allowing each organization (tenant) to declare a custom hierarchy.
 
-### Multi-Tenancy Isolation
-- **D-03**: Single database instance with logical data separation using a `tenantId` field present on all Convex database documents.
+### Supervisor Reporting Structure
+- **D-04**: Direct manager/reporting supervisor relations are tracked dynamically using a simple `managerId` field pointing to another User ID within the same Tenant, representing a generic tree structure.
 
-### Reporting Lines Hierarchy
-- **D-04**: Track reporting hierarchy by having a simple `managerId` field directly on the User entity pointing to another User in the same Tenant.
-- **D-05**: User Roles are defined as a static TS enum: `employee`, `manager`, `hr_head`, `ceo`.
+### Audit Log Foundation
+- **D-05**: Introduce a basic `AuditLogEntity` domain skeleton in Phase 1 to lay the foundation for policy governance, publication tracking, and approval histories (no service implementation needed yet).
 
-### Hexagonal Folder Structure
-- **D-06**: Restructure codebase matching:
+### Modular Monolith & Hexagonal Folder Structure
+- **D-06**: Enforce strict Hexagonal Architecture structure:
   ```
   convex/
     schema.ts             <- Convex database schema definition
@@ -35,18 +35,20 @@ Establish the core multi-tenant directory, user profiles, reporting structures, 
     modules/
       tenant/
         domain/
-          entities.ts     <- Pure TS (Tenant, User, Role entities)
+          entities.ts     <- Pure TS (Tenant, User, Role, AuditLog entities)
           types.ts
         ports/
           tenant.repository.port.ts <- TS Interfaces
           user.repository.port.ts
+          role.repository.port.ts
         application/
           tenant.service.ts  <- Orchestrates tenant operations
-          user.service.ts
+          user.service.ts    <- Handles dynamic role assignments and registration
         adapters/
           database/
             convex-tenant.repository.ts <- Implements port using Convex DB
             convex-user.repository.ts
+            convex-role.repository.ts
   ```
 
 ### the agent's Discretion
@@ -60,7 +62,7 @@ Establish the core multi-tenant directory, user profiles, reporting structures, 
 ## Specific Ideas
 
 - Domain layer is 100% Pure TS, not importing from any Convex library, guaranteeing database independence.
-- Convex entry points are thin wrappers that decode inputs, fetch dependencies, delegate to Application services, and handle runtime exceptions.
+- Roles can be absolutely anything (Receptionist, Monk, CEO, Supervisor). The DSL evaluator in Phase 2 will dynamically match these role strings against matching rules (e.g., `approve_by: supervisor`).
 
 </specifics>
 
@@ -71,7 +73,7 @@ Establish the core multi-tenant directory, user profiles, reporting structures, 
 
 ### Product Vision & Specifications
 - `docs/idea.md` — Multi-tenant policy engine concept, core models, stack, constraints, and 2-week MVP roadmap.
-- `docs/engineering.md` — Strict testing rules (100% engine coverage, 90%+ critical logic), architecture isolation boundaries, and strict TS code quality guidelines.
+- `docs/engineering.md` — Quality philosophies, strict testing coverage targets (100% engine coverage, 90%+ critical logic), and architectural bounds.
 
 </canonical_refs>
 
@@ -85,14 +87,14 @@ Establish the core multi-tenant directory, user profiles, reporting structures, 
 - Absolute Modular Monolith + Ports & Adapters pattern established in `EXECUTE_RULE.MD`.
 
 ### Integration Points
-- This is Phase 1; all subsequent phases will import and build upon the tenant/user domain models and repository ports created here.
+- This is Phase 1; all subsequent modules (DSL compiler, policy versioner, request evaluator) will import and build upon the tenant, user, dynamic role, and audit log domain models created here.
 
 </code_context>
 
 <deferred>
 ## Deferred Ideas
 
-- None — discussion stayed within phase scope.
+- Full AuditLog persistence flow — Phase 6. Only the domain entity is created in Phase 1.
 
 </deferred>
 
