@@ -2,112 +2,127 @@
 
 ## Overview
 
-Mini-stry's development journey begins at the absolute core of the product: building a secure, deterministic, pure-TypeScript Lexer, Parser, and AST Interpreter to compile and execute policy DSL rules. Once the core engine is proven, we construct the versioning ledger and the dynamic approval generation logic. Only then do we layer in the supporting directory context providers (Tenants, Users, dynamic ID-based Roles, reports-to supervisors) and implement a secure audit logging layer. Finally, we deliver a premium Monaco-based React portal.
+Mini-stry's development journey is structured around the runtime formula:
+
+```
+Policy + EvaluationContext  →  Decision  →  Decision Consumers
+```
+
+**Phase 1** establishes the multi-tenant directory primitives (Tenants, Users, dynamic Roles, domain skeletons). **Phase 2** implements the Policy Runtime Core — defines the `EvaluationContext` interface, structured JSON rule schemas, native JSON Schema validation (a prerequisite to evaluation), the safe Pure-TS evaluator, and base Decision emission. **Phase 3** wraps the runtime in a Policy Lifecycle — draft, publish, immutability, rollback, audit. **Phase 4** introduces the request submission runtime and decision-path tracing. **Phase 5** ships the first reference Decision Consumer — sequential supervisor approval routing — to demonstrate the runtime's downstream pluggability. **Phase 6** delivers a premium Monaco-based React admin portal.
+
+The runtime stays domain-neutral. Approval routing is one consumer among many; it is not the runtime's purpose.
 
 ## Phases
 
-- [ ] **Phase 1: Safe Policy Runtime & DSL Parser** - Build a safe, deterministic, pure-TypeScript Lexer, Parser, and AST Interpreter, verified against mock context payloads with 100% Vitest coverage.
-- [ ] **Phase 2: Policy Versioning & Publishing Ledger** - Develop the policy creation, immutable version increments upon publishing, active-version tracking, and rollback operations.
-- [ ] **Phase 3: Decision & Approval Generation** - Dynamic approval task tree and sequential chain construction resolved from evaluation AST decision nodes.
-- [ ] **Phase 4: Multi-Tenant Context & Directory Providers** - Database schema and dynamic directory adapters (Tenants, Users, dynamic roleId links, and managerId supervisors) as supporting context providers.
-- [ ] **Phase 5: Audit Logging & Tracing** - Record immutable execution audit logs for policy changes and approval transaction tracks.
-- [ ] **Phase 6: Frontend Monaco Editor & UI Dashboards** - React portal with Monaco DSL editor, request submission, and manager approval inbox.
+- [ ] **Phase 1: Core Platform Foundations** - Establish modular directory structure, domain entity interfaces, Convex schemas (Tenants, Users, dynamic ID-based Roles, initial skeletons for Policy, PolicyVersion, AuditLog), and decoupled Application Services (RoleService and UserService) verified with Vitest.
+- [ ] **Phase 2: Policy Runtime Core** - Define the `EvaluationContext` interface, structured JSON rule schemas, native JSON Schema validation (prerequisite to evaluation), the safe relational evaluator (Pure TS, no `eval()`), and base Decision emission.
+- [ ] **Phase 3: Policy Lifecycle** - Wrap the runtime in a draft → publish → activate → rollback lifecycle with immutable versioning. Reuse the runtime's JSON Schema validator at lifecycle boundaries.
+- [ ] **Phase 4: Request Runtime** - Orchestrate evaluation payloads submitted as EvaluationContexts to active policies, persist decision records, and trace step-by-step execution paths.
+- [ ] **Phase 5: Approval Routing (Reference Decision Consumer)** - Ship the first reference Decision Consumer. Resolve supervisor reporting lines (`managerId`) and role registries to generate sequential, multi-stage approval task chains from Request-Approval Decisions.
+- [ ] **Phase 6: Admin Portal & UI Dashboard** - Premium React portal featuring a Monaco-based JSON editor with autocompletion, real-time validation, request logs, and personal approval dashboard.
 
 ---
 
 ## Phase Details
 
-### Phase 1: Safe Policy Runtime & DSL Parser
-**Goal**: Build a highly tested, secure, and completely deterministic Lexer, Parser, and AST Interpreter in pure TypeScript to compile rules and evaluate outcomes without using `eval()`.
+### Phase 1: Core Platform Foundations
+**Goal**: Bootstrap directory structures, database schemas, decoupled core domain entities, and separated application-layer registries (RoleService and UserService) to support dynamic ID-based role reference structures.
 **Depends on**: Nothing (first phase)
-**Requirements**: POL-05, POL-06, RUN-02, AUD-03
+**Requirements**: CON-01, CON-02, CON-03, CON-04, POL-05, POL-06, AUD-03
 **Success Criteria**:
-  1. Base modular directory structure is established under Hexagonal Architecture rules.
-  2. Lexer tokenizes a policy file with conditional expressions.
-  3. AST Parser builds clean, structured rule representations.
-  4. Interpreter evaluates rules correctly against dynamic payloads and returns predicted decisions.
-  5. Policy engine unit tests achieve 100% code coverage.
+  1. Base modular directory structure established under modular monorepo and Hexagonal Architecture rules.
+  2. Convex schemas define isolation index structures for Tenants, Users, dynamic Roles, and initial skeletons.
+  3. Stable user-role references resolved via unique database ID (`roleId`), eliminating renaming failures.
+  4. RoleService and UserService decoupled in application layer, enforcing Single Responsibility.
+  5. Skeletons for `PolicyEntity`, `PolicyVersionEntity`, and `AuditLogEntity` defined as first-class domain citizens.
 **Plans**: 3 plans
+- [ ] 01-01: Establish Hexagonal directory structure and pure-TS domain entity interfaces (Tenant, User, Role, Policy, PolicyVersion, AuditLog).
+- [ ] 01-02: Design Convex database schemas with strict logical isolation multi-tenant index fields.
+- [ ] 01-03: Implement decoupled RoleService and UserService application layers, Convex persistence adapters, and Vitest test suites.
 
-Plans:
-- [ ] 01-01: Configure Typescript environment, Vitest, and create the baseline Monolith-Hexagonal directory structure with domain entities (Tenant, User, Role, Policy, PolicyVersion, AuditLog).
-- [ ] 01-02: Implement the lexical scanner (Lexer) and AST Parser for the custom policy DSL syntax.
-- [ ] 01-03: Implement the safe, deterministic evaluation Interpreter (evaluator) in pure TS, verified by 100% test coverage in Vitest.
-
-### Phase 2: Policy Versioning & Publishing Ledger
-**Goal**: Develop the policy pipeline that compiles the DSL and guarantees version immutability upon publishing.
+### Phase 2: Policy Runtime Core
+**Goal**: Implement the pure-function runtime: `Policy + EvaluationContext → Decision`. Define the `EvaluationContext` interface, structured JSON rule schemas, native JSON Schema validation (as a prerequisite to evaluation), the safe relational evaluator (Pure TS, no `eval()`), and base Decision emission.
 **Depends on**: Phase 1
-**Requirements**: POL-01, POL-02, POL-03, POL-04
+**Requirements**: CTX-01, CTX-02, RUN-01, RUN-02, RUN-03, DEC-02
 **Success Criteria**:
-  1. Creating and publishing a policy compiles the DSL and increments versions cleanly.
-  2. Modifying a published policy throws an explicit error, guaranteeing immutability.
-  3. Rollback operations restore previous active versions instantly.
-**Plans**: 2 plans
-- [ ] 02-01: Implement policy drafts, compilation validation, and immutable publishing flows.
-- [ ] 02-02: Implement active-state activation, rollback mechanics, and repository port operations.
-
-### Phase 3: Decision & Approval Generation
-**Goal**: Process dynamic request payloads against active policies to dynamically generate structured decisions and sequential approval tasks.
-**Depends on**: Phase 2
-**Requirements**: DEC-01, DEC-02, DEC-03
-**Success Criteria**:
-  1. Evaluating requests evaluates active DSL rules and outputs decision nodes (e.g. Auto-Approve vs task generation).
-  2. Generates sequential Approval Tasks (Step 1 must be approved before Step 2 opens).
-  3. Approve/Reject decisions trigger clean state machine transitions.
-**Plans**: 2 plans
-- [ ] 03-01: Implement Request Domain entities and evaluation orchestrator.
-- [ ] 03-02: Implement sequential approval task chain generation and decision state machine.
-
-### Phase 4: Multi-Tenant Context & Directory Providers
-**Goal**: Build database schema, dynamic role mappings, and user directories to feed context variables into the runtime.
-**Depends on**: Phase 3
-**Requirements**: CON-01, CON-02, CON-03, CON-04
-**Success Criteria**:
-  1. Convex Schema defines Tenants, Users (linked via roleId), dynamic Roles, and AuditLogs.
-  2. UserService and RoleService are decoupled and enforce single responsibility.
-  3. Dynamic roleId references keep user linkages stable if roles are renamed.
+  1. `EvaluationContext` defined as a domain-neutral TS interface with no hardcoded domain fields.
+  2. JSON rule model supports relational operators (e.g. eq, gt, lt, contains) and variable lookups against the EvaluationContext.
+  3. JSON Schema validation rejects malformed policies before they reach the evaluator. The evaluator can never run on an invalid policy.
+  4. Condition evaluation engine runs in Pure TypeScript, completely banning dynamic code execution or `eval()`.
+  5. Base decision emitter accurately produces structured Decisions (Auto-Approve, Auto-Reject, Request-Approval). The Decision type is open to future outcomes.
+  6. 100% test coverage on JSON Schema validation, condition evaluation, and Decision emission.
 **Plans**: 3 plans
-- [ ] 04-01: Implement Convex database schema, logical multi-tenant indices, and repository ports.
-- [ ] 04-02: Implement decoupled RoleService and UserService application layers.
-- [ ] 04-03: Implement Convex database adapters and verify dynamic roleId/reports-to validations with tests.
+- [ ] 02-01: Define the `EvaluationContext` interface and structured JSON policy rule schemas; ship the JSON Schema validator as the runtime's first checkpoint.
+- [ ] 02-02: Implement deterministic Pure-TS JSON Policy Condition Evaluator with relational logic over the EvaluationContext.
+- [ ] 02-03: Implement base Decision emitter yielding structured Decisions from rule evaluation results.
 
-### Phase 5: Audit Logging & Tracing
-**Goal**: Hook immutable transaction audit logs into policy publications, compilations, and approval decisions.
-**Depends on**: Phase 4
-**Requirements**: AUD-01, AUD-02, AUD-03
+### Phase 3: Policy Lifecycle
+**Goal**: Wrap the runtime in an administrative lifecycle — draft, publish (immutable), activate, rollback — and persist policy publication audit logs. Lifecycle operations reuse the runtime's JSON Schema validator at their boundaries.
+**Depends on**: Phase 2
+**Requirements**: POL-01, POL-02, POL-03, POL-04, AUD-01
 **Success Criteria**:
-  1. Logs secure ledger entries for all policy activation updates.
-  2. Logs every request evaluation detail, storing the exact AST decision path.
+  1. Draft modifications invoke the runtime-layer JSON Schema validator before save.
+  2. Modifying a published policy throws an explicit error, guaranteeing absolute version immutability.
+  3. Active-version tracking allows seamless updates and instant rollbacks to arbitrary version IDs.
+  4. Policy publication/rollback events logged to immutable audit records.
 **Plans**: 2 plans
-- [ ] 05-01: Implement AuditLog domain port and middleware trackers.
-- [ ] 05-02: Implement Convex database adapters for audit logging and verify integration.
+- [ ] 03-01: Implement draft modifications calling the runtime schema validator, and immutable publishing logic.
+- [ ] 03-02: Implement active-state selector, rollback handler, and Convex lifecycle persistence adapters.
 
-### Phase 6: Frontend Monaco Editor & UI Dashboards
-**Goal**: Build a stunning, dark-mode React client featuring a Monaco DSL editor, submission forms, and a manager approval inbox.
+### Phase 4: Request Runtime
+**Goal**: Orchestrate request payload submissions as EvaluationContexts, run them through the Policy Runtime against active policy versions, and persist decision-path traces.
+**Depends on**: Phase 3
+**Requirements**: DEC-01, AUD-02
+**Success Criteria**:
+  1. PolicyRuntimeService successfully runs submitted EvaluationContexts against active JSON rules.
+  2. Records step-by-step evaluation results, storing the precise decision path mapped during the run.
+**Plans**: 2 plans
+- [ ] 04-01: Implement request submission handlers (EvaluationContext intake) and PolicyRuntimeService orchestration logic.
+- [ ] 04-02: Implement step-by-step path tracer and record outcomes to AuditLogs.
+
+### Phase 5: Approval Routing (Reference Decision Consumer)
+**Goal**: Ship the first reference Decision Consumer. Resolve supervisor reporting lines (`managerId`) and role registries to dynamically construct sequential, multi-stage approval task chains from Request-Approval Decisions. This phase demonstrates how external consumers act on Decisions; the runtime itself remains agnostic to it.
+**Depends on**: Phase 4
+**Requirements**: DEC-03
+**Success Criteria**:
+  1. `ApprovalRoutingService` subscribes to Request-Approval Decisions emitted by the runtime; the runtime has no compile-time dependency on routing.
+  2. Dynamically resolves supervisor/reporting managers using User `managerId` references.
+  3. Resolves target tenant roles per review step using the dynamic Roles registry.
+  4. Generates sequential multi-stage Approval Tasks (e.g. Stage 1 must pass before Stage 2 activates).
+  5. Approver actions (Approve, Reject) trigger deterministic task state transitions.
+**Plans**: 2 plans
+- [ ] 05-01: Implement role and supervisor reporting hierarchy dynamic resolvers.
+- [ ] 05-02: Implement sequential approval task generator and step-by-step approval state machine, subscribed to runtime Decisions.
+
+### Phase 6: Admin Portal & UI Dashboard
+**Goal**: Build a highly premium React web interface with a dark-mode theme, live Monaco JSON policy editor, active request logs, and interactive supervisor dashboards.
 **Depends on**: Phase 5
 **Requirements**: UI-01, UI-02, UI-03, UI-04
 **Success Criteria**:
-  1. Premium, animated React portal wowing the user.
-  2. Admin writes DSL policies inside Monaco Editor with real-time compilation checks.
-  3. Personal inbox displays pending tasks with transparent decision trails.
-**Plans**: 4 plans
-- [ ] 06-01: Bootstrap React routing, layout, and TailwindCSS theme tokens.
-- [ ] 06-02: Integrate Monaco Editor with live syntax check panel.
-- [ ] 06-03: Build request logs, dynamic forms, and approval dashboards.
-- [ ] 06-04: Build governance timeline viewer for audit logs.
+  1. Admin portal embeds Monaco Editor featuring live JSON Schema autocomplete and error hints (driven by the runtime's schema).
+  2. Request center displays dynamic submission forms (EvaluationContext intake) and rich execution logs visualization.
+  3. Personal dashboard features active inbox tasks allowing fast Approve/Reject actions.
+  4. Governance module visualizes audit trails and comparative policy version lists.
+**Plans**: 3 plans
+- [ ] 06-01: Bootstrap modern React routes, visual layouts, and dark mode design HSL variables.
+- [ ] 06-02: Build Admin Policy Portal with autocomplete Monaco JSON Editor and schema check panel.
+- [ ] 06-03: Build Request Logs visualizer, Approver Personal Inbox, and Governance timeline dashboards.
 
 ---
 
 ## Progress
 
-**Execution Order:**
+**Execution Order**:
 Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Safe Policy Runtime & DSL Parser | 0/3 | Not started | - |
-| 2. Policy Versioning & Publishing | 0/2 | Not started | - |
-| 3. Decision & Approval Generation | 0/2 | Not started | - |
-| 4. Multi-Tenant Context & Directories | 0/3 | Not started | - |
-| 5. Audit Logging & Tracing | 0/2 | Not started | - |
-| 6. Frontend Monaco Editor & UI | 0/4 | Not started | - |
+| 1. Core Platform Foundations | 0/3 | Ready to plan | - |
+| 2. Policy Runtime Core | 0/3 | Not started | - |
+| 3. Policy Lifecycle | 0/2 | Not started | - |
+| 4. Request Runtime | 0/2 | Not started | - |
+| 5. Approval Routing (Reference Decision Consumer) | 0/2 | Not started | - |
+| 6. Admin Portal & UI Dashboard | 0/3 | Not started | - |
+
+---
+*Last updated: 2026-05-31 after Final Architecture Alignment Review (RUN-03 moved Phase 3 → Phase 2; CTX-01/CTX-02 added to Phase 2; Phase 5 reframed as Reference Decision Consumer).*
