@@ -17,8 +17,9 @@ Empowers organizations to dynamically define, version, and execute custom busine
 ### Active
 
 - [ ] **SYS-01 (Multi-Tenancy)**: Support isolated data, users, and roles across multiple tenants.
-- [ ] **SYS-02 (Dynamic Data-Driven Roles)**: Support custom, tenant-defined roles configured dynamically as database records (e.g. receptionist, monk, supervisor, CEO) rather than static code enums.
-- [ ] **SYS-03 (Reporting Lines)**: Support direct reporting links on users to resolve relative approval chains (e.g. reports to supervisor).
+- [ ] **SYS-02 (Dynamic ID-Based Roles)**: Support custom, tenant-defined roles configured dynamically in the database and linked to users via stable identifiers (`roleId`) rather than mutable name strings or static enums.
+- [ ] **SYS-03 (Reporting Lines)**: Support direct reporting supervisor links (`managerId`) on users to resolve relative hierarchy paths during evaluation.
+- [ ] **SYS-04 (Role Management System)**: Support registering, listing, and renaming roles dynamically via a dedicated Role Service.
 - [ ] **POL-01 (Policy Versioning & Publishing)**: Support creating, versioning, and publishing policies. Published policies are immutable, and only one version is active at a time.
 - [ ] **DSL-01 (Safe Policy DSL)**: Support a human-readable, text-based DSL for defining multi-stage approval rules.
 - [ ] **ENG-01 (Safe DSL Interpreter)**: Implement a completely deterministic, safe DSL parser and evaluation engine in Pure TypeScript (NO `eval()` or dynamic execution).
@@ -36,8 +37,11 @@ Empowers organizations to dynamically define, version, and execute custom busine
 ## Context
 
 We are building a highly decoupled, modular policy engine. To guarantee extreme maintainability and prevent domain leaks, we are utilizing **Hexagonal Architecture (Ports & Adapters)** in a **Modular Monolith** style.
-- **Domain Layer**: Contains the core logic of the Policy Engine, dynamic parser, and foundational entities (Tenant, User, Role, AuditLog) in Pure TS. Completely isolated.
-- **Application Layer**: Contains services executing actions and orchestrating business logic, communicating through Ports.
+- **Domain Layer**: Contains the core logic of the Policy Engine, dynamic parser, and foundational entities (**Tenant, User, Role, Policy, PolicyVersion, AuditLog**) in Pure TS. Completely isolated.
+- **Application Layer**: Contains services executing actions and orchestrating business logic:
+  - **RoleService**: Manages role creations, renames, and queries.
+  - **UserService**: Manages user registrations, role assignments, and supervisor reporting lines.
+  - **TenantService**: Manages tenant registrations.
 - **Adapter Layer**: Implements persistence and communication adapters (Convex).
 
 ## Constraints
@@ -51,8 +55,9 @@ We are building a highly decoupled, modular policy engine. To guarantee extreme 
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Dynamic Role Model | Hardcoding roles in enums limits the platform to HR. Treating roles as tenant configuration data enables multi-domain flexibility. | — Pending |
-| Foundational AuditLog | Policy governance requires strict auditability. Establishing an AuditLog skeleton in Phase 1 ensures tracing is designed-in. | — Pending |
+| ID-based Role References | Storing role name strings directly on users creates coupling and leads to inconsistencies if roles are renamed. Using a stable `roleId` keeps references stable. | — Pending |
+| Policy Domain Skeletons in Phase 1 | Placing `PolicyEntity` and `PolicyVersionEntity` skeletons in Phase 1 establishes policies as first-class citizens and prevents future breaking domain refactors. | — Pending |
+| Dedicated RoleService | Separates role management (register, rename, list) from user management (register, assign, report), adhering to Single Responsibility. | — Pending |
 
 ## Evolution
 

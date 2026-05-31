@@ -10,9 +10,9 @@ Requirements for the initial release (MVP). Each maps to a corresponding roadmap
 ### Authentication & Tenant System (SYS)
 
 - [ ] **SYS-01**: Support multi-tenancy with strict data isolation between tenant organizations.
-- [ ] **SYS-02**: Support users belonging to a tenant, with dynamic roles configured as database records (e.g. receptionist, monk, CEO) rather than static code enums.
-- [ ] **SYS-03**: Support direct reporting supervisor links on users to dynamically resolve relative hierarchy paths (e.g. reports to manager) during approval generation.
-- [ ] **SYS-04**: Support registering dynamic Roles per tenant in the database, decoupling role configurations from platform code.
+- [ ] **SYS-02**: Support users belonging to a tenant, linked via a stable `roleId` to dynamic role definitions rather than name strings or static enums.
+- [ ] **SYS-03**: Support direct reporting supervisor links (`managerId`) on users to dynamically resolve relative hierarchy paths (e.g. reports to supervisor) during approval generation.
+- [ ] **SYS-04**: Support registering, listing, and renaming dynamic Roles per tenant in the database via a dedicated Role Service (`RoleService`).
 
 ### Policy Management (POL)
 
@@ -20,6 +20,8 @@ Requirements for the initial release (MVP). Each maps to a corresponding roadmap
 - [ ] **POL-02**: Support publishing policies, which increments the version number.
 - [ ] **POL-03**: Guarantee immutability of policy versions once published (no modifications to existing versions).
 - [ ] **POL-04**: Track the single active policy version for each request type in a tenant, allowing rollback to previous versions.
+- [ ] **POL-05**: Establish `PolicyEntity` domain skeleton in Phase 1 to lay the foundation for policy configuration.
+- [ ] **POL-06**: Establish `PolicyVersionEntity` domain skeleton in Phase 1 to lay the foundation for immutable version metadata.
 
 ### DSL & Interpreter Engine (DSL)
 
@@ -88,6 +90,8 @@ Acknowledged but deferred to future milestones.
 | SYS-03 | Phase 1 (Tenant & Core Setup) | Pending |
 | SYS-04 | Phase 1 (Tenant & Core Setup) | Pending |
 | AUD-03 | Phase 1 (Tenant & Core Setup) | Pending |
+| POL-05 | Phase 1 (Tenant & Core Setup) | Pending |
+| POL-06 | Phase 1 (Tenant & Core Setup) | Pending |
 | DSL-01 | Phase 2 (DSL Interpreter) | Pending |
 | DSL-02 | Phase 2 (DSL Interpreter) | Pending |
 | DSL-03 | Phase 2 (DSL Interpreter) | Pending |

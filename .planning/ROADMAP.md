@@ -19,18 +19,18 @@ Mini-stry's journey begins by establishing a robust, multi-tenant database found
 ## Phase Details
 
 ### Phase 1: Tenant & Core Data Model Setup
-**Goal**: Establish the core multi-tenant data structures, User, dynamic Role, and foundational AuditLog entities, reporting supervisor structures, and directories under Hexagonal Architecture.
+**Goal**: Establish the core multi-tenant directory, Tenant, User (with ID-based roleId references), dynamic Role, foundational AuditLog, Policy, and PolicyVersion entities, reporting supervisor structures, and directories under Hexagonal Architecture.
 **Depends on**: Nothing (first phase)
-**Requirements**: SYS-01, SYS-02, SYS-03, SYS-04, AUD-03
+**Requirements**: SYS-01, SYS-02, SYS-03, SYS-04, AUD-03, POL-05, POL-06
 **Success Criteria**:
   1. Multi-tenant database tables (including dynamic roles and audit logs) are registered in Convex schema.
   2. Subdirectory layout enforces Hexagonal Architecture with clear `adapters`, `application`, `domain`, and `ports` subfolders.
-  3. TypeScript compilation passes, verifying 100% data-driven roles and basic AuditLog skeleton entities.
-  4. Vitest testing environment runs successfully.
+  3. TypeScript compilation passes, verifying 100% data-driven roles, Policy/PolicyVersion skeletons, and basic AuditLog entities.
+  4. Vitest testing environment runs successfully, validating separated `RoleService` and `UserService` layers.
 **Plans**: 3 plans
-- [ ] 01-01: Configure Typescript environment, Vitest, and create the baseline Monolith-Hexagonal directory structure with domain models.
-- [ ] 01-02: Create Convex Schema defining tenants, users, dynamic roles, policies, requests, tasks, and audit logs.
-- [ ] 01-03: Implement core domain entities (Tenant, User, Role, AuditLog), Repository Ports, and Convex database adapters, fully covered by unit tests.
+- [ ] 01-01: Configure Typescript environment, Vitest, and create the baseline Monolith-Hexagonal directory structure with domain models (including dynamic roles, audit logs, and policy skeletons).
+- [ ] 01-02: Create Convex Schema defining tenants, users (linked via roleId), dynamic roles, policies, requests, tasks, and audit logs.
+- [ ] 01-03: Implement core domain entities, Repository Ports, separated RoleService & UserService, and Convex database adapters, fully covered by unit tests.
 
 ### Phase 2: Safe DSL Interpreter Engine
 **Goal**: Build a highly tested, secure lexical scanner, parser, and interpreter in Pure TS to evaluate conditions and emit approval targets.

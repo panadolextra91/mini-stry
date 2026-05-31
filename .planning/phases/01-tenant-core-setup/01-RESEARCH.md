@@ -9,19 +9,20 @@
 
 ### Locked Decisions
 - **D-01**: The platform must remain 100% domain-neutral. No HR-specific static code, role enums, or HR-only business assumptions are allowed. Leave requests are purely a demonstration workflow.
-- **D-02**: Roles are completely data-driven (data, not code). We will implement a `RoleEntity` representing tenant-defined roles (e.g. Receptionist, Monk, CEO). The `UserEntity` role property dynamically refers to a registered role string rather than a static TypeScript enum.
-- **D-03**: Support dynamic role registering in the database, allowing each organization (tenant) to declare a custom hierarchy.
-- **D-04**: Direct manager/reporting supervisor relations are tracked dynamically using a simple `managerId` field pointing to another User ID within the same Tenant, representing a generic tree structure.
-- **D-05**: Introduce a basic `AuditLogEntity` domain skeleton in Phase 1 to lay the foundation for policy governance, publication tracking, and approval histories (no service implementation needed yet).
-- **D-06**: Enforce strict Hexagonal Architecture structure: `domain/`, `ports/`, `application/`, `adapters/` in modular monograph structure.
+- **D-02**: Roles are completely data-driven (data, not code). A `RoleEntity` represents tenant-defined roles (e.g. Receptionist, Monk, CEO).
+- **D-03**: Users are linked to dynamic roles via a stable identifier **`roleId`** referencing the `RoleEntity.id` (not the name string) to ensure references remain consistent if a role is renamed.
+- **D-04**: Separate role management and user management into distinct, highly focused application services: `RoleService` and `UserService`.
+- **D-05**: Place lightweight **`PolicyEntity`** and **`PolicyVersionEntity`** skeletons in the core domain in Phase 1 (no schemas, persistence, or services yet) to prevent future breaking domain refactors.
+- **D-06**: Direct manager/reporting supervisor relations are tracked dynamically using a simple `managerId` field pointing to another User ID within the same Tenant.
+- **D-07**: Introduce a basic `AuditLogEntity` domain skeleton in Phase 1 (no service implementation needed yet).
 
 ### the agent's Discretion
 - Exact method signatures in Port interfaces.
 - Testing mock configurations and Vitest boilerplate setup.
-- Helper scripts for bootstrapping database fields.
 
 ### Deferred Ideas (OUT OF SCOPE)
 - Full AuditLog persistence flow — Phase 6. Only the domain entity is created in Phase 1.
+- Policy & PolicyVersion persistence and services — Phase 3. Only domain skeletons exist in Phase 1.
 
 </user_constraints>
 
@@ -30,9 +31,10 @@
 
 | Capability | Primary Tier | Secondary Tier | Rationale |
 |------------|-------------|----------------|-----------|
-| Tenant & Role CRUD operations | API/Backend (Convex RPC) | Database/Storage | Handled through mutation/query RPC endpoints calling application services |
+| Tenant & Role CRUD operations | API/Backend (Convex RPC) | Database/Storage | Handled through mutation/query RPC endpoints calling separated services |
+| User registrations with roleId validation | API/Backend | Database/Storage | UserService queries RoleRepositoryPort to verify roleId is valid for the tenant |
+| Policy & PolicyVersion foundations | Domain (Pure TS) | — | Skeletons declared in domain to establish core entities early |
 | Data isolation checks | Application Layer | Database/Storage | Every database fetch/write enforces logical `tenantId` checking via repository ports |
-| AuditLog schema registry | Database/Storage | Domain (Pure TS) | Basic skeleton registered in Convex schema and Domain entities for future governance |
 | Unit testing coverage | Local/CLI (Vitest) | — | Decoupled Ports allow full test doubles in Vitest without running Convex |
 
 </architectural_responsibility_map>
@@ -40,16 +42,16 @@
 <research_summary>
 ## Summary
 
-This research focuses on building a strict **Hexagonal Architecture (Ports & Adapters)** in a Nest-like modular monolith structure using **Convex** as the serverless database. The core theme of this platform is **absolute domain neutrality**: the system does not hardcode any roles (like employee, manager) or HR rules in code. Roles and organization structures are treated entirely as dynamic **data**, configured in the database per tenant.
+This research establishes a strict **Hexagonal Architecture (Ports & Adapters)** Monolith with complete domain neutrality using **Convex**. By keeping roles, reporting paths, and policies as data configurations in the database instead of code, the engine handles any domain structure.
 
-To achieve complete domain neutrality and dynamic roles in Phase 1:
-1. We define three tables in Convex: `tenants`, `roles`, and `users`. A user record has a `role` string which dynamically references a defined role within that tenant.
-2. We establish the reporting supervisor tree by having a simple `managerId` field (acting as a generic reports-to link) on the `UserEntity`.
-3. We define an `AuditLog` entity skeleton to track events.
-4. Core business modules (`src/modules/tenant`) contain only pure TS code, completely isolated from Convex.
-5. In-Memory mock repositories are used in Vitest to test services and domain flows with 100% code coverage.
+To ensure long-term correctness and prevent domain leaks:
+1. Users reference dynamic roles via a stable, unique **`roleId`** string pointing to `RoleEntity.id`, rather than role name strings. This keeps user linkages stable even if roles are renamed.
+2. We enforce Single Responsibility by separating **`RoleService`** (role CRUD and naming) from **`UserService`** (user profiles and reporting structures).
+3. We introduce **`PolicyEntity`** and **`PolicyVersionEntity`** domain skeletons in Phase 1, making them first-class domain citizens.
+4. Convex query/mutation transaction frames (`ctx.db`) are passed to the Repository Adapters inside Convex RPC entry points.
+5. Non-serverless Vitest unit tests use TS mock repositories for 100% test coverage.
 
-**Primary recommendation:** Register the dynamic roles table in the database and represent `role` as a string parameter throughout the Domain and Application layers to ensure total architectural flexibility.
+**Primary recommendation:** Register the dynamic `roles` table in Convex and verify `roleId` linkages inside `UserService` using the `RoleRepositoryPort` before registering users.
 
 </research_summary>
 
@@ -90,7 +92,7 @@ src/
 └── modules/
     └── tenant/
         ├── domain/
-        │   ├── entities.ts     # Pure TS Entities (Tenant, User, Role, AuditLog)
+        │   ├── entities.ts     # Pure TS Entities (Tenant, User, Role, Policy, PolicyVersion, AuditLog)
         │   └── types.ts        # Pure TS Types
         ├── ports/
         │   ├── tenant.repository.port.ts
@@ -98,7 +100,8 @@ src/
         │   └── user.repository.port.ts
         ├── application/
         │   ├── tenant.service.ts
-        │   ├── user.service.ts
+        │   ├── role.service.ts # Dedicated RoleService (register, rename, list)
+        │   ├── user.service.ts # Dedicated UserService (register, assign, report)
         │   ├── dtos.ts         # Data Transfer Objects
         │   └── user.service.spec.ts  # Vitest unit tests (100% coverage)
         └── adapters/
@@ -108,8 +111,8 @@ src/
                 └── convex-user.repository.ts
 ```
 
-### Pattern 1: Domain-Neutral Dynamic Roles
-Keep roles entirely data-driven. The user's role is a string pointing to a registered Role entity.
+### Pattern 1: Pure Domain Modeling & Stable roleId Links
+Users reference dynamic roles via a stable `roleId` pointing to `RoleEntity.id`.
 ```typescript
 // src/modules/tenant/domain/entities.ts
 export class RoleEntity {
@@ -129,81 +132,78 @@ export class UserEntity {
   public readonly tenantId: string;
   public readonly name: string;
   public readonly email: string;
-  public readonly role: string; // Dynamic string matching RoleEntity.name
-  public readonly managerId?: string; // Reports-to supervisor link
+  public readonly roleId: string; // Stable reference to RoleEntity.id
+  public readonly managerId?: string; // Parent supervisor reports-to link
 
   constructor(props: {
     id: string;
     tenantId: string;
     name: string;
     email: string;
-    role: string;
+    roleId: string;
     managerId?: string;
   }) {
     this.id = props.id;
     this.tenantId = props.tenantId;
     this.name = props.name;
     this.email = props.email;
-    this.role = props.role;
+    this.roleId = props.roleId;
     this.managerId = props.managerId;
   }
 }
 ```
 
-### Pattern 2: AuditLog Domain Skeleton
-A lightweight, immutable ledger skeleton declared inside the core domain.
+### Pattern 2: First-Class Policy Skeletons
+`PolicyEntity` and `PolicyVersionEntity` are declared in Phase 1 to lay the conceptual foundation for future policy compiled runs.
 ```typescript
 // src/modules/tenant/domain/entities.ts (continued)
-export class AuditLogEntity {
+export class PolicyEntity {
   public readonly id: string;
   public readonly tenantId: string;
-  public readonly actorId: string;
-  public readonly action: string;
-  public readonly targetType: string; // e.g. "policy", "request", "role"
-  public readonly targetId: string;
-  public readonly details: string;
-  public readonly timestamp: number;
+  public readonly name: string;
+
+  constructor(props: { id: string; tenantId: string; name: string }) {
+    this.id = props.id;
+    this.tenantId = props.tenantId;
+    this.name = props.name;
+  }
+}
+
+export class PolicyVersionEntity {
+  public readonly id: string;
+  public readonly policyId: string;
+  public readonly version: number;
+  public readonly content: string;
+  public readonly status: string; // "draft" | "active" | "archived"
 
   constructor(props: {
     id: string;
-    tenantId: string;
-    actorId: string;
-    action: string;
-    targetType: string;
-    targetId: string;
-    details: string;
-    timestamp: number;
+    policyId: string;
+    version: number;
+    content: string;
+    status: string;
   }) {
     this.id = props.id;
-    this.tenantId = props.tenantId;
-    this.actorId = props.actorId;
-    this.action = props.action;
-    this.targetType = props.targetType;
-    this.targetId = props.targetId;
-    this.details = props.details;
-    this.timestamp = props.timestamp;
+    this.policyId = props.policyId;
+    this.version = props.version;
+    this.content = props.content;
+    this.status = props.status;
   }
 }
 ```
 
 </architecture_patterns>
 
-<dont_hand_roll>
-## Don't Hand-Roll
-
-| Problem | Don't Build | Use Instead | Why |
-|---------|-------------|-------------|-----|
-| Dynamic Role Authorization | Complex hardcoded state guards | Database metadata mapping | Data-driven configurations allow zero-downtime additions of new roles. |
-
-</dont_hand_roll>
-
 <common_pitfalls>
 ## Common Pitfalls
 
-### Pitfall 1: Domain-leakage via Hardcoded Enums
-**What goes wrong:** Restricting the platform to specific organization types (like HR) by writing static role enums (monk vs manager vs supervisor).
-**Why it happens:** Attempting to hardcode domain convenience in typescript files.
-**How to avoid:** Treat roles as records in the database. Read roles dynamically, and let the parser in Phase 2 handle validation at runtime.
+### Pitfall 1: Dynamic Role Name Coupling
+**What goes wrong:** If roles are mapped directly by name strings (e.g. `role: "CEO"`), renaming the role to `"Chief Executive"` breaks query consistency and invalidates user associations.
+**How to avoid:** Always map users to dynamic roles using a unique, immutable database ID (`roleId`), treating role names as editable display fields.
+
+### Pitfall 2: UserService Bloat
+**What goes wrong:** Building user registration, role creation, and role renaming inside `UserService` creates a single coalesced bloated service.
+**How to avoid:** Strictly partition business operations into distinct `RoleService` and `UserService` files.
 
 </common_pitfalls>
 
@@ -228,8 +228,8 @@ export default defineSchema({
     tenantId: v.string(), // logical isolation
     name: v.string(),
     email: v.string(),
-    role: v.string(), // dynamic role string referencing roles.name
-    managerId: v.optional(v.string()), // parent reporting supervisor link
+    roleId: v.string(), // stable identifier referencing roles._id
+    managerId: v.optional(v.string()), // supervisor reports-to link
   }).index("by_tenant", ["tenantId"]),
   auditLogs: defineTable({
     tenantId: v.string(),
@@ -259,8 +259,8 @@ export default defineSchema({
 
 **Research scope:**
 - Core technology: Convex, TypeScript dynamic typings.
-- Ecosystem: Hexagonal Architecture, modular monoliths, Vitest.
-- Patterns: Dynamic data-driven roles, AuditLog skeleton, reports-to tree structure.
+- Ecosystem: Hexagonal Architecture, separated services, Vitest.
+- Patterns: ID-based roleId linkages, separated RoleService/UserService, Policy/PolicyVersion skeletons.
 
 **Confidence breakdown:**
 - Standard stack: HIGH

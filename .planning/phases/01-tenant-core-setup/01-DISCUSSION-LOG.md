@@ -5,19 +5,43 @@
 
 **Date:** 2026-05-31
 **Phase:** 01-tenant-core-setup
-**Areas discussed:** Domain Neutrality & Decoupled Roles, Multi-Tenancy Isolation, Reporting Lines, Audit Log Foundation
+**Areas discussed:** Domain Neutrality & decoupled Role linkage, Multi-Tenancy Isolation, Reporting Lines, Service Responsibilities, Policy Foundations, Audit Log Foundation
 
 ---
 
-## Domain Neutrality & Decoupled Roles
+## Domain Neutrality & Decoupled Role Linkage
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| Static Role Enum | Hardcode employee, manager, hr_head, ceo roles as a code enum. | |
-| Dynamic Data-Driven Roles | Create `RoleEntity` and `Role` schema to represent dynamic, tenant-configured roles (e.g. receptionist, supervisor, monk). | ✓ |
+| User.role: string | Link user directly to role name string (e.g. role: "Manager"). coupling user to role renames. | |
+| User.roleId: string | Link user via a stable `roleId` referencing the dynamic `RoleEntity.id` (data, not code). | ✓ |
 
-**User's choice:** Dynamic Data-Driven Roles (data, not code).
-**Notes:** Decouples core platform from HR-specific limitations, allowing multi-domain compatibility (hotels, temples, contractors).
+**User's choice:** Stable `roleId` referencing dynamic Role ID.
+**Notes:** Prevents user references from breaking when a role name is updated/re-labeled by the tenant.
+
+---
+
+## Service Responsibilities
+
+| Option | Description | Selected |
+|--------|-------------|----------|
+| Coalesced UserService | Handle role registration, role renaming, and user setups all inside `UserService`. | |
+| Separated Services | Dedicated `RoleService` (registerRole, renameRole, listRoles) and `UserService` (registerUser, assignRole, reporting). | ✓ |
+
+**User's choice:** Dedicated, separated `RoleService` and `UserService`.
+**Notes:** Adheres strictly to Single Responsibility, avoiding high coupling inside `UserService`.
+
+---
+
+## Policy Foundations
+
+| Option | Description | Selected |
+|--------|-------------|----------|
+| Postponed | Defer policy modeling completely to Phase 3. | |
+| Phase 1 Domain Skeletons | Introduce `PolicyEntity` and `PolicyVersionEntity` skeletons in domain layer in Phase 1 without databases schemas or services. | ✓ |
+
+**User's choice:** Policy & PolicyVersion domain skeletons in Phase 1.
+**Notes:** Prevents future breaking domain refactors and establishes policies as first-class citizens from the start.
 
 ---
 
@@ -29,7 +53,6 @@
 | Database-per-tenant | Physical database separation. Extremely secure, but high complexity and infrastructure overhead. | |
 
 **User's choice:** Single Database + Tenant ID (Logical separation).
-**Notes:** Fits best for early validation and startup MVP speed.
 
 ---
 
@@ -41,7 +64,6 @@
 | Dedicated Reporting Table | Dedicated table mapping hierarchy and history. | |
 
 **User's choice:** Simple reporting link.
-**Notes:** Simple, dynamic supervisor tree structure is highly domain-neutral.
 
 ---
 
@@ -53,7 +75,6 @@
 | Foundational Skeleton | Introduce `AuditLogEntity` domain model skeleton and schema in Phase 1 without service implementation. | ✓ |
 
 **User's choice:** Foundational Skeleton in Phase 1.
-**Notes:** Essential for governance tracing, establishing the database entity layout early.
 
 ---
 
@@ -61,11 +82,11 @@
 
 - Exact method signatures in Port interfaces.
 - Testing mock configurations and Vitest boilerplate setup.
-- Helper scripts for bootstrapping database fields.
 
 ## Deferred Ideas
 
 - Full AuditLog persistence flow — Phase 6.
+- Full Policy & PolicyVersion persistence and services — Phase 3.
 
 ---
 
