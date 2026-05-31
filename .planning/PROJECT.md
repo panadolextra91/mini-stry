@@ -12,6 +12,11 @@ The runtime consumes a structured **JSON Policy** and an **EvaluationContext** (
 
 **Decision Consumers** (such as sequential multi-stage approval routing) act on Decisions but are external to the runtime. The runtime does not depend on, know about, or import any consumer. Leave approval and the approval routing workflow are strictly demonstration consumers — not part of the core runtime.
 
+**Two parallel context envelopes** carry the platform's first-class architectural information:
+
+- **`EvaluationContext`** — runtime input. *"What data is being evaluated?"* Consumed by the Policy Runtime alongside a Policy to produce a Decision.
+- **`TenantContext`** — operational envelope. *"Who owns this operation?"* Passed explicitly as the first parameter to every application service method. Carries `tenantId` (and future fields like `actorId`, `requestId`). Mirrors `EvaluationContext` in stature — both are domain-neutral, structurally-typed, never ambient.
+
 Policy authoring (JSON → DSL → Visual Builder) is treated as a replaceable front-end detail. The core Policy Runtime remains stable, deterministic, and domain-neutral.
 
 ## Core Value
@@ -53,7 +58,7 @@ Executes secure, deterministic, and immutable policy decisions by evaluating str
 We are building a highly decoupled, modular policy engine. To guarantee extreme maintainability and prevent domain leaks, we are utilizing **Hexagonal Architecture (Ports & Adapters)** in a **Modular Monolith** style.
 
 - **Domain Layer**: Contains the core logic of the Policy Engine, the `EvaluationContext` data shape, dynamic JSON condition evaluators, and foundational entities (**Tenant, User, Role, Policy, PolicyVersion, AuditLog**) in Pure TS. Completely isolated.
-- **Application Layer**: Contains services executing actions and orchestrating business logic:
+- **Application Layer**: Contains services executing actions and orchestrating business logic. **Every service method accepts `TenantContext` as its first parameter** — no ambient resolution, no globals, no AsyncLocalStorage.
   - **PolicyRuntimeService**: Orchestrates JSON Schema validation followed by condition evaluation against the `EvaluationContext`, and emits a Decision.
   - **RoleService**: Manages dynamic role registries.
   - **UserService**: Manages user profiles and supervisor reporting lines.
@@ -66,6 +71,7 @@ We are building a highly decoupled, modular policy engine. To guarantee extreme 
 - **Architecture Constraint**: Absolute adherence to Modular Monolith + Hexagonal Architecture (Ports & Adapters). **Module Boundary Rule:** *Cross-module imports are ALLOWED through public APIs (per-module barrel `index.ts`); cross-module coupling is NOT — deep imports into another module's `adapters/`, `domain/`, or `application/` internals are prohibited.* Decision Consumers may depend on the runtime; the runtime may not depend on consumers.
 - **Testing Constraint**: 100% test coverage for the Policy Engine (schema validator, condition evaluator), Policy Versioning, and Decision Generation. 90%+ coverage on all critical business logic.
 - **Security Constraint**: No usage of `eval()` or dynamic JS/TS code generation. The JSON condition evaluator must compare properties strictly using TypeScript relational operators. Policies must pass JSON Schema validation before any evaluation runs.
+- **TenantContext Constraint**: `TenantContext` MUST be passed explicitly as the first parameter to every application service method. **Ambient tenant resolution is prohibited** — no AsyncLocalStorage, no module-level state, no implicit globals. Tenant is a security boundary; making it explicit at every call site makes leakage visible at code-review time.
 
 ## Key Decisions
 
@@ -76,6 +82,7 @@ We are building a highly decoupled, modular policy engine. To guarantee extreme 
 | ID-based Role References | Storing role name strings directly on users creates coupling. Using a stable `roleId` keeps user linkages stable even if roles are renamed. | Approved |
 | DSL-First Approach Rejection | Replaced custom policy DSL parser, AST compiler, and lexer with standard structured JSON policies to eliminate compiler complexity, avoid overengineering, and focus strictly on policy runtime validation. | Approved |
 | EvaluationContext as First-Class Concept | Formalized `EvaluationContext` (CTX-01, CTX-02) as a named architectural concept. Without an explicit name for runtime input, downstream phases drift into ad-hoc payload conventions and the runtime accidentally couples to a domain shape. | Approved |
+| TenantContext as Operational Envelope | Formalized `TenantContext` (Phase 1, D-19) as the operational mirror of `EvaluationContext`. Every application service method takes `ctx: TenantContext` as its first parameter. Carries `tenantId` now; extensible to `actorId`, `requestId`, etc. without changing signatures. Ambient resolution (AsyncLocalStorage, globals) is prohibited — tenant boundary must be visible at every call site. The two contexts answer two questions: "Who owns this operation?" (TenantContext) and "What data is being evaluated?" (EvaluationContext). | Approved |
 | JSON Schema Validation Belongs in Runtime Core | Schema validation is a prerequisite for safe evaluation: the evaluator cannot be trusted to run on an unvalidated policy. RUN-03 moved from Phase 3 (Lifecycle) to Phase 2 (Runtime Core). Lifecycle (save / publish / activate) re-uses the same validator at its boundaries. | Approved |
 | Decision Consumers Are External to the Runtime | Approval Routing is one Decision Consumer among many possible (notifications, escalations, future integrations). The runtime emits Decisions; it does not own consumers. Phase 5 is reframed as a *reference consumer*, not the runtime's purpose. | Approved |
 | Manager Cycle Depth Limit | Capping `managerId` reporting chains at 50 hops (`MAX_MANAGER_CHAIN_DEPTH = 50`) prevents infinite recursion, cycles, and potential execution DOS. | Approved |
@@ -91,7 +98,7 @@ Canonical mental model. Use this as the reference order of importance for all fu
 4. **Policy Runtime** — pure-function evaluator: JSON Schema validation + condition evaluation
 5. **Decision** — deterministic runtime output (Auto-Approve, Auto-Reject, Request-Approval, future outcomes)
 6. **Decision Consumers** — external services that act on Decisions (approval routing, notifications, escalations, ...)
-7. **Tenants** — multi-tenant isolation boundary
+7. **Tenants & TenantContext** — multi-tenant isolation boundary; `TenantContext` is the explicit operational envelope (`{ tenantId, ... }`) passed as the first parameter to every application service method
 8. **Roles & Users** — directory primitives referenced by policies and consumers
 9. **Audit Log** — immutable governance ledger over policies, decisions, and consumer actions
 10. **UI** — Admin Portal, Request Logs, Approver Inbox (front-end consumers of the runtime)
@@ -115,4 +122,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-31 after Phase 1 completion (CON-01 to CON-04 validated, Manager Cycle Depth Limit and Convex/ HARD RULE decisions added).*
+*Last updated: 2026-06-01 — TenantContext surfaced as first-class architectural concept (operational mirror of EvaluationContext): noted in "What This Is", Application Layer, Constraints, Key Decisions, and Concept Hierarchy #7. Deferred item from Phase 1 CONTEXT.md closed.*
