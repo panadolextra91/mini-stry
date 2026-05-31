@@ -6,3 +6,4 @@ node_modules
 .gitnexus
 .DS_Store
 .env.local
+coverage
