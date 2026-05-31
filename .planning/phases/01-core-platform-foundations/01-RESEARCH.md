@@ -360,8 +360,14 @@ export default defineSchema({
     payload: v.any(),
     createdAt: v.number(),
   })
-    .index("by_tenant_created", ["tenantId", "createdAt"])
-    .index("by_tenant_event_created", ["tenantId", "eventType", "createdAt"]),
+    // NOTE: Phase 1 ships ONLY by_tenant_created (single tenant-prefixed index
+    // is sufficient to prove D-09 isolation on the skeleton table). The
+    // by_tenant_event_created index shown below is RESERVED for Phase 4+
+    // when DEC-01/AUD-02 wire actual audit writes and event-type queries
+    // materialize. Do NOT add it at Phase 1 — Mẹ's "don't over-engineer
+    // audit" rule. Reference example only:
+    //   .index("by_tenant_event_created", ["tenantId", "eventType", "createdAt"])
+    .index("by_tenant_created", ["tenantId", "createdAt"]),
 });
 ```
 
