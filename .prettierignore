@@ -1,0 +1,5 @@
+node_modules/
+dist/
+coverage/
+convex/_generated/
+package-lock.json

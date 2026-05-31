@@ -4,3 +4,4 @@
 .gemini
 node_modules
 .gitnexus
+.DS_Store
