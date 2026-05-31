@@ -1,12 +1,12 @@
-# Project: Mini-stry
+# Project: Mini-stry (Policy Runtime Platform)
 
 ## What This Is
 
-Mini-stry is a multi-tenant, domain-agnostic policy engine that allows organizations (tenants) to define their own business rules and approval workflows dynamically. Instead of hardcoding business rules (like HR leave policies), the platform's behavior is driven entirely by custom policies written in a human-readable, text-based DSL. The first domain use case is employee leave approval.
+Mini-stry is a domain-neutral **Policy Runtime Platform** that compiles, versions, and executes custom business rules dynamically. Instead of hardcoding domain-specific rules (like leave request parameters or expense approval stages), the platform's behavior is driven entirely by custom policies written in a human-readable, text-based DSL. **Leave approval is strictly a demonstration workflow** used to prove the engine; the runtime itself is domain-agnostic and built to support arbitrary tenant-defined procedures.
 
 ## Core Value
 
-Empowers organizations to dynamically define, version, and execute custom business rules and multi-stage approval workflows without hardcoding domain-specific logic.
+Executes secure, deterministic, and immutable policy decisions and sequential multi-stage approval chains from dynamic context inputs without hardcoding domain-specific logic.
 
 ## Requirements
 
@@ -16,37 +16,35 @@ Empowers organizations to dynamically define, version, and execute custom busine
 
 ### Active
 
-- [ ] **SYS-01 (Multi-Tenancy)**: Support isolated data, users, and roles across multiple tenants.
-- [ ] **SYS-02 (Dynamic ID-Based Roles)**: Support custom, tenant-defined roles configured dynamically in the database and linked to users via stable identifiers (`roleId`) rather than mutable name strings or static enums.
-- [ ] **SYS-03 (Reporting Lines)**: Support direct reporting supervisor links (`managerId`) on users to resolve relative hierarchy paths during evaluation.
-- [ ] **SYS-04 (Role Management System)**: Support registering, listing, and renaming roles dynamically via a dedicated Role Service.
-- [ ] **POL-01 (Policy Versioning & Publishing)**: Support creating, versioning, and publishing policies. Published policies are immutable, and only one version is active at a time.
-- [ ] **DSL-01 (Safe Policy DSL)**: Support a human-readable, text-based DSL for defining multi-stage approval rules.
-- [ ] **ENG-01 (Safe DSL Interpreter)**: Implement a completely deterministic, safe DSL parser and evaluation engine in Pure TypeScript (NO `eval()` or dynamic execution).
-- [ ] **REQ-01 (Request Submission)**: Allow users to submit requests containing dynamic context payloads.
-- [ ] **EVL-01 (Approval Generation)**: Evaluate submitted requests against the active policy to dynamically generate approval chains and tasks.
-- [ ] **AUD-01 (Audit Logging Foundation)**: Establish foundational AuditLog schema and domain entities in Phase 1 to track policy publication, approval history, and governance records.
-- [ ] **UI-01 (Admin and User Portal)**: Provide a React-based UI featuring a Monaco-based Policy Editor, request forms, and a personal approval inbox.
+- [ ] **POL-01 (Policy Definition)**: Support creating and defining policies containing human-readable text-based DSL rules.
+- [ ] **POL-02 (Policy Versioning & Immutability)**: Support immutable policy versions once published, allowing active version selection and safe rollbacks.
+- [ ] **RUN-01 (Safe DSL Interpreter)**: Implement a completely deterministic, safe lexical scanner, parser, and AST interpreter in Pure TypeScript (NO `eval()` or dynamic code execution).
+- [ ] **RUN-02 (Syntax & Semantic Validation)**: Compile and validate DSL syntax and check for structural errors before allowing policy publication.
+- [ ] **DEC-01 (Decision & Approval Task Generator)**: Evaluate dynamic context payloads against active policies to output structured decisions and sequential multi-stage approval chains.
+- [ ] **AUD-01 (Immutable Governance Ledger)**: Record secure audit log entries for all policy publication lifecycle events and step-by-step approval execution paths.
+- [ ] **SYS-01 (Multi-Tenancy)**: Support strict logical data isolation across multiple tenant organizations.
+- [ ] **SYS-02 (Dynamic Context Providers)**: Support dynamic, data-driven roles linked to users via stable identifiers (`roleId`) and dynamic supervisor reporting links (`managerId`) to feed variables into the runtime.
+- [ ] **UI-01 (Monaco Policy Editor & Inbox)**: Provide a React client dashboard featuring a Monaco-based DSL Editor with live syntax feedback, request submission logs, and personal approval dashboards.
 
 ### Out of Scope
 
-- **Payroll, Attendance, & Recruitment** — HR-specific features are explicitly out of scope. The platform must remain domain-neutral.
-- **Microservices & CQRS** — Out of scope. We will keep the architecture simple, boring, and consolidated.
-- **Workflow & Visual Builders** — Out of scope for MVP. Focus purely on text-based DSL execution.
+- **HR SaaS Features** — Payroll, attendance tracking, and recruitment are explicitly out of scope. The platform must remain domain-neutral.
+- **Visual DSL and Workflow Builders** — The MVP focuses exclusively on compiling and executing a text-based DSL.
+- **CQRS & Complex Infrastructure** — Keep the architecture simple, boring, and consolidated to ship fast and validate the core policy engine.
 
 ## Context
 
 We are building a highly decoupled, modular policy engine. To guarantee extreme maintainability and prevent domain leaks, we are utilizing **Hexagonal Architecture (Ports & Adapters)** in a **Modular Monolith** style.
-- **Domain Layer**: Contains the core logic of the Policy Engine, dynamic parser, and foundational entities (**Tenant, User, Role, Policy, PolicyVersion, AuditLog**) in Pure TS. Completely isolated.
+- **Domain Layer**: Contains the core logic of the Policy Engine, dynamic AST parser, and foundational entities (**Policy, PolicyVersion, Tenant, User, Role, AuditLog**) in Pure TS. Completely isolated.
 - **Application Layer**: Contains services executing actions and orchestrating business logic:
-  - **RoleService**: Manages role creations, renames, and queries.
-  - **UserService**: Manages user registrations, role assignments, and supervisor reporting lines.
-  - **TenantService**: Manages tenant registrations.
+  - **PolicyRuntimeService**: Orchestrates DSL compilation and dynamic rule evaluations.
+  - **RoleService**: Manages dynamic role registries.
+  - **UserService**: Manages user profiles and supervisor reporting lines.
 - **Adapter Layer**: Implements persistence and communication adapters (Convex).
 
 ## Constraints
 
-- **Domain-Neutrality Constraint**: The core platform must remain 100% domain-neutral. No HR-specific static code, role enums, or business primitives are allowed in the core domain.
+- **Domain-Neutrality Constraint**: The core platform must remain 100% domain-neutral. No HR-specific static code, role enums, or HR-only primitives are allowed in the domain layer.
 - **Architecture Constraint**: Absolute adherence to Modular Monolith + Hexagonal Architecture (Ports & Adapters). No cross-importing between modules at Adapters/Application level.
 - **Testing Constraint**: 100% test coverage for the Policy Engine (DSL interpreter), Policy Versioning, and Approval Generation. 90%+ coverage on all critical business logic.
 - **Security Constraint**: No usage of `eval()` or dynamic JS/TS code generation. The DSL interpreter must be a deterministic parser.
@@ -55,8 +53,8 @@ We are building a highly decoupled, modular policy engine. To guarantee extreme 
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| ID-based Role References | Storing role name strings directly on users creates coupling and leads to inconsistencies if roles are renamed. Using a stable `roleId` keeps references stable. | — Pending |
-| Policy Domain Skeletons in Phase 1 | Placing `PolicyEntity` and `PolicyVersionEntity` skeletons in Phase 1 establishes policies as first-class citizens and prevents future breaking domain refactors. | — Pending |
+| Policy-First Phase Ordering | By developing the Policy Runtime and DSL Parser in Phase 1 (instead of user directories), we ensure our directories are planned around the engine rather than the engine around directories. | — Pending |
+| ID-based Role References | Storing role name strings directly on users creates coupling. Using a stable `roleId` keeps user linkages stable even if roles are renamed. | — Pending |
 | Dedicated RoleService | Separates role management (register, rename, list) from user management (register, assign, report), adhering to Single Responsibility. | — Pending |
 
 ## Evolution

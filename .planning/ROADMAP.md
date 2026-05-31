@@ -1,125 +1,113 @@
-# Roadmap: Mini-stry
+# Roadmap: Mini-stry (Policy Runtime Platform)
 
 ## Overview
 
-Mini-stry's journey begins by establishing a robust, multi-tenant database foundation. From there, we build the core of the product: a deterministic, safe, pure-TypeScript DSL parsing and interpretation engine. With the engine in place, we overlay policy versioning, dynamic request submission, and multi-stage approval chain generation. Finally, we implement immutable audit logs and deliver a premium React management portal integrated with Monaco Editor.
+Mini-stry's development journey begins at the absolute core of the product: building a secure, deterministic, pure-TypeScript Lexer, Parser, and AST Interpreter to compile and execute policy DSL rules. Once the core engine is proven, we construct the versioning ledger and the dynamic approval generation logic. Only then do we layer in the supporting directory context providers (Tenants, Users, dynamic ID-based Roles, reports-to supervisors) and implement a secure audit logging layer. Finally, we deliver a premium Monaco-based React portal.
 
 ## Phases
 
-- [ ] **Phase 1: Tenant & Core Data Model Setup** - Establish the core multi-tenant directory, user profiles, reporting structures, and database schema under Hexagonal Architecture rules.
-- [ ] **Phase 2: Safe DSL Interpreter Engine** - Build a safe, deterministic Lexer, Parser, and AST Interpreter in pure TypeScript without using `eval()`.
-- [ ] **Phase 3: Policy Versioning & Immutability** - Implement policy creation, immutable version increments upon publishing, active-version tracking, and rollback.
-- [ ] **Phase 4: Request Submission & Policy Evaluation** - Core services to submit requests with dynamic payloads and run evaluations against the active policy.
-- [ ] **Phase 5: Dynamic Approval Workflow Engine** - Generate multi-stage approval chains from evaluation outputs and process Approve/Reject task actions.
-- [ ] **Phase 6: Audit Logging & Ledger** - Record immutable audit logs for policy version updates and step-by-step approval transitions.
-- [ ] **Phase 7: Frontend Application & Monaco Editor** - React admin/user UI with a Monaco-based DSL editor, request dashboard, and manager inbox.
+- [ ] **Phase 1: Safe Policy Runtime & DSL Parser** - Build a safe, deterministic, pure-TypeScript Lexer, Parser, and AST Interpreter, verified against mock context payloads with 100% Vitest coverage.
+- [ ] **Phase 2: Policy Versioning & Publishing Ledger** - Develop the policy creation, immutable version increments upon publishing, active-version tracking, and rollback operations.
+- [ ] **Phase 3: Decision & Approval Generation** - Dynamic approval task tree and sequential chain construction resolved from evaluation AST decision nodes.
+- [ ] **Phase 4: Multi-Tenant Context & Directory Providers** - Database schema and dynamic directory adapters (Tenants, Users, dynamic roleId links, and managerId supervisors) as supporting context providers.
+- [ ] **Phase 5: Audit Logging & Tracing** - Record immutable execution audit logs for policy changes and approval transaction tracks.
+- [ ] **Phase 6: Frontend Monaco Editor & UI Dashboards** - React portal with Monaco DSL editor, request submission, and manager approval inbox.
 
 ---
 
 ## Phase Details
 
-### Phase 1: Tenant & Core Data Model Setup
-**Goal**: Establish the core multi-tenant directory, Tenant, User (with ID-based roleId references), dynamic Role, foundational AuditLog, Policy, and PolicyVersion entities, reporting supervisor structures, and directories under Hexagonal Architecture.
+### Phase 1: Safe Policy Runtime & DSL Parser
+**Goal**: Build a highly tested, secure, and completely deterministic Lexer, Parser, and AST Interpreter in pure TypeScript to compile rules and evaluate outcomes without using `eval()`.
 **Depends on**: Nothing (first phase)
-**Requirements**: SYS-01, SYS-02, SYS-03, SYS-04, AUD-03, POL-05, POL-06
+**Requirements**: POL-05, POL-06, RUN-02, AUD-03
 **Success Criteria**:
-  1. Multi-tenant database tables (including dynamic roles and audit logs) are registered in Convex schema.
-  2. Subdirectory layout enforces Hexagonal Architecture with clear `adapters`, `application`, `domain`, and `ports` subfolders.
-  3. TypeScript compilation passes, verifying 100% data-driven roles, Policy/PolicyVersion skeletons, and basic AuditLog entities.
-  4. Vitest testing environment runs successfully, validating separated `RoleService` and `UserService` layers.
+  1. Base modular directory structure is established under Hexagonal Architecture rules.
+  2. Lexer tokenizes a policy file with conditional expressions.
+  3. AST Parser builds clean, structured rule representations.
+  4. Interpreter evaluates rules correctly against dynamic payloads and returns predicted decisions.
+  5. Policy engine unit tests achieve 100% code coverage.
 **Plans**: 3 plans
-- [ ] 01-01: Configure Typescript environment, Vitest, and create the baseline Monolith-Hexagonal directory structure with domain models (including dynamic roles, audit logs, and policy skeletons).
-- [ ] 01-02: Create Convex Schema defining tenants, users (linked via roleId), dynamic roles, policies, requests, tasks, and audit logs.
-- [ ] 01-03: Implement core domain entities, Repository Ports, separated RoleService & UserService, and Convex database adapters, fully covered by unit tests.
 
-### Phase 2: Safe DSL Interpreter Engine
-**Goal**: Build a highly tested, secure lexical scanner, parser, and interpreter in Pure TS to evaluate conditions and emit approval targets.
+Plans:
+- [ ] 01-01: Configure Typescript environment, Vitest, and create the baseline Monolith-Hexagonal directory structure with domain entities (Tenant, User, Role, Policy, PolicyVersion, AuditLog).
+- [ ] 01-02: Implement the lexical scanner (Lexer) and AST Parser for the custom policy DSL syntax.
+- [ ] 01-03: Implement the safe, deterministic evaluation Interpreter (evaluator) in pure TS, verified by 100% test coverage in Vitest.
+
+### Phase 2: Policy Versioning & Publishing Ledger
+**Goal**: Develop the policy pipeline that compiles the DSL and guarantees version immutability upon publishing.
 **Depends on**: Phase 1
-**Requirements**: DSL-01, DSL-02, DSL-03
-**Success Criteria**:
-  1. Lexer successfully tokenizes a custom policy file with conditional expressions.
-  2. Parser constructs a clean Abstract Syntax Tree (AST) representing rules.
-  3. Interpreter evaluates rules correctly against dynamic payloads (e.g. `leave_days: 5`) and returns planned approval targets (e.g., manager, ceo).
-  4. Policy engine unit tests achieve 100% coverage.
-**Plans**: 3 plans
-- [ ] 02-01: Create the lexical scanner (Lexer) and tokens list for the policy DSL.
-- [ ] 02-02: Create the AST parser supporting rules, if-conditions, and approval targets.
-- [ ] 02-03: Implement the deterministic evaluation interpreter, including error handlers and comprehensive test suite.
-
-### Phase 3: Policy Versioning & Immutability
-**Goal**: Develop the policy publishing pipeline that guarantees past versions remain completely immutable.
-**Depends on**: Phase 2
 **Requirements**: POL-01, POL-02, POL-03, POL-04
 **Success Criteria**:
-  1. Creating and publishing a policy compiles the DSL, validates semantic correctness, and increments version integers cleanly.
-  2. Trying to edit a published version throws an explicit, user-friendly exception.
-  3. Rolled-back versions restore as "active" immediately.
+  1. Creating and publishing a policy compiles the DSL and increments versions cleanly.
+  2. Modifying a published policy throws an explicit error, guaranteeing immutability.
+  3. Rollback operations restore previous active versions instantly.
 **Plans**: 2 plans
-- [ ] 03-01: Implement policy draft, validation, and immutable publishing flow.
-- [ ] 03-02: Implement active-state activation, rollback mechanics, and repository port operations.
+- [ ] 02-01: Implement policy drafts, compilation validation, and immutable publishing flows.
+- [ ] 02-02: Implement active-state activation, rollback mechanics, and repository port operations.
 
-### Phase 4: Request Submission & Policy Evaluation
-**Goal**: Connect user request submissions with dynamic evaluation processes.
-**Depends on**: Phase 3
-**Requirements**: REQ-01, REQ-02, REQ-03
+### Phase 3: Decision & Approval Generation
+**Goal**: Process dynamic request payloads against active policies to dynamically generate structured decisions and sequential approval tasks.
+**Depends on**: Phase 2
+**Requirements**: DEC-01, DEC-02, DEC-03
 **Success Criteria**:
-  1. Submitting a request stores metadata and parameters successfully.
-  2. Submission invokes the correct active policy version, feeding parameters into the safe interpreter.
-  3. Evaluation returns concrete approval roles/relationships without failure.
-**Plans**: 2 plans
-- [ ] 04-01: Implement Request Domain entities and Request submission services.
-- [ ] 04-02: Build Request Evaluation orchestrator that runs active policy DSLs against submission payloads.
-
-### Phase 5: Dynamic Approval Workflow Engine
-**Goal**: Convert abstract policy targets (e.g. `manager`, `ceo`) to actual user assignments and resolve sequential task chains.
-**Depends on**: Phase 4
-**Requirements**: APP-01, APP-02, APP-03
-**Success Criteria**:
-  1. Converts relative targets like `manager` to specific user IDs using reporting lines.
+  1. Evaluating requests evaluates active DSL rules and outputs decision nodes (e.g. Auto-Approve vs task generation).
   2. Generates sequential Approval Tasks (Step 1 must be approved before Step 2 opens).
-  3. Approving all steps sets Request status to `approved`; rejecting any step terminates the flow and sets it to `rejected`.
+  3. Approve/Reject decisions trigger clean state machine transitions.
 **Plans**: 2 plans
-- [ ] 05-01: Implement relative-to-absolute approver resolution and sequential chain generation.
-- [ ] 05-02: Implement task decision actions (Approve, Reject) and request status transition state machine.
+- [ ] 03-01: Implement Request Domain entities and evaluation orchestrator.
+- [ ] 03-02: Implement sequential approval task chain generation and decision state machine.
 
-### Phase 6: Audit Logging & Ledger
-**Goal**: Implement complete system and transaction audit logging to guarantee high-integrity operations.
-**Depends on**: Phase 5
-**Requirements**: AUD-01, AUD-02
+### Phase 4: Multi-Tenant Context & Directory Providers
+**Goal**: Build database schema, dynamic role mappings, and user directories to feed context variables into the runtime.
+**Depends on**: Phase 3
+**Requirements**: CON-01, CON-02, CON-03, CON-04
 **Success Criteria**:
-  1. Every policy publication, activation, or rollback logs a secure audit entry.
-  2. Every request evaluation and individual approval step documents the exact dynamic data and AST path selected.
-**Plans**: 2 plans
-- [ ] 06-01: Establish the Audit Log domain entity and core logging ports.
-- [ ] 06-02: Hook logging middleware into policy, request, and task services to automatically capture trace paths.
+  1. Convex Schema defines Tenants, Users (linked via roleId), dynamic Roles, and AuditLogs.
+  2. UserService and RoleService are decoupled and enforce single responsibility.
+  3. Dynamic roleId references keep user linkages stable if roles are renamed.
+**Plans**: 3 plans
+- [ ] 04-01: Implement Convex database schema, logical multi-tenant indices, and repository ports.
+- [ ] 04-02: Implement decoupled RoleService and UserService application layers.
+- [ ] 04-03: Implement Convex database adapters and verify dynamic roleId/reports-to validations with tests.
 
-### Phase 7: Frontend Application & Monaco Editor
-**Goal**: Build a beautiful, responsive React application integrated with Monaco Editor, forms, and task dashboards.
-**Depends on**: Phase 6
+### Phase 5: Audit Logging & Tracing
+**Goal**: Hook immutable transaction audit logs into policy publications, compilations, and approval decisions.
+**Depends on**: Phase 4
+**Requirements**: AUD-01, AUD-02, AUD-03
+**Success Criteria**:
+  1. Logs secure ledger entries for all policy activation updates.
+  2. Logs every request evaluation detail, storing the exact AST decision path.
+**Plans**: 2 plans
+- [ ] 05-01: Implement AuditLog domain port and middleware trackers.
+- [ ] 05-02: Implement Convex database adapters for audit logging and verify integration.
+
+### Phase 6: Frontend Monaco Editor & UI Dashboards
+**Goal**: Build a stunning, dark-mode React client featuring a Monaco DSL editor, submission forms, and a manager approval inbox.
+**Depends on**: Phase 5
 **Requirements**: UI-01, UI-02, UI-03, UI-04
 **Success Criteria**:
-  1. User is wowed by a premium, dark-mode-first dashboard utilizing smooth transitions.
-  2. Admin can write policies inside Monaco Editor with real-time grammar checks and version panels.
-  3. Users can submit leaves through dynamic form, and managers have an instant approve/reject task inbox.
+  1. Premium, animated React portal wowing the user.
+  2. Admin writes DSL policies inside Monaco Editor with real-time compilation checks.
+  3. Personal inbox displays pending tasks with transparent decision trails.
 **Plans**: 4 plans
-- [ ] 07-01: Bootstrap the React layout, routes, and styling theme system.
-- [ ] 07-02: Build Monaco DSL Editor and validation panel.
-- [ ] 07-03: Build request submission forms and history panels.
-- [ ] 07-04: Build approval inbox, decision details, and audit log viewer.
+- [ ] 06-01: Bootstrap React routing, layout, and TailwindCSS theme tokens.
+- [ ] 06-02: Integrate Monaco Editor with live syntax check panel.
+- [ ] 06-03: Build request logs, dynamic forms, and approval dashboards.
+- [ ] 06-04: Build governance timeline viewer for audit logs.
 
 ---
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Tenant & Core Data Model Setup | 0/3 | Not started | - |
-| 2. Safe DSL Interpreter Engine | 0/3 | Not started | - |
-| 3. Policy Versioning & Immutability | 0/2 | Not started | - |
-| 4. Request Submission & Policy Evaluation | 0/2 | Not started | - |
-| 5. Dynamic Approval Workflow Engine | 0/2 | Not started | - |
-| 6. Audit Logging & Ledger | 0/2 | Not started | - |
-| 7. Frontend Application & Monaco Editor | 0/4 | Not started | - |
+| 1. Safe Policy Runtime & DSL Parser | 0/3 | Not started | - |
+| 2. Policy Versioning & Publishing | 0/2 | Not started | - |
+| 3. Decision & Approval Generation | 0/2 | Not started | - |
+| 4. Multi-Tenant Context & Directories | 0/3 | Not started | - |
+| 5. Audit Logging & Tracing | 0/2 | Not started | - |
+| 6. Frontend Monaco Editor & UI | 0/4 | Not started | - |

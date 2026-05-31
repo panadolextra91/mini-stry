@@ -4,15 +4,15 @@
 
 See: .planning/PROJECT.md (updated 2026-05-31)
 
-**Core value:** Empowers organizations to dynamically define, version, and execute custom business rules and multi-stage approval workflows without hardcoding domain-specific logic.
-**Current focus:** Phase 1: Tenant & Core Data Model Setup
+**Core value:** Executes secure, deterministic, and immutable policy decisions and sequential multi-stage approval chains from dynamic context inputs without hardcoding domain-specific logic.
+**Current focus:** Phase 1: Safe Policy Runtime & DSL Parser
 
 ## Current Position
 
-Phase: 1 of 7 (Tenant & Core Data Model Setup)
+Phase: 1 of 6 (Safe Policy Runtime & DSL Parser)
 Plan: 0 of 3 in current phase
-Status: Ready to execute
-Last activity: 2026-05-31 — Planning completed for Phase 1 (3 plans generated).
+Status: Ready to plan
+Last activity: 2026-05-31 — Project aligned around domain-neutral Policy Runtime Platform mental model.
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -27,13 +27,12 @@ Progress: [░░░░░░░░░░] 0%
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1. Tenant & Core Setup | 0 | 0 | 0 min |
-| 2. Safe DSL Interpreter | 0 | 0 | 0 min |
-| 3. Policy Versioning | 0 | 0 | 0 min |
-| 4. Request Submission | 0 | 0 | 0 min |
-| 5. Approval Workflow | 0 | 0 | 0 min |
-| 6. Audit Logging | 0 | 0 | 0 min |
-| 7. Frontend Monaco UI | 0 | 0 | 0 min |
+| 1. Safe Policy Runtime & DSL | 0 | 0 | 0 min |
+| 2. Versioning & Publishing | 0 | 0 | 0 min |
+| 3. Decision & Approval Gen | 0 | 0 | 0 min |
+| 4. Multi-Tenant Directory | 0 | 0 | 0 min |
+| 5. Audit Logging & Tracing | 0 | 0 | 0 min |
+| 6. Frontend Monaco Editor UI | 0 | 0 | 0 min |
 
 **Recent Trend:**
 - Last 5 plans: N/A
@@ -48,8 +47,9 @@ Progress: [░░░░░░░░░░] 0%
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- [Init]: Decoupled Repository Port Pattern adopted to abstract Prisma or Convex adapters from pure TS core.
-- [Init]: Non-eval lexer and parser chosen for secure DSL evaluation without javascript eval() execution.
+- [Init]: Re-aligned roadmap sequence to build the Policy Engine & safe TS AST Parser in Phase 1, treating directories as supporting context providers.
+- [Init]: Decoupled User-Role linkages by introducing stable `roleId` referencing dynamic roles, preventing renaminig breakages.
+- [Init]: Dynamic RoleService separated from UserService to respect Single Responsibility.
 
 ### Pending Todos
 
@@ -69,6 +69,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-31 20:40
-Stopped at: Phase 1 context gathered.
-Resume file: .planning/phases/01-tenant-core-setup/01-CONTEXT.md
+Last session: 2026-05-31 20:50
+Stopped at: Project realigned to Policy Runtime narrative.
+Resume file: None

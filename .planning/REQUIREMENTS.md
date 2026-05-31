@@ -1,73 +1,65 @@
-# Requirements: Mini-stry
+# Requirements: Mini-stry (Policy Runtime Platform)
 
 **Defined:** 2026-05-31
-**Core Value:** Empowers organizations to dynamically define, version, and execute custom business rules and multi-stage approval workflows without hardcoding domain-specific logic.
+**Core Value:** Executes secure, deterministic, and immutable policy decisions and sequential multi-stage approval chains from dynamic context inputs without hardcoding domain-specific logic.
 
 ## v1 Requirements
 
 Requirements for the initial release (MVP). Each maps to a corresponding roadmap phase.
 
-### Authentication & Tenant System (SYS)
+### Policy Definition & Versioning (POL)
 
-- [ ] **SYS-01**: Support multi-tenancy with strict data isolation between tenant organizations.
-- [ ] **SYS-02**: Support users belonging to a tenant, linked via a stable `roleId` to dynamic role definitions rather than name strings or static enums.
-- [ ] **SYS-03**: Support direct reporting supervisor links (`managerId`) on users to dynamically resolve relative hierarchy paths (e.g. reports to supervisor) during approval generation.
-- [ ] **SYS-04**: Support registering, listing, and renaming dynamic Roles per tenant in the database via a dedicated Role Service (`RoleService`).
-
-### Policy Management (POL)
-
-- [ ] **POL-01**: Support creating policies linked to a specific request type (e.g. "leave_request").
+- [ ] **POL-01**: Support creating policies representing custom rules for arbitrary request types (e.g. "leave_request", "purchase_authorization").
 - [ ] **POL-02**: Support publishing policies, which increments the version number.
-- [ ] **POL-03**: Guarantee immutability of policy versions once published (no modifications to existing versions).
-- [ ] **POL-04**: Track the single active policy version for each request type in a tenant, allowing rollback to previous versions.
-- [ ] **POL-05**: Establish `PolicyEntity` domain skeleton in Phase 1 to lay the foundation for policy configuration.
-- [ ] **POL-06**: Establish `PolicyVersionEntity` domain skeleton in Phase 1 to lay the foundation for immutable version metadata.
+- [ ] **POL-03**: Guarantee absolute immutability of policy versions once published.
+- [ ] **POL-04**: Track the single active policy version for each request type, allowing seamless activation and version rollback.
+- [ ] **POL-05**: Establish `PolicyEntity` domain skeleton in Phase 1 to define policies as first-class citizens.
+- [ ] **POL-06**: Establish `PolicyVersionEntity` domain skeleton in Phase 1 to define immutable version structures.
 
-### DSL & Interpreter Engine (DSL)
+### Evaluation Runtime & DSL (RUN)
 
-- [ ] **DSL-01**: Define a human-readable text-based DSL syntax (e.g., specifying conditions based on variables like `leave_days <= 2` and assigning approvers).
-- [ ] **DSL-02**: Implement a deterministic, safe lexical scanner, parser, and interpreter in pure TypeScript without using `eval()` or dynamic code execution.
-- [ ] **DSL-03**: Validate DSL syntax and check for semantic errors (e.g. referencing non-existent roles/variables) before allowing publishing.
+- [ ] **RUN-01**: Define a human-readable text-based DSL syntax (e.g., specifying conditions based on variables like `leave_days <= 2` and assigning dynamic approvers).
+- [ ] **RUN-02**: Implement a deterministic, safe lexical scanner, parser, and interpreter in pure TypeScript without using `eval()` or dynamic code execution.
+- [ ] **RUN-03**: Validate DSL syntax and check for semantic errors (e.g. referencing unregistered roles or undefined inputs) before allowing policy publication.
 
-### Request Submission & Evaluation (REQ)
+### Decision & Approval Generation (DEC)
 
-- [ ] **REQ-01**: Support submitting requests containing a dynamic payload (e.g., `{ leave_days: 5, reason: "Vacation" }`).
-- [ ] **REQ-02**: Evaluate a request against the active policy version's DSL rules using the dynamic payload and user context (e.g. user role and manager).
-- [ ] **REQ-03**: Generate a structured, sequential approval chain (Approval Tasks) dynamically based on matching DSL rule outputs.
+- [ ] **DEC-01**: Support evaluating dynamic request context payloads against active policy DSL rules.
+- [ ] **DEC-02**: Generate structured decisions (e.g. Auto-Approve, Auto-Reject) dynamically based on parser outputs.
+- [ ] **DEC-03**: Generate sequential multi-stage approval chains (Approval Tasks) when evaluation conditions require human intervention.
 
-### Approval Workflow & Tasks (APP)
-
-- [ ] **APP-01**: Support approval tasks assigned to specific users based on their roles or relationships (e.g. the submitter's manager).
-- [ ] **APP-02**: Allow authorized approvers to Approve or Reject a task.
-- [ ] **APP-03**: Transition request status automatically based on task decisions: moves to `approved` when all chain tasks are approved, or `rejected` immediately if any task is rejected.
-
-### Audit Logging (AUD)
+### Audit Logging & Governance (AUD)
 
 - [ ] **AUD-01**: Create immutable audit log records when policies are published, activated, or rolled back.
 - [ ] **AUD-02**: Create audit log records tracking the exact decision path of policy evaluations and individual approval decisions.
-- [ ] **AUD-03**: Establish foundational AuditLog schema and domain entities in Phase 1 to lay the groundwork for governance tracking.
+- [ ] **AUD-03**: Establish foundational `AuditLogEntity` domain skeleton in Phase 1 to lay the groundwork for governance.
+
+### Multi-Tenant Context & Directory Providers (CON)
+
+- [ ] **CON-01**: Support strict logical data isolation across multiple tenant organizations.
+- [ ] **CON-02**: Support dynamic Roles configured in the database per tenant and registered via a dedicated `RoleService`.
+- [ ] **CON-03**: Support Users belonging to a tenant, linked via a stable, unique `roleId` to dynamic role definitions.
+- [ ] **CON-04**: Support dynamic supervisor reporting lines (`managerId` / reports-to link) on Users to resolve relative hierarchy paths during evaluation.
 
 ### User Interface (UI)
 
-- [ ] **UI-01**: Tenant Admin Portal: view and manage policies, with a Monaco Editor interface for writing DSL rules.
-- [ ] **UI-02**: Employee Portal: submit new leave requests and track the progress of their submitted requests.
-- [ ] **UI-03**: Approval Inbox: unified, real-time dashboard for managers/executives to view pending tasks and make approve/reject decisions.
-- [ ] **UI-04**: Audit Log Viewer: view history of policy versions and approval audit trails.
+- [ ] **UI-01**: Admin Policy Portal: view and manage policies, featuring a Monaco Editor panel for writing DSL rules with live syntax validation.
+- [ ] **UI-02**: Request Log: submit request payloads and track their active evaluation/approval states.
+- [ ] **UI-03**: Personal Inbox: unified dashboard for approvers to view pending approval tasks and record Approve/Reject decisions.
+- [ ] **UI-04**: Governance Viewer: inspect policy version histories and step-by-step approval decision logs.
 
 ---
 
 ## v2 Requirements
 
-Acknowledged but deferred to future milestones.
-
-### Advanced DSL Features
-- **DSL-04**: Support logical operators (`AND`, `OR`, `NOT`) and nested parentheses in conditions.
-- **DSL-05**: Support parallel approval groups (e.g., approval required by *any two* managers).
-- **DSL-06**: Support SLA deadlines and auto-escalation or auto-approval rules.
+### Advanced Evaluation
+- **RUN-04**: Support logical operators (`AND`, `OR`, `NOT`) and nested groupings in DSL conditions.
+- **DEC-04**: Support parallel approval groups (e.g., approval required by *any two* managers).
+- **DEC-05**: Support SLA deadlines and auto-escalation or auto-approval rules.
 
 ### Integrations
 - **INT-01**: Slack/Teams notification integration for pending approvals.
-- **INT-02**: Calendar integrations (e.g., automatically post approved leaves to Google Calendar).
+- **INT-02**: Calendar integrations (e.g., post approved leave calendars).
 
 ---
 
@@ -75,9 +67,9 @@ Acknowledged but deferred to future milestones.
 
 | Feature | Reason |
 |---------|--------|
-| Attendance Tracking & Timesheets | High complexity, not core to the policy engine product. |
-| Payroll Processing | Highly regulated, requires complex calculation engines and bank integrations. |
-| Performance Reviews & Feedback | Standard HR features that do not showcase the dynamic policy engine capabilities. |
+| Attendance Tracking & Timesheets | High complexity, HR-specific feature, not core to the policy runtime. |
+| Payroll Processing | Highly regulated, HR-specific, requires dedicated calculation engines. |
+| Performance Reviews & Directories | HR features that do not showcase policy execution. |
 
 ---
 
@@ -85,36 +77,33 @@ Acknowledged but deferred to future milestones.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SYS-01 | Phase 1 (Tenant & Core Setup) | Pending |
-| SYS-02 | Phase 1 (Tenant & Core Setup) | Pending |
-| SYS-03 | Phase 1 (Tenant & Core Setup) | Pending |
-| SYS-04 | Phase 1 (Tenant & Core Setup) | Pending |
-| AUD-03 | Phase 1 (Tenant & Core Setup) | Pending |
-| POL-05 | Phase 1 (Tenant & Core Setup) | Pending |
-| POL-06 | Phase 1 (Tenant & Core Setup) | Pending |
-| DSL-01 | Phase 2 (DSL Interpreter) | Pending |
-| DSL-02 | Phase 2 (DSL Interpreter) | Pending |
-| DSL-03 | Phase 2 (DSL Interpreter) | Pending |
-| POL-01 | Phase 3 (Policy & Versioning) | Pending |
-| POL-02 | Phase 3 (Policy & Versioning) | Pending |
-| POL-03 | Phase 3 (Policy & Versioning) | Pending |
-| POL-04 | Phase 3 (Policy & Versioning) | Pending |
-| REQ-01 | Phase 4 (Request Submission & Eval) | Pending |
-| REQ-02 | Phase 4 (Request Submission & Eval) | Pending |
-| REQ-03 | Phase 4 (Request Submission & Eval) | Pending |
-| APP-01 | Phase 5 (Approval Workflow Engine) | Pending |
-| APP-02 | Phase 5 (Approval Workflow Engine) | Pending |
-| APP-03 | Phase 5 (Approval Workflow Engine) | Pending |
-| AUD-01 | Phase 6 (Audit Logging) | Pending |
-| AUD-02 | Phase 6 (Audit Logging) | Pending |
-| UI-01 | Phase 7 (Frontend Application) | Pending |
-| UI-02 | Phase 7 (Frontend Application) | Pending |
-| UI-03 | Phase 7 (Frontend Application) | Pending |
-| UI-04 | Phase 7 (Frontend Application) | Pending |
+| POL-05 | Phase 1 (Safe Policy Runtime) | Pending |
+| POL-06 | Phase 1 (Safe Policy Runtime) | Pending |
+| RUN-02 | Phase 1 (Safe Policy Runtime) | Pending |
+| AUD-03 | Phase 1 (Safe Policy Runtime) | Pending |
+| POL-01 | Phase 2 (Versioning & Publishing) | Pending |
+| POL-02 | Phase 2 (Versioning & Publishing) | Pending |
+| POL-03 | Phase 2 (Versioning & Publishing) | Pending |
+| POL-04 | Phase 2 (Versioning & Publishing) | Pending |
+| RUN-01 | Phase 3 (DSL Syntax & Validation) | Pending |
+| RUN-03 | Phase 3 (DSL Syntax & Validation) | Pending |
+| DEC-01 | Phase 4 (Evaluation & Decisions) | Pending |
+| DEC-02 | Phase 4 (Evaluation & Decisions) | Pending |
+| DEC-03 | Phase 4 (Evaluation & Decisions) | Pending |
+| CON-01 | Phase 5 (Multi-Tenant Context) | Pending |
+| CON-02 | Phase 5 (Multi-Tenant Context) | Pending |
+| CON-03 | Phase 5 (Multi-Tenant Context) | Pending |
+| CON-04 | Phase 5 (Multi-Tenant Context) | Pending |
+| AUD-01 | Phase 6 (Audit Governance) | Pending |
+| AUD-02 | Phase 6 (Audit Governance) | Pending |
+| UI-01 | Phase 7 (Monaco UI Dashboard) | Pending |
+| UI-02 | Phase 7 (Monaco UI Dashboard) | Pending |
+| UI-03 | Phase 7 (Monaco UI Dashboard) | Pending |
+| UI-04 | Phase 7 (Monaco UI Dashboard) | Pending |
 
 **Coverage:**
-- v1 requirements: 22 total
-- Mapped to phases: 22
+- v1 requirements: 23 total
+- Mapped to phases: 23
 - Unmapped: 0 ✓
 
 ---
