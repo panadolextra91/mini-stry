@@ -9,10 +9,10 @@ Requirements for the initial release (MVP). Each maps to a corresponding roadmap
 
 ### Multi-Tenant Context & Directory Providers (CON)
 
-- [ ] **CON-01**: Support strict logical data isolation across multiple tenant organizations.
-- [ ] **CON-02**: Support dynamic Roles configured in the database per tenant and registered via a dedicated `RoleService`.
-- [ ] **CON-03**: Support Users belonging to a tenant, linked via a stable, unique `roleId` to dynamic role definitions.
-- [ ] **CON-04**: Support dynamic supervisor reporting lines (`managerId` / reports-to link) on Users to resolve relative hierarchy paths during evaluation.
+- [x] **CON-01**: Support strict logical data isolation across multiple tenant organizations.
+- [x] **CON-02**: Support dynamic Roles configured in the database per tenant and registered via a dedicated `RoleService`.
+- [x] **CON-03**: Support Users belonging to a tenant, linked via a stable, unique `roleId` to dynamic role definitions.
+- [x] **CON-04**: Support dynamic supervisor reporting lines (`managerId` / reports-to link) on Users to resolve relative hierarchy paths during evaluation.
 
 ### Evaluation Context (CTX)
 

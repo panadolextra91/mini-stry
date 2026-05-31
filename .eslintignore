@@ -1,6 +1,0 @@
-node_modules/
-dist/
-coverage/
-convex/_generated/
-*.config.js
-*.config.cjs

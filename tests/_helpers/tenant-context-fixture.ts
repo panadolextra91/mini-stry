@@ -1,2 +1,6 @@
-// TODO: filled in plan 01-04 once @/modules/directory/application/tenant-context exists.
-export const PLACEHOLDER_TENANT_CONTEXT_FIXTURE = true;
+import { tenantContext, tenantId, type TenantContext } from "@/modules/directory/index.js";
+
+export const TENANT_A: TenantContext = tenantContext(tenantId("tenant_a"));
+export const TENANT_B: TenantContext = tenantContext(tenantId("tenant_b"));
+
+export const makeTenantContext = (raw: string): TenantContext => tenantContext(tenantId(raw));

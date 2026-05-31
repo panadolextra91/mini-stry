@@ -14,7 +14,7 @@ The runtime stays domain-neutral. Approval routing is one consumer among many; i
 
 ## Phases
 
-- [ ] **Phase 1: Core Platform Foundations** - Establish modular directory structure, domain entity interfaces, Convex schemas (Tenants, Users, dynamic ID-based Roles, initial skeletons for Policy, PolicyVersion, AuditLog), and decoupled Application Services (RoleService and UserService) verified with Vitest.
+- [x] **Phase 1: Core Platform Foundations** - Establish modular directory structure, domain entity interfaces, Convex schemas (Tenants, Users, dynamic ID-based Roles, initial skeletons for Policy, PolicyVersion, AuditLog), and decoupled Application Services (RoleService and UserService) verified with Vitest.
 - [ ] **Phase 2: Policy Runtime Core** - Define the `EvaluationContext` interface, structured JSON rule schemas, native JSON Schema validation (prerequisite to evaluation), the safe relational evaluator (Pure TS, no `eval()`), and base Decision emission.
 - [ ] **Phase 3: Policy Lifecycle** - Wrap the runtime in a draft → publish → activate → rollback lifecycle with immutable versioning. Reuse the runtime's JSON Schema validator at lifecycle boundaries.
 - [ ] **Phase 4: Request Runtime** - Orchestrate evaluation payloads submitted as EvaluationContexts to active policies, persist decision records, and trace step-by-step execution paths.
@@ -36,10 +36,10 @@ The runtime stays domain-neutral. Approval routing is one consumer among many; i
   4. RoleService and UserService decoupled in application layer, enforcing Single Responsibility.
   5. Skeletons for `PolicyEntity`, `PolicyVersionEntity`, and `AuditLogEntity` defined as first-class domain citizens.
 **Plans**: 4 plans
-- [ ] 01-01: Bootstrap repository toolchain — package.json + tsconfig + vitest.config + ESLint flat config (with no-restricted-paths zones enforcing D-08) + Prettier + ARCHITECTURE.md + initial convex/ stub (Wave 1).
-- [ ] 01-02: Build the Pure-TS domain layer — branded IDs, entity interfaces, TenantContext (D-19), repository ports, custom error classes, curated module barrels + READMEs for directory/policy/audit (Wave 2).
-- [ ] 01-03: Define convex/schema.ts with six tables and tenant-prefixed composite indexes (CON-01..04, POL-05/06, AUD-03) plus Convex Auth field reservation; produce convex/_generated/ via codegen (Wave 2).
-- [ ] 01-04: Implement RoleService + UserService + Convex adapters (mappers, repositories) + in-memory fakes + Vitest suite (90% coverage on tenant isolation, role uniqueness, manager cycle prevention); BLOCKING task pushes schema to live Convex deployment + runs gitnexus analyze (Wave 3).
+- [x] 01-01: Bootstrap repository toolchain — package.json + tsconfig + vitest.config + ESLint flat config (with no-restricted-paths zones enforcing D-08) + Prettier + ARCHITECTURE.md + initial convex/ stub (Wave 1).
+- [x] 01-02: Build the Pure-TS domain layer — branded IDs, entity interfaces, TenantContext (D-19), repository ports, custom error classes, curated module barrels + READMEs for directory/policy/audit (Wave 2).
+- [x] 01-03: Define convex/schema.ts with six tables and tenant-prefixed composite indexes (CON-01..04, POL-05/06, AUD-03) plus Convex Auth field reservation; produce convex/_generated/ via codegen (Wave 2).
+- [x] 01-04: Implement RoleService + UserService + Convex adapters (mappers, repositories) + in-memory fakes + Vitest suite (90% coverage on tenant isolation, role uniqueness, manager cycle prevention); BLOCKING task pushes schema to live Convex deployment + runs gitnexus analyze (Wave 3).
 
 ### Phase 2: Policy Runtime Core
 **Goal**: Implement the pure-function runtime: `Policy + EvaluationContext → Decision`. Define the `EvaluationContext` interface, structured JSON rule schemas, native JSON Schema validation (as a prerequisite to evaluation), the safe relational evaluator (Pure TS, no `eval()`), and base Decision emission.
@@ -118,8 +118,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Core Platform Foundations | 0/4 | Ready to execute | - |
-| 2. Policy Runtime Core | 0/3 | Not started | - |
+| 1. Core Platform Foundations | 4/4 | Completed | 2026-05-31 |
+| 2. Policy Runtime Core | 0/3 | Ready to execute | - |
 | 3. Policy Lifecycle | 0/2 | Not started | - |
 | 4. Request Runtime | 0/2 | Not started | - |
 | 5. Approval Routing (Reference Decision Consumer) | 0/2 | Not started | - |

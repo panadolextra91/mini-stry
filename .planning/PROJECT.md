@@ -22,14 +22,14 @@ Executes secure, deterministic, and immutable policy decisions by evaluating str
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] **CON-01 (Multi-Tenancy)**: Support strict logical data isolation across multiple tenant organizations. *(Validated in Phase 1)*
+- [x] **CON-02 (Dynamic Roles)**: Support dynamic, data-driven roles configured per tenant in the database. *(Validated in Phase 1)*
+- [x] **CON-03 (Stable User-Role Reference)**: Link users to roles via stable `roleId` references, preventing renaming failures. *(Validated in Phase 1)*
+- [x] **CON-04 (Supervisor Reporting Line)**: Support supervisor/reports-to references (`managerId`) on users to resolve dynamic reporting structures. *(Validated in Phase 1)*
 
 ### Active
 
-- [ ] **CON-01 (Multi-Tenancy)**: Support strict logical data isolation across multiple tenant organizations.
-- [ ] **CON-02 (Dynamic Roles)**: Support dynamic, data-driven roles configured per tenant in the database.
-- [ ] **CON-03 (Stable User-Role Reference)**: Link users to roles via stable `roleId` references, preventing renaming failures.
-- [ ] **CON-04 (Supervisor Reporting Line)**: Support supervisor/reports-to references (`managerId`) on users to resolve dynamic reporting structures.
+
 - [ ] **CTX-01 (EvaluationContext as First-Class Input)**: Model the runtime input as a structured `EvaluationContext` — a domain-neutral key/value payload. The runtime formula is `Policy + EvaluationContext = Decision`.
 - [ ] **CTX-02 (Domain-Neutral Context Interface)**: Define `EvaluationContext` as a Pure-TS interface with no hardcoded domain-specific fields. Domain shape is supplied per-request by callers.
 - [ ] **POL-01 (Policy Definition)**: Support defining policies containing structured JSON rule blocks.
@@ -78,6 +78,8 @@ We are building a highly decoupled, modular policy engine. To guarantee extreme 
 | EvaluationContext as First-Class Concept | Formalized `EvaluationContext` (CTX-01, CTX-02) as a named architectural concept. Without an explicit name for runtime input, downstream phases drift into ad-hoc payload conventions and the runtime accidentally couples to a domain shape. | Approved |
 | JSON Schema Validation Belongs in Runtime Core | Schema validation is a prerequisite for safe evaluation: the evaluator cannot be trusted to run on an unvalidated policy. RUN-03 moved from Phase 3 (Lifecycle) to Phase 2 (Runtime Core). Lifecycle (save / publish / activate) re-uses the same validator at its boundaries. | Approved |
 | Decision Consumers Are External to the Runtime | Approval Routing is one Decision Consumer among many possible (notifications, escalations, future integrations). The runtime emits Decisions; it does not own consumers. Phase 5 is reframed as a *reference consumer*, not the runtime's purpose. | Approved |
+| Manager Cycle Depth Limit | Capping `managerId` reporting chains at 50 hops (`MAX_MANAGER_CHAIN_DEPTH = 50`) prevents infinite recursion, cycles, and potential execution DOS. | Approved |
+| Convex/ HARD RULE | Convex handlers (`convex/`) are exclusively thin DI assembly points (validation, DI wiring, response mapping). Absolutely no domain logic, evaluation, or business rules are permitted here. | Approved |
 
 ## Concept Hierarchy
 
@@ -113,4 +115,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-31 after Final Architecture Alignment Review + Phase 1 Discuss-Phase alignment (Architecture Constraint reworded to Module Boundary Rule per discuss-phase; DEC-03 numbering corrected to match REQUIREMENTS.md)*
+*Last updated: 2026-05-31 after Phase 1 completion (CON-01 to CON-04 validated, Manager Cycle Depth Limit and Convex/ HARD RULE decisions added).*

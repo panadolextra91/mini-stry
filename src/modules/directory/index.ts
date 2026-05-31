@@ -14,3 +14,6 @@ export type { UserRepositoryPort } from "./ports/user-repository.port.js";
 export type { RoleRepositoryPort } from "./ports/role-repository.port.js";
 // Errors
 export { RoleNameAlreadyExistsError, EmailAlreadyExistsError, RoleNotFoundError, UserNotFoundError, ManagerNotFoundError, ManagerCycleError } from "./application/errors.js";
+// Services
+export { RoleService } from "./application/role-service.js";
+export { UserService } from "./application/user-service.js";
