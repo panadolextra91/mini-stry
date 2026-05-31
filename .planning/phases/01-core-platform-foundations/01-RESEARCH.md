@@ -1066,7 +1066,7 @@ All code examples above are verified against current Convex documentation. The 1
 
 **Summary:** 8 assumptions, none architecturally load-bearing. A1 and A4 are the most consequential and both have well-understood fallbacks. The planner should surface A1 (ESLint plugin choice) at the start of `01-03` so it can be locked early.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should error handling use custom error classes or `Result<T, E>` types?**
    - What we know: Both are valid. Custom errors integrate naturally with Convex's error reporting (errors thrown in mutations propagate to client). `Result<T, E>` is more functional but requires every caller to pattern-match.

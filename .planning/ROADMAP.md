@@ -35,10 +35,11 @@ The runtime stays domain-neutral. Approval routing is one consumer among many; i
   3. Stable user-role references resolved via unique database ID (`roleId`), eliminating renaming failures.
   4. RoleService and UserService decoupled in application layer, enforcing Single Responsibility.
   5. Skeletons for `PolicyEntity`, `PolicyVersionEntity`, and `AuditLogEntity` defined as first-class domain citizens.
-**Plans**: 3 plans
-- [ ] 01-01: Establish Hexagonal directory structure and pure-TS domain entity interfaces (Tenant, User, Role, Policy, PolicyVersion, AuditLog).
-- [ ] 01-02: Design Convex database schemas with strict logical isolation multi-tenant index fields.
-- [ ] 01-03: Implement decoupled RoleService and UserService application layers, Convex persistence adapters, and Vitest test suites.
+**Plans**: 4 plans
+- [ ] 01-01: Bootstrap repository toolchain — package.json + tsconfig + vitest.config + ESLint flat config (with no-restricted-paths zones enforcing D-08) + Prettier + ARCHITECTURE.md + initial convex/ stub (Wave 1).
+- [ ] 01-02: Build the Pure-TS domain layer — branded IDs, entity interfaces, TenantContext (D-19), repository ports, custom error classes, curated module barrels + READMEs for directory/policy/audit (Wave 2).
+- [ ] 01-03: Define convex/schema.ts with six tables and tenant-prefixed composite indexes (CON-01..04, POL-05/06, AUD-03) plus Convex Auth field reservation; produce convex/_generated/ via codegen (Wave 2).
+- [ ] 01-04: Implement RoleService + UserService + Convex adapters (mappers, repositories) + in-memory fakes + Vitest suite (90% coverage on tenant isolation, role uniqueness, manager cycle prevention); BLOCKING task pushes schema to live Convex deployment + runs gitnexus analyze (Wave 3).
 
 ### Phase 2: Policy Runtime Core
 **Goal**: Implement the pure-function runtime: `Policy + EvaluationContext → Decision`. Define the `EvaluationContext` interface, structured JSON rule schemas, native JSON Schema validation (as a prerequisite to evaluation), the safe relational evaluator (Pure TS, no `eval()`), and base Decision emission.
@@ -117,7 +118,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Core Platform Foundations | 0/3 | Ready to plan | - |
+| 1. Core Platform Foundations | 0/4 | Ready to execute | - |
 | 2. Policy Runtime Core | 0/3 | Not started | - |
 | 3. Policy Lifecycle | 0/2 | Not started | - |
 | 4. Request Runtime | 0/2 | Not started | - |
