@@ -69,6 +69,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-31 20:30
-Stopped at: Project initialized.
-Resume file: None
+Last session: 2026-05-31 20:40
+Stopped at: Phase 1 context gathered.
+Resume file: .planning/phases/01-tenant-core-setup/01-CONTEXT.md
