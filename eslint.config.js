@@ -3,6 +3,9 @@ import importPlugin from "eslint-plugin-import";
 
 export default tseslint.config(
   {
+    ignores: ["node_modules/", "dist/", "coverage/", "convex/_generated/", "*.config.js", "*.config.cjs"],
+  },
+  {
     files: ["src/**/*.ts", "convex/**/*.ts", "tests/**/*.ts"],
     plugins: {
       import: importPlugin,
