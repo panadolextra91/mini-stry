@@ -29,7 +29,7 @@ describe("ConvexRoleRepository", () => {
       collect: vi.fn().mockResolvedValue([{ _id: "role_123", tenantId: fromTenantId(TENANT_A.tenantId), name: "admin", createdAt: 1234 }]),
     };
     const mockDb = createFakeMutationDb();
-    mockDb.query.mockReturnValue(mockQuery as unknown as ReturnType<typeof mockDb.query>);
+    mockDb.query.mockReturnValue(mockQuery as never);
 
     const repo = new ConvexRoleRepository(asQueryDb(mockDb));
     const roles = await repo.listByTenant(TENANT_A);
