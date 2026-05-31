@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-stopped_at: Phase 1 completed successfully
-last_updated: "2026-05-31T17:36:27.540Z"
-last_activity: 2026-05-31 -- Phase 1 marked complete
+status: active
+stopped_at: Phase 2 context gathered (02-CONTEXT.md + 02-DISCUSSION-LOG.md)
+last_updated: "2026-06-01T00:00:00.000Z"
+last_activity: 2026-06-01 -- Phase 2 (Policy Runtime Core) context captured (D-21..D-31)
 progress:
   total_phases: 6
   completed_phases: 1
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-31 after Final Architecture Alignment Review)
 
 **Core value:** Executes secure, deterministic, and immutable policy decisions by evaluating structured JSON policies against an **EvaluationContext**. Decision Consumers (such as approval routing) act on these decisions but are not part of the runtime core.
-**Current focus:** Between phases — Phase 1 ✓ complete, Phase 2 (Policy Runtime Core) awaiting `/gsd:discuss-phase 2`
+**Current focus:** Phase 2 (Policy Runtime Core) — context captured, awaiting `/gsd:plan-phase 2`
 
 ## Current Position
 
-Phase: 1 of 6 — ✓ COMPLETE
-Plan: 4 of 4 — all shipped (bc290fb + 5442d22)
-Status: Phase 1 complete; ready to discuss Phase 2
-Last activity: 2026-06-01 — Phase 1 closed (services + adapters + tests green, schema pushed, gitnexus indexed). 42 tests pass, 93.51% coverage. CON-01..04 + POL-05/06 + AUD-03 validated.
+Phase: 2 of 6 — context captured
+Plan: 0 of 3 — awaiting planning
+Status: Phase 2 CONTEXT.md ready; next step `/gsd:plan-phase 2`
+Last activity: 2026-06-01 — Phase 2 discussion completed. 11 decisions locked (D-21..D-31): Ajv + JSON Schema 2020-12 validator port, match-first rule list with tagged-discriminator predicates, 8 strict type-aware operators, flat EvaluationContext + fail-fast EvaluationError, discriminated-union Decision with first-class evaluationTrace, runtime/ owns Decision type.
 
 Progress: [██░░░░░░░░] 17%
 
@@ -91,6 +91,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-31T14:52:46.150Z
-Stopped at: Phase 1 completed successfully
-Resume file: .planning/ROADMAP.md
+Last session: 2026-06-01T00:00:00.000Z
+Stopped at: Phase 2 context gathered (02-CONTEXT.md + 02-DISCUSSION-LOG.md)
+Resume file: .planning/phases/02-policy-runtime-core/02-CONTEXT.md
