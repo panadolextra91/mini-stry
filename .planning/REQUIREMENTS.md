@@ -84,13 +84,13 @@ Requirements for the initial release (MVP). Each maps to a corresponding roadmap
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CON-01 | Phase 1: Core Platform Foundations | Pending |
-| CON-02 | Phase 1: Core Platform Foundations | Pending |
-| CON-03 | Phase 1: Core Platform Foundations | Pending |
-| CON-04 | Phase 1: Core Platform Foundations | Pending |
-| POL-05 | Phase 1: Core Platform Foundations | Pending |
-| POL-06 | Phase 1: Core Platform Foundations | Pending |
-| AUD-03 | Phase 1: Core Platform Foundations | Pending |
+| CON-01 | Phase 1: Core Platform Foundations | ✓ Completed |
+| CON-02 | Phase 1: Core Platform Foundations | ✓ Completed |
+| CON-03 | Phase 1: Core Platform Foundations | ✓ Completed |
+| CON-04 | Phase 1: Core Platform Foundations | ✓ Completed |
+| POL-05 | Phase 1: Core Platform Foundations | ✓ Completed |
+| POL-06 | Phase 1: Core Platform Foundations | ✓ Completed |
+| AUD-03 | Phase 1: Core Platform Foundations | ✓ Completed |
 | CTX-01 | Phase 2: Policy Runtime Core | Pending |
 | CTX-02 | Phase 2: Policy Runtime Core | Pending |
 | RUN-01 | Phase 2: Policy Runtime Core | Pending |
@@ -114,6 +114,8 @@ Requirements for the initial release (MVP). Each maps to a corresponding roadmap
 - v1 requirements: 25 total
 - Mapped to phases: 25
 - Unmapped: 0 ✓
+- **Completed (Phase 1):** 7 (CON-01..04, POL-05/06, AUD-03)
+- **Remaining:** 18 (Phase 2-6)
 
 **Changes vs prior revision:**
 - Added CTX section (CTX-01, CTX-02) — EvaluationContext promoted to first-class.
@@ -123,4 +125,4 @@ Requirements for the initial release (MVP). Each maps to a corresponding roadmap
 
 ---
 *Requirements defined: 2026-05-31*
-*Last updated: 2026-05-31 after Final Architecture Alignment Review*
+*Last updated: 2026-06-01 — Phase 1 requirements (CON-01..04, POL-05/06, AUD-03) marked Completed; 18 reqs remain across Phase 2-6.*

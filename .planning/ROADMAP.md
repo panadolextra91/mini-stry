@@ -119,11 +119,11 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Core Platform Foundations | 4/4 | Completed | 2026-05-31 |
-| 2. Policy Runtime Core | 0/3 | Ready to execute | - |
+| 2. Policy Runtime Core | 0/3 | Not started | - |
 | 3. Policy Lifecycle | 0/2 | Not started | - |
 | 4. Request Runtime | 0/2 | Not started | - |
 | 5. Approval Routing (Reference Decision Consumer) | 0/2 | Not started | - |
 | 6. Admin Portal & UI Dashboard | 0/3 | Not started | - |
 
 ---
-*Last updated: 2026-05-31 after Final Architecture Alignment Review (RUN-03 moved Phase 3 → Phase 2; CTX-01/CTX-02 added to Phase 2; Phase 5 reframed as Reference Decision Consumer).*
+*Last updated: 2026-06-01 — Phase 1 (Core Platform Foundations) closed. 4/4 plans shipped, 42/42 tests pass, 93.51% coverage, schema pushed to Convex deployment. Ready to discuss Phase 2 (Policy Runtime Core).*
