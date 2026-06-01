@@ -53,9 +53,22 @@ The runtime stays domain-neutral. Approval routing is one consumer among many; i
   5. Base decision emitter accurately produces structured Decisions (Auto-Approve, Auto-Reject, Request-Approval). The Decision type is open to future outcomes.
   6. 100% test coverage on JSON Schema validation, condition evaluation, and Decision emission.
 **Plans**: 3 plans
+
+**Wave 1**
 - [ ] 02-01: Define the `EvaluationContext` interface and structured JSON policy rule schemas; ship the JSON Schema validator as the runtime's first checkpoint.
+
+**Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 02-02: Implement deterministic Pure-TS JSON Policy Condition Evaluator with relational logic over the EvaluationContext.
+
+**Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 02-03: Implement base Decision emitter yielding structured Decisions from rule evaluation results.
+
+**Cross-cutting constraints:**
+- Hexagonal: `SchemaValidatorPort` (`runtime/ports/`) + Ajv adapter (`runtime/adapters/ajv/`); Ajv `ErrorObject` never crosses the adapter boundary (D-22)
+- JSON Schema document at `src/modules/runtime/schema/policy-content.schema.json` is the canonical source of truth (D-23) — runtime, lifecycle (Phase 3), and Monaco (Phase 6) all consume the same artifact
+- Decision is a discriminated union owned by `runtime/` (D-29, D-31); no standalone `decision/` module
+- 100% test coverage on `src/modules/runtime/**/*.ts` (engineering.md + per-folder vitest threshold from 02-01)
+- No `eval()`, no `any`, no Convex, no `TenantContext` in Phase 2 runtime (PROJECT.md constraints)
 
 ### Phase 3: Policy Lifecycle
 **Goal**: Wrap the runtime in an administrative lifecycle — draft, publish (immutable), activate, rollback — and persist policy publication audit logs. Lifecycle operations reuse the runtime's JSON Schema validator at their boundaries.
