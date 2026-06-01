@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-05-31 after Final Architecture Alignment
 
 ## Current Position
 
-Phase: 2 of 6 — planned (3/3 plans written)
-Plan: 0 of 3 — awaiting execution
-Status: Phase 2 PLAN.md files ready; next step `/gsd:execute-phase 2`
-Last activity: 2026-06-01 — Phase 2 plans written manually (no subagent — researcher dropped, planner spawn cancelled by user). 02-01: types + JSON Schema + Ajv validator port (Wave 1). 02-02: pure-TS match-first evaluator + trace (Wave 2). 02-03: validateAndEvaluate composer + e2e fixtures + DEC-02 coverage (Wave 3). Vitest 100% threshold for runtime/.
+Phase: 2 of 6 — executing (3/3 plans written)
+Plan: 1 of 3 — completed
+Status: Phase 2 Plan 02-01 completed. Ready for 02-02.
+Last activity: 2026-06-01 — Completed 02-01 (runtime core domain and schema validation)
 
 Progress: [██░░░░░░░░] 17%
 
