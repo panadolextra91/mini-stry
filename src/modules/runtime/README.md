@@ -6,7 +6,7 @@ Pure functions over EvaluationContext. No TenantContext, no Convex, no consumers
 - **Types**: EvaluationContext, JsonValue, PolicyContent, Rule, RuleId, Predicate, ComparePredicate, Operator, Decision, EvaluationResult, TraceEntry
 - **Decision factories**: autoApprove, autoReject, requestApproval
 - **Schema validator**: SchemaValidatorPort, ValidationResult, AjvSchemaValidator (D-22)
-- **Errors**: ValidationError, EvaluationError (codes: MISSING_FIELD | TYPE_MISMATCH | UNSUPPORTED_OPERATOR)
+- **Errors**: ValidationError, EvaluationError (codes: MISSING_FIELD | TYPE_MISMATCH | UNSUPPORTED_OPERATOR), PolicySchemaInvalidError (thrown by validateAndEvaluate when schema validation fails; carries `errors: readonly ValidationError[]`)
 - **Canonical schema artifact**: src/modules/runtime/schema/policy-content.schema.json (D-23 — source of truth for runtime, lifecycle, and Monaco)
 
 ## Module Boundary Rule (D-08)
