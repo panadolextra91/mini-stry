@@ -58,10 +58,10 @@ The runtime stays domain-neutral. Approval routing is one consumer among many; i
 - [x] 02-01: Define the `EvaluationContext` interface and structured JSON policy rule schemas; ship the JSON Schema validator as the runtime's first checkpoint.
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 02-02: Implement deterministic Pure-TS JSON Policy Condition Evaluator with relational logic over the EvaluationContext.
+- [x] 02-02: Implement deterministic Pure-TS JSON Policy Condition Evaluator with relational logic over the EvaluationContext.
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 02-03: Implement base Decision emitter yielding structured Decisions from rule evaluation results.
+- [x] 02-03: Implement base Decision emitter yielding structured Decisions from rule evaluation results.
 
 **Cross-cutting constraints:**
 - Hexagonal: `SchemaValidatorPort` (`runtime/ports/`) + Ajv adapter (`runtime/adapters/ajv/`); Ajv `ErrorObject` never crosses the adapter boundary (D-22)
@@ -132,7 +132,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Core Platform Foundations | 4/4 | Completed | 2026-05-31 |
-| 2. Policy Runtime Core | 1/3 | In progress | - |
+| 2. Policy Runtime Core | 3/3 | Completed | 2026-06-01 |
 | 3. Policy Lifecycle | 0/2 | Not started | - |
 | 4. Request Runtime | 0/2 | Not started | - |
 | 5. Approval Routing (Reference Decision Consumer) | 0/2 | Not started | - |

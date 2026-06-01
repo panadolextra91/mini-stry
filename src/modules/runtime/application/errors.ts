@@ -24,3 +24,11 @@ export class EvaluationError extends Error {
     this.name = "EvaluationError";
   }
 }
+
+export class PolicySchemaInvalidError extends Error {
+  readonly code = "POLICY_SCHEMA_INVALID" as const;
+  constructor(public readonly errors: readonly ValidationError[]) {
+    super(`Policy schema validation failed with ${errors.length} error(s)`);
+    this.name = "PolicySchemaInvalidError";
+  }
+}
