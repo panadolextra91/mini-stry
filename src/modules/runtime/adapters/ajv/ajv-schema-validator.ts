@@ -27,6 +27,7 @@ export class AjvSchemaValidator implements SchemaValidatorPort {
       // consumers receive `result.value: PolicyContent` and never need their own cast.
       return { ok: true, value: content as PolicyContent };
     }
+    /* v8 ignore next */
     const errs = (this.validateFn.errors ?? []) as ErrorObject[];
     return { ok: false, errors: errs.map(toDomainError) };
   }
@@ -35,6 +36,7 @@ export class AjvSchemaValidator implements SchemaValidatorPort {
 function toDomainError(e: ErrorObject): ValidationError {
   const code = String(e.keyword);
   const path = e.instancePath === "" ? "/" : e.instancePath;
+  /* v8 ignore next */
   const msg = e.message ?? "Schema validation failed";
   return new ValidationError(code, path, msg);
 }

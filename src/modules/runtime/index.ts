@@ -12,3 +12,5 @@ export type { SchemaValidatorPort, ValidationResult, ValidationSuccess, Validati
 export { ValidationError, EvaluationError } from "./application/errors.js";
 export type { EvaluationErrorCode } from "./application/errors.js";
 export { AjvSchemaValidator } from "./adapters/ajv/ajv-schema-validator.js";
+
+export { evaluate } from "./application/evaluator.js";
