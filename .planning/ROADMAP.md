@@ -15,7 +15,7 @@ The runtime stays domain-neutral. Approval routing is one consumer among many; i
 ## Phases
 
 - [x] **Phase 1: Core Platform Foundations** - Establish modular directory structure, domain entity interfaces, Convex schemas (Tenants, Users, dynamic ID-based Roles, initial skeletons for Policy, PolicyVersion, AuditLog), and decoupled Application Services (RoleService and UserService) verified with Vitest.
-- [ ] **Phase 2: Policy Runtime Core** - Define the `EvaluationContext` interface, structured JSON rule schemas, native JSON Schema validation (prerequisite to evaluation), the safe relational evaluator (Pure TS, no `eval()`), and base Decision emission.
+- [x] **Phase 2: Policy Runtime Core** - Define the `EvaluationContext` interface, structured JSON rule schemas, native JSON Schema validation (prerequisite to evaluation), the safe relational evaluator (Pure TS, no `eval()`), and base Decision emission.
 - [ ] **Phase 3: Policy Lifecycle** - Wrap the runtime in a draft → publish → activate → rollback lifecycle with immutable versioning. Reuse the runtime's JSON Schema validator at lifecycle boundaries.
 - [ ] **Phase 4: Request Runtime** - Orchestrate evaluation payloads submitted as EvaluationContexts to active policies, persist decision records, and trace step-by-step execution paths.
 - [ ] **Phase 5: Approval Routing (Reference Decision Consumer)** - Ship the first reference Decision Consumer. Resolve supervisor reporting lines (`managerId`) and role registries to generate sequential, multi-stage approval task chains from Request-Approval Decisions.
@@ -80,8 +80,19 @@ The runtime stays domain-neutral. Approval routing is one consumer among many; i
   3. Active-version tracking allows seamless updates and instant rollbacks to arbitrary version IDs.
   4. Policy publication/rollback events logged to immutable audit records.
 **Plans**: 2 plans
-- [ ] 03-01: Implement draft modifications calling the runtime schema validator, and immutable publishing logic.
-- [ ] 03-02: Implement active-state selector, rollback handler, and Convex lifecycle persistence adapters.
+
+**Wave 1**
+- [ ] 03-01: Implement draft creation calling the runtime schema validator, immutable publishing logic, optimistic concurrency, and domain event infrastructure (EventDispatcher).
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 03-02: Implement rollback-as-forward-clone, active-version selector, audit event subscribers, and Convex lifecycle persistence adapters.
+
+**Cross-cutting constraints:**
+- Lifecycle reuses `SchemaValidatorPort` from `runtime/` — no separate validator (RUN-03, D-34)
+- Domain events dispatched synchronously via `EventDispatcher` — no external messaging (D-35)
+- Audit records store by-reference: IDs + metadata only, never content (D-37)
+- Optimistic concurrency on drafts via `revision` field (D-36)
+- Version numbers strictly monotonic — rollback creates forward clone (D-33)
 
 ### Phase 4: Request Runtime
 **Goal**: Orchestrate request payload submissions as EvaluationContexts, run them through the Policy Runtime against active policy versions, and persist decision-path traces.
@@ -133,10 +144,10 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 |-------|----------------|--------|-----------|
 | 1. Core Platform Foundations | 4/4 | Completed | 2026-05-31 |
 | 2. Policy Runtime Core | 3/3 | Completed | 2026-06-01 |
-| 3. Policy Lifecycle | 0/2 | Not started | - |
+| 3. Policy Lifecycle | 0/2 | Planned | - |
 | 4. Request Runtime | 0/2 | Not started | - |
 | 5. Approval Routing (Reference Decision Consumer) | 0/2 | Not started | - |
 | 6. Admin Portal & UI Dashboard | 0/3 | Not started | - |
 
 ---
-*Last updated: 2026-06-01 — Phase 1 (Core Platform Foundations) closed. 4/4 plans shipped, 42/42 tests pass, 93.51% coverage, schema pushed to Convex deployment. Ready to discuss Phase 2 (Policy Runtime Core).*
+*Last updated: 2026-06-01 — Phase 2 (Policy Runtime Core) closed. 3/3 plans shipped (02-01 schema + Ajv adapter, 02-02 pure-TS evaluator + trace, 02-03 validateAndEvaluate composer + e2e fixtures), 100% test coverage on `src/modules/runtime/**/*.ts`, ~95.69% global. CTX-01, CTX-02, RUN-01, RUN-02, RUN-03, DEC-02 validated. Ready for `/gsd:verify-work 2` then `/gsd:discuss-phase 3` (Policy Lifecycle).*
