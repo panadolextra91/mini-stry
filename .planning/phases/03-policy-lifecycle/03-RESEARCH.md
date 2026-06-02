@@ -19,9 +19,9 @@ The codebase already has the foundational building blocks: `Policy` and `PolicyV
 - **D-32 (Draft Data Model):** Drafts are `PolicyVersion` entities with `status='draft'`. `Policy` owns identity + `activeVersionId` only. `PolicyVersion` owns: `content`, `versionNumber`, `status`, `createdBy`, `createdAt`, `publishedAt`. One draft + one active published per policy. Transitions on `PolicyVersion`, not `Policy`.
 - **D-33 (Rollback Mechanism):** Forward-only version cloning. Rollback from v3→v1 creates v4 (copy of v1's content). Publish v4 to activate. Version numbers are strictly monotonic. Includes `rollbackFromVersionId` metadata.
 - **D-34 (Validation Strictness):** Drafts may contain invalid content. Validation runs on every save, updating `validationStatus` ('valid' | 'invalid') and `validationErrors`. Publishing requires `validationStatus === 'valid'`. Validation is a publish gate, not a draft storage gate.
-- **D-35 (Audit Log Invocation):** Synchronous in-process Domain Events. No external messaging. `PolicyService` emits domain events (`PolicyPublished`, `PolicyRolledBack`, `DraftCreated`, `DraftUpdated`). Audit subscribers persist `AuditLog` records via lightweight in-memory event dispatcher.
+- **D-35 (Audit Log Invocation):** Synchronous in-process Domain Events. No external messaging. `PolicyService` emits domain events (`DraftCreated`, `DraftUpdated`, `PolicyPublished`). There is no separate `PolicyRolledBack` event — rollback is modeled as `DraftCreated` (with `rollbackFromVersionId != null`) followed by `PolicyPublished`. Audit subscribers infer rollback from `rollbackFromVersionId`. Audit subscribers persist `AuditLog` records via lightweight in-memory event dispatcher.
 - **D-36 (Draft Concurrency):** Optimistic concurrency control. `PolicyVersion` contains `revision: number`. `SaveDraft` requires `expectedRevision`. Save succeeds only if `expectedRevision === currentRevision`, increments revision. Mismatches throw `ConflictError`.
-- **D-37 (Audit Log Snapshot Strategy):** By-reference. Records store `eventType`, `policyId`, `policyVersionId`, `versionNumber`, `actorId`, `timestamp`, `rollbackFromVersionId`. No content duplication. `PolicyVersion` is the canonical immutable source.
+- **D-37 (Audit Log Snapshot Strategy):** By-reference. Records store `eventType`, `tenantId`, `policyId`, `policyVersionId`, `versionNumber`, `actorId`, `timestamp`, `rollbackFromVersionId`. No content duplication. `PolicyVersion` is the canonical immutable source. Audit payloads may include `tenantId` metadata.
 
 ### Agent's Discretion
 - Event dispatcher implementation details (synchronous vs microtask)
@@ -113,7 +113,7 @@ src/modules/policy/
 │   ├── ids.ts                      # (existing) PolicyId, PolicyVersionId
 │   ├── policy.ts                   # (EXTEND) Add requestType field
 │   ├── policy-version.ts           # (EXTEND) Add status, validationStatus, validationErrors, revision, rollbackFromVersionId, createdBy
-│   ├── policy-events.ts            # (NEW) Domain event types: PolicyPublished, PolicyRolledBack, DraftCreated, DraftUpdated
+│   ├── policy-events.ts            # (NEW) Domain event types: DraftCreated, DraftUpdated, PolicyPublished (no PolicyRolledBack — rollback inferred from DraftCreated.rollbackFromVersionId)
 │   └── policy-version-status.ts    # (NEW) Status enum: 'draft' | 'published'
 ├── application/
 │   ├── policy-service.ts           # (NEW) Lifecycle orchestrator
@@ -211,6 +211,8 @@ async rollback(ctx: TenantContext, policyId: PolicyId, targetVersionId: PolicyVe
   const targetVersion = await this.versionRepo.findById(ctx, targetVersionId);
   if (!targetVersion) throw new VersionNotFoundError(targetVersionId);
   
+  // NOTE: getNextVersionNumber() query-max-plus-1 is acceptable for MVP.
+  // Future production implementations must allocate atomically within a single transaction.
   const nextNumber = await this.versionRepo.getNextVersionNumber(ctx, policyId);
   
   const draft = await this.versionRepo.create(ctx, {
@@ -218,14 +220,19 @@ async rollback(ctx: TenantContext, policyId: PolicyId, targetVersionId: PolicyVe
     versionNumber: nextNumber,
     content: targetVersion.content, // Clone content from target
     status: 'draft',
-    validationStatus: 'valid', // Source was published → already valid
-    validationErrors: [],
+    // Do NOT re-run validation — clone directly from source version.
+    // Historical published versions are already validated.
+    // Avoids coupling rollback behavior to future validator changes.
+    validationStatus: targetVersion.validationStatus,
+    validationErrors: targetVersion.validationErrors,
     revision: 0,
     rollbackFromVersionId: targetVersionId,
     createdBy: ctx.actorId,
   });
 
-  await this.dispatcher.emit('DraftCreated', { ...draft, isRollback: true });
+  // Rollback emits DraftCreated with rollbackFromVersionId != null.
+  // There is no separate PolicyRolledBack event.
+  await this.dispatcher.emit('DraftCreated', { ...draft });
   return draft;
 }
 ```
@@ -340,21 +347,16 @@ export interface PolicyPublishedEvent {
   readonly timestamp: number;
 }
 
-export interface PolicyRolledBackEvent {
-  readonly tenantId: TenantId;
-  readonly policyId: PolicyId;
-  readonly policyVersionId: PolicyVersionId;
-  readonly versionNumber: number;
-  readonly rollbackFromVersionId: PolicyVersionId;
-  readonly actorId: UserId;
-  readonly timestamp: number;
-}
+// NOTE: No PolicyRolledBackEvent — rollback is modeled as DraftCreated
+// with rollbackFromVersionId != null, followed by PolicyPublished.
+// Audit subscribers infer rollback from rollbackFromVersionId.
 
 export type PolicyEventMap = {
   DraftCreated: DraftCreatedEvent;
   DraftUpdated: DraftUpdatedEvent;
   PolicyPublished: PolicyPublishedEvent;
-  PolicyRolledBack: PolicyRolledBackEvent;
+  // No PolicyRolledBack — rollback is modeled as DraftCreated
+  // with rollbackFromVersionId != null, followed by PolicyPublished.
 };
 ```
 
