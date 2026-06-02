@@ -54,10 +54,18 @@ export default defineSchema({
     policyId: v.id("policies"),
     versionNumber: v.number(),
     content: v.any(), // Intentionally v.any() per D-12; Phase 2 owns the shape
+    status: v.string(), // 'draft' | 'published' (D-32)
+    validationStatus: v.string(), // 'valid' | 'invalid' | 'unchecked' (D-34)
+    validationErrors: v.array(v.object({ code: v.string(), path: v.string(), message: v.string() })),
+    revision: v.number(), // optimistic concurrency counter (D-36)
+    rollbackFromVersionId: v.union(v.id("policyVersions"), v.null()), // D-33 forward clone metadata
+    createdBy: v.string(), // UserId (branded string stored as plain string in Convex)
     publishedAt: v.union(v.number(), v.null()),
   })
     .index("by_tenant_policy_version", ["tenantId", "policyId", "versionNumber"])
-    .index("by_tenant_policy_published", ["tenantId", "policyId", "publishedAt"]),
+    .index("by_tenant_policy_published", ["tenantId", "policyId", "publishedAt"])
+    .index("by_tenant_policy_status", ["tenantId", "policyId", "status"]),
+
 
   auditLogs: defineTable({
     tenantId: v.id("tenants"),

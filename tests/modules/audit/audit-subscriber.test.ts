@@ -20,8 +20,8 @@ describe("AuditEventSubscriber", () => {
 
     const logs = await auditRepo.findByTenant(TENANT_A);
     expect(logs).toHaveLength(1);
-    expect(logs[0].eventType).toBe("policy.draft_created");
-    const payload = logs[0].payload as Record<string, unknown>;
+    expect(logs[0]!.eventType).toBe("policy.draft_created");
+    const payload = logs[0]!.payload as Record<string, unknown>;
     expect(payload.rollbackFromVersionId).toBeNull();
   });
 

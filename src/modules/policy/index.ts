@@ -33,3 +33,7 @@ export type {
 } from "./ports/policy-version-repository.port.js";
 // Re-export EventDispatcher from shared
 export { EventDispatcher } from "@/shared/event-dispatcher.js";
+// Convex adapters
+export { ConvexPolicyRepository } from "./adapters/convex/convex-policy-repository.js";
+export { ConvexPolicyVersionRepository } from "./adapters/convex/convex-policy-version-repository.js";
+export { toPolicyDomain, toPolicyVersionDomain, toPolicyId, fromPolicyId, toPolicyVersionId, fromPolicyVersionId } from "./adapters/convex/mappers.js";

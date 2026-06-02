@@ -24,7 +24,8 @@ export function setupPolicy(validator: SchemaValidatorPort) {
   const versionRepo = new InMemoryPolicyVersionRepository();
   const dispatcher = new EventDispatcher<PolicyEventMap>();
   const auditRepo = new InMemoryAuditLogRepository();
-  const _auditSubscriber = new AuditEventSubscriber(auditRepo, dispatcher);
+  // Wired via constructor side-effect — must instantiate but result unused
+  void new AuditEventSubscriber(auditRepo, dispatcher);
   const policyService = new PolicyService(
     policyRepo,
     versionRepo,

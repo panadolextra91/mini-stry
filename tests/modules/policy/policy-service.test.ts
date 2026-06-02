@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { setupPolicy } from "../../_helpers/in-memory-fakes.js";
 import { TENANT_A, TENANT_B } from "../../_helpers/tenant-context-fixture.js";
 import type { SchemaValidatorPort, ValidationResult } from "@/modules/runtime/index.js";
@@ -12,7 +12,6 @@ import {
   ConflictError,
   policyVersionId,
 } from "@/modules/policy/index.js";
-import type { PolicyEventMap } from "@/modules/policy/index.js";
 import { userId } from "@/modules/directory/index.js";
 
 const ACTOR = userId("user_actor");
@@ -93,7 +92,7 @@ describe("PolicyService", () => {
       await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
 
       expect(handler).toHaveBeenCalledOnce();
-      expect(handler.mock.calls[0][0]).toMatchObject({
+      expect(handler.mock.calls[0]![0]).toMatchObject({
         policyId: policy.id,
         actorId: ACTOR,
         rollbackFromVersionId: null,
@@ -171,7 +170,7 @@ describe("PolicyService", () => {
       await policyService.saveDraft(TENANT_A, draft.id, { x: 1 }, 0);
 
       expect(handler).toHaveBeenCalledOnce();
-      expect(handler.mock.calls[0][0]).toMatchObject({
+      expect(handler.mock.calls[0]![0]).toMatchObject({
         policyId: policy.id,
         policyVersionId: draft.id,
       });
@@ -232,7 +231,7 @@ describe("PolicyService", () => {
       await policyService.publishDraft(TENANT_A, draft.id);
 
       expect(handler).toHaveBeenCalledOnce();
-      expect(handler.mock.calls[0][0]).toMatchObject({
+      expect(handler.mock.calls[0]![0]).toMatchObject({
         policyId: policy.id,
         policyVersionId: draft.id,
         actorId: ACTOR,
@@ -329,7 +328,7 @@ describe("PolicyService", () => {
       await policyService.rollback(TENANT_A, policy.id, v1.id, ACTOR);
 
       expect(handler).toHaveBeenCalledOnce();
-      expect(handler.mock.calls[0][0]).toMatchObject({
+      expect(handler.mock.calls[0]![0]).toMatchObject({
         policyId: policy.id,
         rollbackFromVersionId: v1.id,
       });
@@ -387,9 +386,9 @@ describe("PolicyService", () => {
     it("create → draft → save → publish", async () => {
       const { policyService, dispatcher } = setupPolicy(alwaysValidValidator());
       const events: string[] = [];
-      dispatcher.on("DraftCreated", () => events.push("DraftCreated"));
-      dispatcher.on("DraftUpdated", () => events.push("DraftUpdated"));
-      dispatcher.on("PolicyPublished", () => events.push("PolicyPublished"));
+      dispatcher.on("DraftCreated", () => { events.push("DraftCreated"); });
+      dispatcher.on("DraftUpdated", () => { events.push("DraftUpdated"); });
+      dispatcher.on("PolicyPublished", () => { events.push("PolicyPublished"); });
 
       const policy = await policyService.createPolicy(TENANT_A, { name: "Full Lifecycle" });
       const draft = await policyService.createDraft(TENANT_A, policy.id, { rules: [] }, ACTOR);
