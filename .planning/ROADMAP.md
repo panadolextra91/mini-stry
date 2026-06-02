@@ -16,7 +16,7 @@ The runtime stays domain-neutral. Approval routing is one consumer among many; i
 
 - [x] **Phase 1: Core Platform Foundations** - Establish modular directory structure, domain entity interfaces, Convex schemas (Tenants, Users, dynamic ID-based Roles, initial skeletons for Policy, PolicyVersion, AuditLog), and decoupled Application Services (RoleService and UserService) verified with Vitest.
 - [x] **Phase 2: Policy Runtime Core** - Define the `EvaluationContext` interface, structured JSON rule schemas, native JSON Schema validation (prerequisite to evaluation), the safe relational evaluator (Pure TS, no `eval()`), and base Decision emission.
-- [ ] **Phase 3: Policy Lifecycle** - Wrap the runtime in a draft → publish → activate → rollback lifecycle with immutable versioning. Reuse the runtime's JSON Schema validator at lifecycle boundaries.
+- [x] **Phase 3: Policy Lifecycle** - Wrap the runtime in a draft → publish → activate → rollback lifecycle with immutable versioning. Reuse the runtime's JSON Schema validator at lifecycle boundaries.
 - [ ] **Phase 4: Request Runtime** - Orchestrate evaluation payloads submitted as EvaluationContexts to active policies, persist decision records, and trace step-by-step execution paths.
 - [ ] **Phase 5: Approval Routing (Reference Decision Consumer)** - Ship the first reference Decision Consumer. Resolve supervisor reporting lines (`managerId`) and role registries to generate sequential, multi-stage approval task chains from Request-Approval Decisions.
 - [ ] **Phase 6: Admin Portal & UI Dashboard** - Premium React portal featuring a Monaco-based JSON editor with autocompletion, real-time validation, request logs, and personal approval dashboard.

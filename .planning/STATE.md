@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: active
-stopped_at: Phase 3 planned (2 plans in 2 waves; ready for /gsd-execute-phase 3)
+stopped_at: Phase 3 complete (2 plans executed; ready for Phase 4)
 last_updated: "2026-06-01T00:00:00.000Z"
-last_activity: 2026-06-01 -- Phase 3 (Policy Lifecycle) planned: 2 plans covering POL-01..04 + AUD-01
+last_activity: 2026-06-02 -- Phase 3 (Policy Lifecycle) executed: 2 plans, POL-01..04 + AUD-01 complete
 progress:
   total_phases: 6
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 9
-  completed_plans: 7
-  percent: 33
+  completed_plans: 9
+  percent: 50
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-06-01 after Phase 2 completion)
 
 ## Current Position
 
-Phase: 3 of 6 — Ready to execute
-Plan: 0 of 2 — pending execution
-Status: Phase 3 planned. 2 plans across 2 waves cover the full lifecycle (draft → publish → activate → rollback) with domain events and audit logging.
-Last activity: 2026-06-01 — Phase 3 planning complete (2 plans, 5 requirements: POL-01..04, AUD-01)
+Phase: 3 of 6 — Complete
+Plan: 2 of 2 — done
+Status: Phase 3 executed. Draft→publish lifecycle, rollback-as-forward-clone, audit event subscribers, Convex adapters. 158 tests, tsc clean.
+Last activity: 2026-06-02 — Phase 3 execution complete
 
-Progress: [██████░░░░] 33% (2/6 phases · 7/7 plans for shipped phases)
+Progress: [██████████░░░░░░░░░░] 50% (3/6 phases · 9/9 plans for shipped phases)
 
 ## Performance Metrics
 
@@ -46,7 +46,7 @@ Progress: [██████░░░░] 33% (2/6 phases · 7/7 plans for ship
 |-------|-------|-------|----------|
 | 1. Core Platform Foundations | 4 | 180m | 45 min |
 | 2. Policy Runtime Core | 3 | 135m | 45 min |
-| 3. Policy Lifecycle | 0 | 0 | 0 min |
+| 3. Policy Lifecycle | 2 | 20m | 10 min |
 | 4. Request Runtime | 0 | 0 | 0 min |
 | 5. Approval Routing (Reference Decision Consumer) | 0 | 0 | 0 min |
 | 6. Admin Portal & UI Dashboard | 0 | 0 | 0 min |
