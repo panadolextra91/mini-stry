@@ -6,7 +6,7 @@
 
 ## Summary
 
-Phase 3 wraps the Phase 2 runtime in an administrative lifecycle: draft → publish (immutable) → activate → rollback. The core technical challenge is implementing a state machine over `PolicyVersion` entities that respects immutability (published versions are frozen), enforces validation at publish-time (reusing the runtime's `SchemaValidatorPort`), and emits domain events consumed by audit log subscribers.
+Phase 3 wraps the Phase 2 runtime in an administrative lifecycle: draft → publish (immutable) → rollback. The core technical challenge is implementing a state machine over `PolicyVersion` entities that respects immutability (published versions are frozen), enforces validation at publish-time (reusing the runtime's `SchemaValidatorPort`), and emits domain events consumed by audit log subscribers.
 
 The codebase already has the foundational building blocks: `Policy` and `PolicyVersion` domain skeletons in `src/modules/policy/`, the `AuditLog` entity in `src/modules/audit/`, branded IDs (`PolicyId`, `PolicyVersionId`, `AuditLogId`), the `SchemaValidatorPort` + `AjvSchemaValidator` in `runtime/`, and the Convex schema with `policies`, `policyVersions`, and `auditLogs` tables. Phase 3 extends these skeletons into full lifecycle entities, adds application services, persistence adapters, and a lightweight domain event system.
 
@@ -17,7 +17,7 @@ The codebase already has the foundational building blocks: `Policy` and `PolicyV
 
 ### Locked Decisions
 - **D-32 (Draft Data Model):** Drafts are `PolicyVersion` entities with `status='draft'`. `Policy` owns identity + `activeVersionId` only. `PolicyVersion` owns: `content`, `versionNumber`, `status`, `createdBy`, `createdAt`, `publishedAt`. One draft + one active published per policy. Transitions on `PolicyVersion`, not `Policy`.
-- **D-33 (Rollback Mechanism):** Forward-only version cloning. Rollback from v3→v1 creates v4 (copy of v1's content). Publish v4 to activate. Version numbers are strictly monotonic. Includes `rollbackFromVersionId` metadata.
+- **D-33 (Rollback Mechanism):** Forward-only version cloning. Rollback from v3→v1 creates v4 (copy of v1's content). Publish v4 to make it active. Version numbers are strictly monotonic. Includes `rollbackFromVersionId` metadata.
 - **D-34 (Validation Strictness):** Drafts may contain invalid content. Validation runs on every save, updating `validationStatus` ('valid' | 'invalid') and `validationErrors`. Publishing requires `validationStatus === 'valid'`. Validation is a publish gate, not a draft storage gate.
 - **D-35 (Audit Log Invocation):** Synchronous in-process Domain Events. No external messaging. `PolicyService` emits domain events (`DraftCreated`, `DraftUpdated`, `PolicyPublished`). There is no separate `PolicyRolledBack` event — rollback is modeled as `DraftCreated` (with `rollbackFromVersionId != null`) followed by `PolicyPublished`. Audit subscribers infer rollback from `rollbackFromVersionId`. Audit subscribers persist `AuditLog` records via lightweight in-memory event dispatcher.
 - **D-36 (Draft Concurrency):** Optimistic concurrency control. `PolicyVersion` contains `revision: number`. `SaveDraft` requires `expectedRevision`. Save succeeds only if `expectedRevision === currentRevision`, increments revision. Mismatches throw `ConflictError`.
@@ -40,10 +40,10 @@ None — CONTEXT.md covers phase scope.
 | ID | Description | Research Support |
 |----|-------------|------------------|
 | POL-01 | Support creating policies containing structured JSON rule blocks | Draft creation via `PolicyService.createDraft()` using existing `PolicyContent` schema |
-| POL-02 | Support publishing policies, which increments the version number | Immutable publish transition: `status='draft'` → `status='published'`, `versionNumber++`, `publishedAt` set |
+| POL-02 | Support publishing policies. (Draft creation allocates the version number) | Immutable publish transition: `status='draft'` → `status='published'`, `publishedAt` set |
 | POL-03 | Guarantee absolute immutability of policy versions once published | `PolicyVersion` with `status='published'` rejects all mutations; enforced at service layer |
-| POL-04 | Track the single active policy version, allowing seamless activation and rollback | `Policy.activeVersionId` tracks current; rollback creates forward clone (D-33) |
-| AUD-01 | Create immutable audit log records when policies are published, activated, or rolled back | Domain event subscribers persist `AuditLog` records with by-reference strategy (D-37) |
+| POL-04 | Track the single active policy version, allowing seamless rollback | `Policy.activeVersionId` tracks current; rollback creates forward clone (D-33) |
+| AUD-01 | Create immutable audit log records when policies are published or rolled back | Domain event subscribers persist `AuditLog` records with by-reference strategy (D-37) |
 </phase_requirements>
 
 ## Architectural Responsibility Map
@@ -374,7 +374,7 @@ export type PolicyEventMap = {
 | Req ID | Behavior | Test Type | Automated Command | File Exists? |
 |--------|----------|-----------|-------------------|-------------|
 | POL-01 | Create policy with JSON rule content | unit | `npx vitest run tests/modules/policy/policy-service.test.ts -t "createDraft"` | ❌ Wave 1 |
-| POL-02 | Publish increments version number | unit | `npx vitest run tests/modules/policy/policy-service.test.ts -t "publish"` | ❌ Wave 1 |
+| POL-02 | Publishing policies | unit | `npx vitest run tests/modules/policy/policy-service.test.ts -t "publish"` | ❌ Wave 1 |
 | POL-03 | Published versions reject mutations | unit | `npx vitest run tests/modules/policy/policy-service.test.ts -t "immutab"` | ❌ Wave 1 |
 | POL-04 | Active version tracking + rollback | unit | `npx vitest run tests/modules/policy/policy-service.test.ts -t "rollback"` | ❌ Wave 2 |
 | AUD-01 | Audit records on publish/rollback | unit | `npx vitest run tests/modules/audit/audit-subscriber.test.ts` | ❌ Wave 2 |

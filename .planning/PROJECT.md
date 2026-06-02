@@ -31,17 +31,18 @@ Executes secure, deterministic, and immutable policy decisions by evaluating str
 - [x] **CON-02 (Dynamic Roles)**: Support dynamic, data-driven roles configured per tenant in the database. *(Validated in Phase 1)*
 - [x] **CON-03 (Stable User-Role Reference)**: Link users to roles via stable `roleId` references, preventing renaming failures. *(Validated in Phase 1)*
 - [x] **CON-04 (Supervisor Reporting Line)**: Support supervisor/reports-to references (`managerId`) on users to resolve dynamic reporting structures. *(Validated in Phase 1)*
+- [x] **CTX-01 (EvaluationContext as First-Class Input)**: Model the runtime input as a structured `EvaluationContext` — a domain-neutral key/value payload. The runtime formula is `Policy + EvaluationContext = Decision`. *(Validated in Phase 2)*
+- [x] **CTX-02 (Domain-Neutral Context Interface)**: Define `EvaluationContext` as a Pure-TS interface with no hardcoded domain-specific fields. Domain shape is supplied per-request by callers. *(Validated in Phase 2)*
+- [x] **RUN-01 (Structured JSON Policy Schemas)**: Define structured JSON rule schemas with relational operators and variable lookups against the EvaluationContext. *(Validated in Phase 2)*
+- [x] **RUN-02 (Safe Rule Evaluation)**: Implement a deterministic, safe rule and condition evaluation engine in Pure TypeScript (NO `eval()` or dynamic code execution). *(Validated in Phase 2)*
+- [x] **RUN-03 (JSON Schema Validation)**: Enforce strict JSON Schema validation for policies natively within the runtime core, as a **prerequisite for safe evaluation**. An invalid policy must never reach the evaluator. *(Validated in Phase 2)*
+- [x] **DEC-02 (Decision Variants & Open Type)**: Emit structured Auto-Approve, Auto-Reject, and Request-Approval Decisions deterministically; Decision type remains open to future outcomes. *(Validated in Phase 2)*
 
 ### Active
 
 
-- [ ] **CTX-01 (EvaluationContext as First-Class Input)**: Model the runtime input as a structured `EvaluationContext` — a domain-neutral key/value payload. The runtime formula is `Policy + EvaluationContext = Decision`.
-- [ ] **CTX-02 (Domain-Neutral Context Interface)**: Define `EvaluationContext` as a Pure-TS interface with no hardcoded domain-specific fields. Domain shape is supplied per-request by callers.
 - [ ] **POL-01 (Policy Definition)**: Support defining policies containing structured JSON rule blocks.
 - [ ] **POL-02 (Policy Lifecycle & Immutability)**: Support immutable policy versions once published, allowing active version selection and safe rollbacks.
-- [ ] **RUN-01 (Structured JSON Policy Schemas)**: Define structured JSON rule schemas with relational operators and variable lookups against the EvaluationContext.
-- [ ] **RUN-02 (Safe Rule Evaluation)**: Implement a deterministic, safe rule and condition evaluation engine in Pure TypeScript (NO `eval()` or dynamic code execution).
-- [ ] **RUN-03 (JSON Schema Validation)**: Enforce strict JSON Schema validation for policies natively within the runtime core, as a **prerequisite for safe evaluation**. An invalid policy must never reach the evaluator.
 - [ ] **DEC-01 (Decision Generator)**: Evaluate an `EvaluationContext` against active JSON policies to output structured Decisions (e.g. Auto-Approve, Auto-Reject, Request-Approval). The Decision type is open — future outcomes plug into the same shape.
 - [ ] **DEC-03 (Reference Decision Consumer — Approval Routing)**: Ship a reference Decision Consumer that converts Request-Approval decisions into sequential multi-stage approval chains. One consumer among many possible; the runtime has no compile-time dependency on it.
 - [ ] **AUD-01 (Immutable Governance Ledger)**: Record secure audit log entries for all policy publication lifecycle events and step-by-step decision/execution paths.
@@ -83,7 +84,7 @@ We are building a highly decoupled, modular policy engine. To guarantee extreme 
 | DSL-First Approach Rejection | Replaced custom policy DSL parser, AST compiler, and lexer with standard structured JSON policies to eliminate compiler complexity, avoid overengineering, and focus strictly on policy runtime validation. | Approved |
 | EvaluationContext as First-Class Concept | Formalized `EvaluationContext` (CTX-01, CTX-02) as a named architectural concept. Without an explicit name for runtime input, downstream phases drift into ad-hoc payload conventions and the runtime accidentally couples to a domain shape. | Approved |
 | TenantContext as Operational Envelope | Formalized `TenantContext` (Phase 1, D-19) as the operational mirror of `EvaluationContext`. Every application service method takes `ctx: TenantContext` as its first parameter. Carries `tenantId` now; extensible to `actorId`, `requestId`, etc. without changing signatures. Ambient resolution (AsyncLocalStorage, globals) is prohibited — tenant boundary must be visible at every call site. The two contexts answer two questions: "Who owns this operation?" (TenantContext) and "What data is being evaluated?" (EvaluationContext). | Approved |
-| JSON Schema Validation Belongs in Runtime Core | Schema validation is a prerequisite for safe evaluation: the evaluator cannot be trusted to run on an unvalidated policy. RUN-03 moved from Phase 3 (Lifecycle) to Phase 2 (Runtime Core). Lifecycle (save / publish / activate) re-uses the same validator at its boundaries. | Approved |
+| JSON Schema Validation Belongs in Runtime Core | Schema validation is a prerequisite for safe evaluation: the evaluator cannot be trusted to run on an unvalidated policy. RUN-03 moved from Phase 3 (Lifecycle) to Phase 2 (Runtime Core). Lifecycle (save / publish) re-uses the same validator at its boundaries. | Approved |
 | Decision Consumers Are External to the Runtime | Approval Routing is one Decision Consumer among many possible (notifications, escalations, future integrations). The runtime emits Decisions; it does not own consumers. Phase 5 is reframed as a *reference consumer*, not the runtime's purpose. | Approved |
 | Manager Cycle Depth Limit | Capping `managerId` reporting chains at 50 hops (`MAX_MANAGER_CHAIN_DEPTH = 50`) prevents infinite recursion, cycles, and potential execution DOS. | Approved |
 | Convex/ HARD RULE | Convex handlers (`convex/`) are exclusively thin DI assembly points (validation, DI wiring, response mapping). Absolutely no domain logic, evaluation, or business rules are permitted here. | Approved |
@@ -122,4 +123,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-01 — TenantContext surfaced as first-class architectural concept (operational mirror of EvaluationContext): noted in "What This Is", Application Layer, Constraints, Key Decisions, and Concept Hierarchy #7. Deferred item from Phase 1 CONTEXT.md closed.*
+*Last updated: 2026-06-01 — Phase 2 (Policy Runtime Core) closed. CTX-01, CTX-02, RUN-01, RUN-02, RUN-03, DEC-02 moved from Active to Validated. Runtime barrel (`src/modules/runtime/`) now exposes `EvaluationContext`, JSON Schema validator (Ajv adapter behind `SchemaValidatorPort`), pure-TS evaluator with first-class `evaluationTrace`, Decision factories (`autoApprove`/`autoReject`/`requestApproval`), and the `validateAndEvaluate` composer. 100% test coverage on `src/modules/runtime/**/*.ts`.*

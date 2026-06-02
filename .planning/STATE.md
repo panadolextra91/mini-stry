@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: active
-stopped_at: Phase 3 complete (2 plans executed; ready for Phase 4)
-last_updated: "2026-06-01T00:00:00.000Z"
-last_activity: 2026-06-02 -- Phase 3 (Policy Lifecycle) executed: 2 plans, POL-01..04 + AUD-01 complete
+status: Phase 3 executed. Draft→publish lifecycle, rollback-as-forward-clone, audit event subscribers, Convex adapters. 158 tests, tsc clean.
+stopped_at: Phase 2 closed (02-01 + 02-02 + 02-03 SUMMARY.md shipped; runtime barrel complete)
+last_updated: "2026-06-02T04:04:18.158Z"
+last_activity: 2026-06-02
 progress:
   total_phases: 6
   completed_phases: 3
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-06-01 after Phase 2 completion)
 
 ## Current Position
 
-Phase: 3 of 6 — Complete
-Plan: 2 of 2 — done
+Phase: 4 of 6 (request runtime)
+Plan: Not started
 Status: Phase 3 executed. Draft→publish lifecycle, rollback-as-forward-clone, audit event subscribers, Convex adapters. 158 tests, tsc clean.
-Last activity: 2026-06-02 — Phase 3 execution complete
+Last activity: 2026-06-02
 
 Progress: [██████████░░░░░░░░░░] 50% (3/6 phases · 9/9 plans for shipped phases)
 
@@ -36,7 +36,7 @@ Progress: [██████████░░░░░░░░░░] 50% (3/
 
 **Velocity:**
 
-- Total plans completed: 7
+- Total plans completed: 9
 - Average duration: 45 min
 - Total execution time: 5.25 hours
 
@@ -50,6 +50,7 @@ Progress: [██████████░░░░░░░░░░] 50% (3/
 | 4. Request Runtime | 0 | 0 | 0 min |
 | 5. Approval Routing (Reference Decision Consumer) | 0 | 0 | 0 min |
 | 6. Admin Portal & UI Dashboard | 0 | 0 | 0 min |
+| 03 | 2 | - | - |
 
 **Recent Trend:**
 
