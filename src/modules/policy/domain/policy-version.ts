@@ -1,5 +1,7 @@
-import type { TenantId } from "@/modules/directory/index.js";
+import type { TenantId, UserId } from "@/modules/directory/index.js";
 import type { PolicyId, PolicyVersionId } from "./ids.js";
+import type { ValidationError } from "@/modules/runtime/index.js";
+import type { PolicyVersionStatus, ValidationStatus } from "./policy-version-status.js";
 
 export interface PolicyVersion {
   readonly id: PolicyVersionId;
@@ -7,9 +9,16 @@ export interface PolicyVersion {
   readonly policyId: PolicyId;
   readonly versionNumber: number;
   /**
-   * Intentionally `unknown` at Phase 1. Phase 2's runtime owns the JSON Schema for content.
-   * Do not narrow this type at Phase 1 — doing so couples storage to runtime concerns.
+   * Intentionally `unknown`. The runtime module owns the JSON Schema for content.
+   * Do not narrow this type — doing so couples storage to runtime concerns.
    */
-  readonly content: unknown; // Phase 2 owns the shape — D-12 + RESEARCH.md Anti-Patterns
-  readonly publishedAt: number | null; // null while draft; non-null after publish
+  readonly content: unknown;
+  readonly status: PolicyVersionStatus;
+  readonly validationStatus: ValidationStatus;
+  readonly validationErrors: readonly ValidationError[];
+  readonly revision: number;
+  readonly rollbackFromVersionId: PolicyVersionId | null;
+  readonly createdBy: UserId;
+  readonly createdAt: number;
+  readonly publishedAt: number | null;
 }
