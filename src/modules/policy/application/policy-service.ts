@@ -10,6 +10,7 @@ import type { EventDispatcher } from "@/shared/event-dispatcher.js";
 import {
   DraftAlreadyExistsError,
   DraftNotFoundError,
+  VersionNotFoundError,
   ImmutableVersionError,
   InvalidPublishError,
   ConflictError,
@@ -161,5 +162,72 @@ export class PolicyService {
     });
 
     return published;
+  }
+
+  async rollback(
+    ctx: TenantContext,
+    policyId: PolicyId,
+    targetVersionId: PolicyVersionId,
+    actorId: UserId,
+  ): Promise<PolicyVersion> {
+    const targetVersion = await this.versionRepo.findById(ctx, targetVersionId);
+    if (!targetVersion) {
+      throw new VersionNotFoundError(targetVersionId);
+    }
+
+    // D-32: one draft per policy
+    const existingDraft = await this.versionRepo.findDraftByPolicy(
+      ctx,
+      policyId,
+    );
+    if (existingDraft) {
+      throw new DraftAlreadyExistsError(policyId);
+    }
+
+    // NOTE: getNextVersionNumber() query-max-plus-1 is acceptable for MVP.
+    // Future production implementations must allocate atomically within a single transaction.
+    const versionNumber = await this.versionRepo.getNextVersionNumber(
+      ctx,
+      policyId,
+    );
+
+    // Do NOT re-run schema validation on the target version content.
+    // Clone validationStatus and validationErrors directly from the source version.
+    // Historical published versions are already validated.
+    // Avoids coupling rollback behavior to future validator changes.
+    const draft = await this.versionRepo.create(ctx, {
+      policyId,
+      content: targetVersion.content,
+      createdBy: actorId,
+      rollbackFromVersionId: targetVersionId,
+      versionNumber,
+      validationStatus: targetVersion.validationStatus,
+      validationErrors: targetVersion.validationErrors,
+    });
+
+    // Rollback emits DraftCreated with rollbackFromVersionId != null.
+    // There is no separate PolicyRolledBack event.
+    await this.dispatcher.emit("DraftCreated", {
+      tenantId: ctx.tenantId,
+      policyId,
+      policyVersionId: draft.id,
+      versionNumber: draft.versionNumber,
+      actorId,
+      rollbackFromVersionId: targetVersionId,
+      timestamp: Date.now(),
+    });
+
+    return draft;
+  }
+
+  async getActiveVersion(
+    ctx: TenantContext,
+    policyId: PolicyId,
+  ): Promise<PolicyVersion | null> {
+    const policy = await this.policyRepo.findById(ctx, policyId);
+    if (!policy || !policy.activeVersionId) {
+      return null;
+    }
+    return this.versionRepo.findById(ctx, policy.activeVersionId);
   }
 }

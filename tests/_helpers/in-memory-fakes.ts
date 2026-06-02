@@ -7,6 +7,7 @@ import { InMemoryPolicyVersionRepository } from "@/modules/policy/adapters/memor
 import { PolicyService, EventDispatcher } from "@/modules/policy/index.js";
 import type { PolicyEventMap } from "@/modules/policy/index.js";
 import type { SchemaValidatorPort } from "@/modules/runtime/index.js";
+import { InMemoryAuditLogRepository, AuditEventSubscriber } from "@/modules/audit/index.js";
 
 export function setupDirectory() {
   const tenantRepo = new InMemoryTenantRepository();
@@ -22,6 +23,8 @@ export function setupPolicy(validator: SchemaValidatorPort) {
   const policyRepo = new InMemoryPolicyRepository();
   const versionRepo = new InMemoryPolicyVersionRepository();
   const dispatcher = new EventDispatcher<PolicyEventMap>();
+  const auditRepo = new InMemoryAuditLogRepository();
+  const _auditSubscriber = new AuditEventSubscriber(auditRepo, dispatcher);
   const policyService = new PolicyService(
     policyRepo,
     versionRepo,
@@ -29,5 +32,5 @@ export function setupPolicy(validator: SchemaValidatorPort) {
     dispatcher,
   );
 
-  return { policyRepo, versionRepo, policyService, dispatcher };
+  return { policyRepo, versionRepo, policyService, dispatcher, auditRepo };
 }

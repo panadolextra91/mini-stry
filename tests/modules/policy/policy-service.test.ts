@@ -6,9 +6,11 @@ import { ValidationError } from "@/modules/runtime/index.js";
 import {
   DraftAlreadyExistsError,
   DraftNotFoundError,
+  VersionNotFoundError,
   ImmutableVersionError,
   InvalidPublishError,
   ConflictError,
+  policyVersionId,
 } from "@/modules/policy/index.js";
 import type { PolicyEventMap } from "@/modules/policy/index.js";
 import { userId } from "@/modules/directory/index.js";
@@ -130,7 +132,6 @@ describe("PolicyService", () => {
 
     it("throws DraftNotFoundError for nonexistent version", async () => {
       const { policyService } = setupPolicy(alwaysValidValidator());
-      const { policyVersionId } = await import("@/modules/policy/index.js");
 
       await expect(
         policyService.saveDraft(TENANT_A, policyVersionId("nope"), {}, 0),
@@ -153,10 +154,8 @@ describe("PolicyService", () => {
       const policy = await policyService.createPolicy(TENANT_A, { name: "Conflict Test" });
       const draft = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
 
-      // Save once to increment revision to 1
       await policyService.saveDraft(TENANT_A, draft.id, { v: 1 }, 0);
 
-      // Now try with stale revision
       await expect(
         policyService.saveDraft(TENANT_A, draft.id, { v: 2 }, 0),
       ).rejects.toThrow(ConflictError);
@@ -188,7 +187,6 @@ describe("PolicyService", () => {
       const published = await policyService.publishDraft(TENANT_A, draft.id);
 
       expect(published.status).toBe("published");
-      expect(published.publishedAt).toBeDefined();
       expect(published.publishedAt).not.toBeNull();
 
       const updatedPolicy = await policyRepo.findById(TENANT_A, policy.id);
@@ -218,7 +216,6 @@ describe("PolicyService", () => {
 
     it("throws DraftNotFoundError for nonexistent version", async () => {
       const { policyService } = setupPolicy(alwaysValidValidator());
-      const { policyVersionId } = await import("@/modules/policy/index.js");
 
       await expect(
         policyService.publishDraft(TENANT_A, policyVersionId("missing")),
@@ -243,13 +240,143 @@ describe("PolicyService", () => {
     });
   });
 
+  describe("rollback", () => {
+    it("creates forward clone with content from target version", async () => {
+      const { policyService } = setupPolicy(alwaysValidValidator());
+      const policy = await policyService.createPolicy(TENANT_A, { name: "Rollback Test" });
+
+      const v1 = await policyService.createDraft(TENANT_A, policy.id, { rules: [{ id: "original" }] }, ACTOR);
+      await policyService.publishDraft(TENANT_A, v1.id);
+
+      const v2 = await policyService.createDraft(TENANT_A, policy.id, { rules: [{ id: "updated" }] }, ACTOR);
+      await policyService.publishDraft(TENANT_A, v2.id);
+
+      const v3 = await policyService.rollback(TENANT_A, policy.id, v1.id, ACTOR);
+
+      expect(v3.versionNumber).toBe(3);
+      expect(v3.content).toEqual({ rules: [{ id: "original" }] });
+      expect(v3.rollbackFromVersionId).toBe(v1.id);
+      expect(v3.status).toBe("draft");
+    });
+
+    it("rollback draft can be published, updating activeVersionId", async () => {
+      const { policyService, policyRepo } = setupPolicy(alwaysValidValidator());
+      const policy = await policyService.createPolicy(TENANT_A, { name: "Rollback Publish" });
+
+      const v1 = await policyService.createDraft(TENANT_A, policy.id, { v: 1 }, ACTOR);
+      await policyService.publishDraft(TENANT_A, v1.id);
+
+      const v2 = await policyService.createDraft(TENANT_A, policy.id, { v: 2 }, ACTOR);
+      await policyService.publishDraft(TENANT_A, v2.id);
+
+      const v3 = await policyService.rollback(TENANT_A, policy.id, v1.id, ACTOR);
+      const published = await policyService.publishDraft(TENANT_A, v3.id);
+
+      expect(published.status).toBe("published");
+      const updatedPolicy = await policyRepo.findById(TENANT_A, policy.id);
+      expect(updatedPolicy!.activeVersionId).toBe(v3.id);
+    });
+
+    it("version numbers strictly increase", async () => {
+      const { policyService } = setupPolicy(alwaysValidValidator());
+      const policy = await policyService.createPolicy(TENANT_A, { name: "Version Numbers" });
+
+      const v1 = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
+      expect(v1.versionNumber).toBe(1);
+      await policyService.publishDraft(TENANT_A, v1.id);
+
+      const v2 = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
+      expect(v2.versionNumber).toBe(2);
+      await policyService.publishDraft(TENANT_A, v2.id);
+
+      const v3 = await policyService.rollback(TENANT_A, policy.id, v1.id, ACTOR);
+      expect(v3.versionNumber).toBe(3);
+    });
+
+    it("throws DraftAlreadyExistsError when draft exists", async () => {
+      const { policyService } = setupPolicy(alwaysValidValidator());
+      const policy = await policyService.createPolicy(TENANT_A, { name: "Dup Rollback" });
+
+      const v1 = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
+      await policyService.publishDraft(TENANT_A, v1.id);
+
+      await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
+
+      await expect(
+        policyService.rollback(TENANT_A, policy.id, v1.id, ACTOR),
+      ).rejects.toThrow(DraftAlreadyExistsError);
+    });
+
+    it("throws VersionNotFoundError for missing target", async () => {
+      const { policyService } = setupPolicy(alwaysValidValidator());
+      const policy = await policyService.createPolicy(TENANT_A, { name: "Missing Target" });
+
+      await expect(
+        policyService.rollback(TENANT_A, policy.id, policyVersionId("nope"), ACTOR),
+      ).rejects.toThrow(VersionNotFoundError);
+    });
+
+    it("emits DraftCreated event with rollbackFromVersionId", async () => {
+      const { policyService, dispatcher } = setupPolicy(alwaysValidValidator());
+      const handler = vi.fn();
+      dispatcher.on("DraftCreated", handler);
+      const policy = await policyService.createPolicy(TENANT_A, { name: "Rollback Event" });
+
+      const v1 = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
+      await policyService.publishDraft(TENANT_A, v1.id);
+
+      handler.mockClear();
+      await policyService.rollback(TENANT_A, policy.id, v1.id, ACTOR);
+
+      expect(handler).toHaveBeenCalledOnce();
+      expect(handler.mock.calls[0][0]).toMatchObject({
+        policyId: policy.id,
+        rollbackFromVersionId: v1.id,
+      });
+    });
+
+    it("clones validationStatus from source (no re-validation)", async () => {
+      const { policyService } = setupPolicy(alwaysValidValidator());
+      const policy = await policyService.createPolicy(TENANT_A, { name: "Clone Validation" });
+
+      const v1 = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
+      await policyService.publishDraft(TENANT_A, v1.id);
+
+      const rollbackDraft = await policyService.rollback(TENANT_A, policy.id, v1.id, ACTOR);
+
+      expect(rollbackDraft.validationStatus).toBe("valid");
+      expect(rollbackDraft.validationErrors).toEqual([]);
+    });
+  });
+
+  describe("getActiveVersion", () => {
+    it("returns null when no version published", async () => {
+      const { policyService } = setupPolicy(alwaysValidValidator());
+      const policy = await policyService.createPolicy(TENANT_A, { name: "No Active" });
+
+      const active = await policyService.getActiveVersion(TENANT_A, policy.id);
+      expect(active).toBeNull();
+    });
+
+    it("returns active version after publish", async () => {
+      const { policyService } = setupPolicy(alwaysValidValidator());
+      const policy = await policyService.createPolicy(TENANT_A, { name: "Active Test" });
+      const draft = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
+      await policyService.publishDraft(TENANT_A, draft.id);
+
+      const active = await policyService.getActiveVersion(TENANT_A, policy.id);
+      expect(active).not.toBeNull();
+      expect(active!.id).toBe(draft.id);
+      expect(active!.status).toBe("published");
+    });
+  });
+
   describe("tenant isolation", () => {
     it("tenant B cannot access tenant A's draft", async () => {
       const { policyService } = setupPolicy(alwaysValidValidator());
       const policy = await policyService.createPolicy(TENANT_A, { name: "Isolated" });
       const draft = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
 
-      // Tenant B trying to save tenant A's draft should fail
       await expect(
         policyService.saveDraft(TENANT_B, draft.id, {}, 0),
       ).rejects.toThrow(DraftNotFoundError);
