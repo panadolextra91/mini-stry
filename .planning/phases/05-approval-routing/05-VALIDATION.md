@@ -2,7 +2,7 @@
 phase: 5
 slug: approval-routing
 status: draft
-nyquist_compliant: false
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-06-03
 ---
@@ -54,6 +54,7 @@ created: 2026-06-03
 | DEC-03 (D-49) | Walk hit: first ancestor holding `targetRoleId` becomes approver | unit | routing-service.test.ts `describe("resolveApprover")` | ❌ W0 |
 | DEC-03 (D-49) | Walk miss: chain ends, no holder → `RoutingError`, no task created | unit | same | ❌ W0 |
 | DEC-03 (D-49) | Self-exclusion: walk starts at `requester.managerId`; requester never self-approves | unit | same | ❌ W0 |
+| DEC-03 (null path) | `requesterId === null` → `RoutingError("no requester")` before any walk; `ApprovalRoutingFailed` emitted; no chain; no rethrow (also keeps `userRepo.findById(UserId)` typecheck green) | unit | routing-service.test.ts | ❌ W0 |
 | DEC-03 (D-50) | Depth cap: >50 hops → `HierarchyTraversalError` | unit | same | ❌ W0 |
 | DEC-03 (D-50/SC#3) | Missing `targetRoleId` in registry → `RoleNotFoundError`, no walk | unit | same | ❌ W0 |
 | DEC-03 (D-51) | Task transitions PENDING→APPROVED / PENDING→REJECTED; terminal rejects further | unit (pure) | `npx vitest run tests/modules/approval/state-machine.test.ts` | ❌ W0 |
@@ -66,15 +67,18 @@ created: 2026-06-03
 | DEC-03 (D-54) | Throwing subscriber does not stop siblings; `emit` does not reject | unit | extend `tests/modules/policy/event-dispatcher.test.ts` (+2 cases) | ⚠️ partial |
 | DEC-03 (D-54) | Routing failure → `ApprovalRoutingFailed` emitted + audited; `RequestEvaluation` still persisted | unit | routing-service.test.ts | ❌ W0 |
 | DEC-03 (D-48) | `submit()` threads `ctx.actorId → RequestEvaluation.requesterId` | unit | extend `tests/modules/request/policy-runtime-service.test.ts` | ⚠️ partial |
+| DEC-03 (live wiring) | `submitRequest` carries `actorId` arg → `tenantContext(tenantId, userId(actorId))` so live routing has a non-null requester | static (grep) | `grep -n "userId(args.actorId)" convex/request.ts` (Task 3) | ❌ W0 |
 | CON-01 | Cross-tenant: chain/task reads filtered by `ctx.tenantId` | unit | routing-service.test.ts + repo fakes | ❌ W0 |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+
+> Note: the live `act()` Approve/Reject Convex mutation (`approveTask`/`rejectTask`) is deliberately deferred to Phase 6 with the approver inbox UI (CONTEXT). `act()` is fully covered as a service via fakes this phase; no live-handler row is expected for it in Phase 5.
 
 ---
 
 ## Wave 0 Requirements
 
-- [ ] `tests/modules/approval/routing-service.test.ts` — DEC-03 walk / auth / idempotency / immutability / failure
+- [ ] `tests/modules/approval/routing-service.test.ts` — DEC-03 walk / null-requester / auth / idempotency / immutability / failure
 - [ ] `tests/modules/approval/state-machine.test.ts` — D-51 transition tables (pure)
 - [ ] `tests/modules/approval/approval-audit-subscriber.test.ts` — D-53 by-reference audit
 - [ ] `tests/_helpers/in-memory-fakes.ts` — extend/add `setupApproval` to wire routing service + chain/task fakes + approval dispatcher
@@ -97,11 +101,11 @@ created: 2026-06-03
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 30s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references
+- [x] No watch-mode flags
+- [x] Feedback latency < 30s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** pending (Wave-0 test files created during execution; `wave_0_complete` flips true once they exist and run red→green)
