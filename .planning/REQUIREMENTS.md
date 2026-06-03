@@ -104,8 +104,8 @@ Requirements for the initial release (MVP). Each maps to a corresponding roadmap
 | POL-03 | Phase 3: Policy Lifecycle | Complete |
 | POL-04 | Phase 3: Policy Lifecycle | Complete |
 | AUD-01 | Phase 3: Policy Lifecycle | Complete |
-| DEC-01 | Phase 4: Request Runtime | Pending |
-| AUD-02 | Phase 4: Request Runtime | Pending |
+| DEC-01 | Phase 4: Request Runtime | Complete |
+| AUD-02 | Phase 4: Request Runtime | Complete |
 | DEC-03 | Phase 5: Approval Routing (Reference Decision Consumer) | Pending |
 | UI-01 | Phase 6: Admin Portal & UI Dashboard | Pending |
 | UI-02 | Phase 6: Admin Portal & UI Dashboard | Pending |
@@ -119,8 +119,10 @@ Requirements for the initial release (MVP). Each maps to a corresponding roadmap
 - Unmapped: 0 ✓
 - **Completed (Phase 1):** 7 (CON-01..04, POL-05/06, AUD-03)
 - **Completed (Phase 2):** 6 (CTX-01, CTX-02, RUN-01, RUN-02, RUN-03, DEC-02)
-- **Total completed:** 13
-- **Remaining:** 12 (Phase 3-6)
+- **Completed (Phase 3):** 5 (POL-01..04, AUD-01)
+- **Completed (Phase 4):** 2 (DEC-01, AUD-02)
+- **Total completed:** 20
+- **Remaining:** 5 (Phase 5-6)
 
 **Changes vs prior revision:**
 
@@ -131,4 +133,4 @@ Requirements for the initial release (MVP). Each maps to a corresponding roadmap
 
 ---
 *Requirements defined: 2026-05-31*
-*Last updated: 2026-06-01 — Phase 2 requirements (CTX-01, CTX-02, RUN-01, RUN-02, RUN-03, DEC-02) marked Completed; 13/25 total validated; 12 reqs remain across Phase 3-6.*
+*Last updated: 2026-06-03 — Phase 4 requirements (DEC-01, AUD-02) marked Completed; 20/25 total validated; 5 reqs remain across Phase 5-6.*
