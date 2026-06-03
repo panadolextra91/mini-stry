@@ -27,8 +27,13 @@ describe("Coverage Fill", () => {
 
   it("covers user repo list and methods", async () => {
     const r = await roleService.createRole(TENANT_A, { name: "r" });
-    const u = await userService.createUser(TENANT_A, { email: "u@u.com", name: "u", roleId: r.id, managerId: null });
-    
+    const u = await userService.createUser(TENANT_A, {
+      email: "u@u.com",
+      name: "u",
+      roleId: r.id,
+      managerId: null,
+    });
+
     const listed = await userService.listUsersByTenant(TENANT_A);
     expect(listed).toHaveLength(1);
 

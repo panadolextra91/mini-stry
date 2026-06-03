@@ -12,13 +12,27 @@ import { ConvexPolicyRepository } from "../src/modules/policy/adapters/convex/co
 import { ConvexPolicyVersionRepository } from "../src/modules/policy/adapters/convex/convex-policy-version-repository.js";
 import { AjvSchemaValidator } from "../src/modules/runtime/index.js";
 import { RequestAuditSubscriber, ConvexAuditLogRepository } from "../src/modules/audit/index.js";
-import { PolicyRuntimeService, ConvexRequestEvaluationRepository, requestEvaluationId } from "../src/modules/request/index.js";
+import {
+  PolicyRuntimeService,
+  ConvexRequestEvaluationRepository,
+  requestEvaluationId,
+} from "../src/modules/request/index.js";
 import type { RequestEventMap } from "../src/modules/request/index.js";
-import { tenantContext, tenantId } from "../src/modules/directory/index.js";
+import { tenantContext, tenantId, userId } from "../src/modules/directory/index.js";
+import { ConvexUserRepository } from "../src/modules/directory/adapters/convex/convex-user-repository.js";
+import { ConvexRoleRepository } from "../src/modules/directory/adapters/convex/convex-role-repository.js";
+import {
+  ApprovalRoutingService,
+  ApprovalAuditSubscriber,
+  ConvexApprovalChainRepository,
+  ConvexApprovalTaskRepository,
+} from "../src/modules/approval/index.js";
+import type { ApprovalEventMap } from "../src/modules/approval/index.js";
 
 export const submitRequest = mutation({
   args: {
     tenantId: v.string(),
+    actorId: v.string(),
     requestType: v.string(),
     context: v.any(),
   },
@@ -48,7 +62,29 @@ export const submitRequest = mutation({
       requestDispatcher,
     );
 
-    const tCtx = tenantContext(tenantId(args.tenantId));
+    const userRepo = new ConvexUserRepository(ctx.db);
+    const roleRepo = new ConvexRoleRepository(ctx.db);
+    const chainRepo = new ConvexApprovalChainRepository(ctx.db);
+    const taskRepo = new ConvexApprovalTaskRepository(ctx.db);
+
+    const approvalDispatcher = new EventDispatcher<ApprovalEventMap>();
+    void new ApprovalAuditSubscriber(auditRepo, approvalDispatcher);
+
+    const routingService = new ApprovalRoutingService(
+      chainRepo,
+      taskRepo,
+      userRepo,
+      roleRepo,
+      evalRepo,
+      approvalDispatcher,
+    );
+
+    const tCtx = tenantContext(tenantId(args.tenantId), userId(args.actorId));
+
+    requestDispatcher.on("RequestEvaluated", (e) => {
+      return routingService.onRequestEvaluated(tCtx, e);
+    });
+
     return service.submit(tCtx, {
       requestType: args.requestType,
       context: args.context,

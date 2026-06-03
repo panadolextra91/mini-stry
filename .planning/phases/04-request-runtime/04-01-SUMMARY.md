@@ -59,6 +59,7 @@ completed: 2026-06-03
 - **Files created:** 12
 
 ## Accomplishments
+
 - Implemented `request/` module containing domain entity, branded IDs, events, errors, repository port, and memory/Convex adapters.
 - Implemented `PolicyRuntimeService.submit` orchestrating the evaluation of `EvaluationContext` against active policy version.
 - Handled three outcome paths: success (persists 'completed'), contract violation (persists 'failed' + rethrows `EvaluationError`), and resolution failure (no record, throws).
@@ -74,6 +75,7 @@ Each task was committed atomically:
 3. **Task 3: PolicyRuntimeService.submit outcome paths** - `976bead` (feat)
 
 ## Files Created/Modified
+
 - `src/modules/request/application/policy-runtime-service.ts` - Orchestrates policy resolution and evaluation.
 - `src/modules/request/domain/request-evaluation.ts` - Entity representing evaluation outcomes.
 - `tests/modules/request/policy-runtime-service.test.ts` - Vitest suite verifying the three outcome paths, tenant isolation, and minimal-trace invariant.
@@ -81,14 +83,18 @@ Each task was committed atomically:
 - `src/modules/policy/application/policy-service.ts` - Enhanced to validate requestType uniqueness and resolve policies.
 
 ## Decisions Made
+
 - **v1 failed-trace decision**: Persisted empty `trace: []` on failed evaluations because `EvaluationError` contains only error metadata. Replay engine will reconstruct the exact evaluation path.
 - **Resolution failure behavior**: Resolved policies using a clean public passthrough method in `PolicyService`, throwing `PolicyNotFoundForRequestType`/`NoActivePolicyError` without creating evaluation records.
 
 ## Deviations from Plan
+
 None - plan executed exactly as written.
 
 ## Issues Encountered
+
 - `RequestEventMap` TS interface lacked implicit index signatures required by `EventDispatcher`. Switched to a type alias to satisfy the compiler constraint.
 
 ## Next Phase Readiness
+
 - 04-01 is fully implemented. Next step is 04-02: request event auditing, replay verification, and thin Convex entry points.

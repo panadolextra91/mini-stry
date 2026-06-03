@@ -17,7 +17,7 @@ export const createTenant = mutation({
   handler: async (ctx, args) => {
     const tenantRepo = new ConvexTenantRepository(ctx.db);
     return tenantRepo.create({ name: args.name });
-  }
+  },
 });
 
 // ROLE HANDLERS
@@ -28,7 +28,7 @@ export const createRole = mutation({
     const roleService = new RoleService(roleRepo);
     const tCtx = tenantContext(tenantId(args.tenantId));
     return roleService.createRole(tCtx, { name: args.name });
-  }
+  },
 });
 
 export const getRole = query({
@@ -38,31 +38,31 @@ export const getRole = query({
     const roleService = new RoleService(roleRepo);
     const tCtx = tenantContext(tenantId(args.tenantId));
     return roleService.findRoleById(tCtx, roleId(args.roleId));
-  }
+  },
 });
 
 // USER HANDLERS
 export const createUser = mutation({
-  args: { 
-    tenantId: v.string(), 
-    email: v.string(), 
-    name: v.union(v.string(), v.null()), 
-    roleId: v.string(), 
-    managerId: v.union(v.string(), v.null()) 
+  args: {
+    tenantId: v.string(),
+    email: v.string(),
+    name: v.union(v.string(), v.null()),
+    roleId: v.string(),
+    managerId: v.union(v.string(), v.null()),
   },
   handler: async (ctx, args) => {
     const userRepo = new ConvexUserRepository(ctx.db);
     const roleRepo = new ConvexRoleRepository(ctx.db);
     const userService = new UserService(userRepo, roleRepo);
     const tCtx = tenantContext(tenantId(args.tenantId));
-    
+
     return userService.createUser(tCtx, {
       email: args.email,
       name: args.name,
       roleId: roleId(args.roleId),
-      managerId: args.managerId ? userId(args.managerId) : null
+      managerId: args.managerId ? userId(args.managerId) : null,
     });
-  }
+  },
 });
 
 export const assignRole = mutation({
@@ -72,19 +72,27 @@ export const assignRole = mutation({
     const roleRepo = new ConvexRoleRepository(ctx.db);
     const userService = new UserService(userRepo, roleRepo);
     const tCtx = tenantContext(tenantId(args.tenantId));
-    
+
     return userService.assignRole(tCtx, userId(args.targetUserId), roleId(args.newRoleId));
-  }
+  },
 });
 
 export const setManager = mutation({
-  args: { tenantId: v.string(), targetUserId: v.string(), managerId: v.union(v.string(), v.null()) },
+  args: {
+    tenantId: v.string(),
+    targetUserId: v.string(),
+    managerId: v.union(v.string(), v.null()),
+  },
   handler: async (ctx, args) => {
     const userRepo = new ConvexUserRepository(ctx.db);
     const roleRepo = new ConvexRoleRepository(ctx.db);
     const userService = new UserService(userRepo, roleRepo);
     const tCtx = tenantContext(tenantId(args.tenantId));
-    
-    return userService.setManager(tCtx, userId(args.targetUserId), args.managerId ? userId(args.managerId) : null);
-  }
+
+    return userService.setManager(
+      tCtx,
+      userId(args.targetUserId),
+      args.managerId ? userId(args.managerId) : null,
+    );
+  },
 });

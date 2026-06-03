@@ -59,7 +59,9 @@ export default defineSchema({
     content: v.any(), // Intentionally v.any() per D-12; Phase 2 owns the shape
     status: v.string(), // 'draft' | 'published' (D-32)
     validationStatus: v.string(), // 'valid' | 'invalid' | 'unchecked' (D-34)
-    validationErrors: v.array(v.object({ code: v.string(), path: v.string(), message: v.string() })),
+    validationErrors: v.array(
+      v.object({ code: v.string(), path: v.string(), message: v.string() }),
+    ),
     revision: v.number(), // optimistic concurrency counter (D-36)
     rollbackFromVersionId: v.union(v.id("policyVersions"), v.null()), // D-33 forward clone metadata
     createdBy: v.string(), // UserId (branded string stored as plain string in Convex)
@@ -68,7 +70,6 @@ export default defineSchema({
     .index("by_tenant_policy_version", ["tenantId", "policyId", "versionNumber"])
     .index("by_tenant_policy_published", ["tenantId", "policyId", "publishedAt"])
     .index("by_tenant_policy_status", ["tenantId", "policyId", "status"]),
-
 
   auditLogs: defineTable({
     tenantId: v.id("tenants"),
@@ -79,6 +80,7 @@ export default defineSchema({
 
   requestEvaluations: defineTable({
     tenantId: v.id("tenants"),
+    requesterId: v.union(v.string(), v.null()),
     requestType: v.string(),
     requestInput: v.any(),
     policyVersionId: v.id("policyVersions"),
@@ -91,4 +93,25 @@ export default defineSchema({
   })
     .index("by_tenant_created", ["tenantId", "createdAt"])
     .index("by_tenant_request_type", ["tenantId", "requestType"]),
+
+  approvalChains: defineTable({
+    tenantId: v.id("tenants"),
+    requestEvaluationId: v.id("requestEvaluations"),
+    status: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_tenant_created", ["tenantId", "createdAt"])
+    .index("by_tenant_request_evaluation", ["tenantId", "requestEvaluationId"]),
+
+  approvalTasks: defineTable({
+    tenantId: v.id("tenants"),
+    chainId: v.id("approvalChains"),
+    stageNumber: v.number(),
+    approverId: v.string(),
+    approverRoleId: v.string(),
+    state: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_tenant_chain", ["tenantId", "chainId"])
+    .index("by_tenant_approver", ["tenantId", "approverId"]),
 });

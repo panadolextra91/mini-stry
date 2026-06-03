@@ -37,10 +37,7 @@ export class PolicyService {
     return this.policyRepo.create(ctx, input);
   }
 
-  async findByRequestType(
-    ctx: TenantContext,
-    requestType: string,
-  ): Promise<Policy | null> {
+  async findByRequestType(ctx: TenantContext, requestType: string): Promise<Policy | null> {
     return this.policyRepo.findByRequestType(ctx, requestType);
   }
 
@@ -51,18 +48,12 @@ export class PolicyService {
     createdBy: UserId,
   ): Promise<PolicyVersion> {
     // D-32: one draft per policy
-    const existingDraft = await this.versionRepo.findDraftByPolicy(
-      ctx,
-      policyId,
-    );
+    const existingDraft = await this.versionRepo.findDraftByPolicy(ctx, policyId);
     if (existingDraft) {
       throw new DraftAlreadyExistsError(policyId);
     }
 
-    const versionNumber = await this.versionRepo.getNextVersionNumber(
-      ctx,
-      policyId,
-    );
+    const versionNumber = await this.versionRepo.getNextVersionNumber(ctx, policyId);
 
     // D-34: validation runs on every save but does not gate storage
     const result = this.validator.validate(content);
@@ -135,10 +126,7 @@ export class PolicyService {
     return updated;
   }
 
-  async publishDraft(
-    ctx: TenantContext,
-    versionId: PolicyVersionId,
-  ): Promise<PolicyVersion> {
+  async publishDraft(ctx: TenantContext, versionId: PolicyVersionId): Promise<PolicyVersion> {
     const version = await this.versionRepo.findById(ctx, versionId);
     if (!version) {
       throw new DraftNotFoundError(versionId);
@@ -159,11 +147,7 @@ export class PolicyService {
       revision: version.revision,
     });
 
-    await this.policyRepo.updateActiveVersion(
-      ctx,
-      version.policyId,
-      versionId,
-    );
+    await this.policyRepo.updateActiveVersion(ctx, version.policyId, versionId);
 
     await this.dispatcher.emit("PolicyPublished", {
       tenantId: ctx.tenantId,
@@ -189,20 +173,14 @@ export class PolicyService {
     }
 
     // D-32: one draft per policy
-    const existingDraft = await this.versionRepo.findDraftByPolicy(
-      ctx,
-      policyId,
-    );
+    const existingDraft = await this.versionRepo.findDraftByPolicy(ctx, policyId);
     if (existingDraft) {
       throw new DraftAlreadyExistsError(policyId);
     }
 
     // NOTE: getNextVersionNumber() query-max-plus-1 is acceptable for MVP.
     // Future production implementations must allocate atomically within a single transaction.
-    const versionNumber = await this.versionRepo.getNextVersionNumber(
-      ctx,
-      policyId,
-    );
+    const versionNumber = await this.versionRepo.getNextVersionNumber(ctx, policyId);
 
     // Do NOT re-run schema validation on the target version content.
     // Clone validationStatus and validationErrors directly from the source version.
@@ -233,10 +211,7 @@ export class PolicyService {
     return draft;
   }
 
-  async getActiveVersion(
-    ctx: TenantContext,
-    policyId: PolicyId,
-  ): Promise<PolicyVersion | null> {
+  async getActiveVersion(ctx: TenantContext, policyId: PolicyId): Promise<PolicyVersion | null> {
     const policy = await this.policyRepo.findById(ctx, policyId);
     if (!policy || !policy.activeVersionId) {
       return null;

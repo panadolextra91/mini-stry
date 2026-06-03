@@ -1,7 +1,13 @@
 import { describe, it, expect } from "vitest";
 import { setupRequest } from "../../_helpers/in-memory-fakes.js";
 import { TENANT_A } from "../../_helpers/tenant-context-fixture.js";
-import { AjvSchemaValidator, EvaluationError, ruleId, autoApprove, autoReject } from "@/modules/runtime/index.js";
+import {
+  AjvSchemaValidator,
+  EvaluationError,
+  ruleId,
+  autoApprove,
+  autoReject,
+} from "@/modules/runtime/index.js";
 import { userId } from "@/modules/directory/index.js";
 
 const ACTOR = userId("user_actor");
@@ -21,7 +27,10 @@ describe("RequestAuditSubscriber", () => {
     const { runtimeService, policyService, auditRepo } = setupRequest(new AjvSchemaValidator());
 
     // Seed policy
-    const policy = await policyService.createPolicy(TENANT_A, { name: "Audit Success", requestType: "audit_success" });
+    const policy = await policyService.createPolicy(TENANT_A, {
+      name: "Audit Success",
+      requestType: "audit_success",
+    });
     const draft = await policyService.createDraft(TENANT_A, policy.id, VALID_CONTENT, ACTOR);
     await policyService.publishDraft(TENANT_A, draft.id);
 
@@ -32,7 +41,7 @@ describe("RequestAuditSubscriber", () => {
     });
 
     const logs = await auditRepo.findByTenant(TENANT_A);
-    const requestLogs = logs.filter(l => l.eventType.startsWith("request."));
+    const requestLogs = logs.filter((l) => l.eventType.startsWith("request."));
     expect(requestLogs).toHaveLength(1);
     expect(requestLogs[0]!.eventType).toBe("request.evaluated");
 
@@ -50,7 +59,10 @@ describe("RequestAuditSubscriber", () => {
     const { runtimeService, policyService, auditRepo } = setupRequest(new AjvSchemaValidator());
 
     // Seed policy
-    const policy = await policyService.createPolicy(TENANT_A, { name: "Audit Fail", requestType: "audit_fail" });
+    const policy = await policyService.createPolicy(TENANT_A, {
+      name: "Audit Fail",
+      requestType: "audit_fail",
+    });
     const draft = await policyService.createDraft(TENANT_A, policy.id, VALID_CONTENT, ACTOR);
     await policyService.publishDraft(TENANT_A, draft.id);
 
@@ -63,7 +75,7 @@ describe("RequestAuditSubscriber", () => {
     ).rejects.toThrow(EvaluationError);
 
     const logs = await auditRepo.findByTenant(TENANT_A);
-    const requestLogs = logs.filter(l => l.eventType.startsWith("request."));
+    const requestLogs = logs.filter((l) => l.eventType.startsWith("request."));
     expect(requestLogs).toHaveLength(1);
     expect(requestLogs[0]!.eventType).toBe("request.evaluation_failed");
 

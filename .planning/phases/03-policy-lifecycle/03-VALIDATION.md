@@ -15,13 +15,13 @@ created: 2026-06-01
 
 ## Test Infrastructure
 
-| Property | Value |
-|----------|-------|
-| **Framework** | Vitest 3.x |
-| **Config file** | `vitest.config.ts` |
-| **Quick run command** | `npx vitest run tests/modules/policy/ --reporter=verbose` |
-| **Full suite command** | `npx vitest run --coverage` |
-| **Estimated runtime** | ~5 seconds |
+| Property               | Value                                                     |
+| ---------------------- | --------------------------------------------------------- |
+| **Framework**          | Vitest 3.x                                                |
+| **Config file**        | `vitest.config.ts`                                        |
+| **Quick run command**  | `npx vitest run tests/modules/policy/ --reporter=verbose` |
+| **Full suite command** | `npx vitest run --coverage`                               |
+| **Estimated runtime**  | ~5 seconds                                                |
 
 ---
 
@@ -36,15 +36,15 @@ created: 2026-06-01
 
 ## Per-Task Verification Map
 
-| Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
-|---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 03-01-01 | 01 | 1 | POL-01, POL-02 | unit | `npx vitest run tests/modules/policy/policy-service.test.ts -t "createDraft"` | ❌ W0 | ⬜ pending |
-| 03-01-02 | 01 | 1 | POL-02, POL-03 | unit | `npx vitest run tests/modules/policy/policy-service.test.ts -t "publish"` | ❌ W0 | ⬜ pending |
-| 03-01-03 | 01 | 1 | POL-03 | unit | `npx vitest run tests/modules/policy/policy-service.test.ts -t "immutab"` | ❌ W0 | ⬜ pending |
-| 03-02-01 | 02 | 2 | POL-04 | unit | `npx vitest run tests/modules/policy/policy-service.test.ts -t "rollback"` | ❌ W0 | ⬜ pending |
-| 03-02-02 | 02 | 2 | AUD-01 | unit | `npx vitest run tests/modules/audit/audit-subscriber.test.ts` | ❌ W0 | ⬜ pending |
+| Task ID  | Plan | Wave | Requirement    | Test Type | Automated Command                                                             | File Exists | Status     |
+| -------- | ---- | ---- | -------------- | --------- | ----------------------------------------------------------------------------- | ----------- | ---------- |
+| 03-01-01 | 01   | 1    | POL-01, POL-02 | unit      | `npx vitest run tests/modules/policy/policy-service.test.ts -t "createDraft"` | ❌ W0       | ⬜ pending |
+| 03-01-02 | 01   | 1    | POL-02, POL-03 | unit      | `npx vitest run tests/modules/policy/policy-service.test.ts -t "publish"`     | ❌ W0       | ⬜ pending |
+| 03-01-03 | 01   | 1    | POL-03         | unit      | `npx vitest run tests/modules/policy/policy-service.test.ts -t "immutab"`     | ❌ W0       | ⬜ pending |
+| 03-02-01 | 02   | 2    | POL-04         | unit      | `npx vitest run tests/modules/policy/policy-service.test.ts -t "rollback"`    | ❌ W0       | ⬜ pending |
+| 03-02-02 | 02   | 2    | AUD-01         | unit      | `npx vitest run tests/modules/audit/audit-subscriber.test.ts`                 | ❌ W0       | ⬜ pending |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+_Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky_
 
 ---
 
@@ -54,13 +54,13 @@ created: 2026-06-01
 - [ ] `tests/modules/audit/audit-subscriber.test.ts` — stubs for AUD-01
 - [ ] `tests/_helpers/in-memory-fakes.ts` — extend with policy/audit repository fakes
 
-*Existing Vitest infrastructure is sufficient — no new framework install needed.*
+_Existing Vitest infrastructure is sufficient — no new framework install needed._
 
 ---
 
 ## Manual-Only Verifications
 
-*All phase behaviors have automated verification.*
+_All phase behaviors have automated verification._
 
 ---
 

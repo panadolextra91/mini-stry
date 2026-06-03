@@ -5,10 +5,7 @@ import type { Predicate } from "../domain/predicate.js";
 import { evaluateCompare } from "./operators.js";
 import { EvaluationError } from "./errors.js";
 
-export function evaluate(
-  policy: PolicyContent,
-  ctx: EvaluationContext,
-): EvaluationResult {
+export function evaluate(policy: PolicyContent, ctx: EvaluationContext): EvaluationResult {
   const trace: TraceEntry[] = [];
   for (const rule of policy.rules) {
     const matched = evaluatePredicate(rule.when, ctx);

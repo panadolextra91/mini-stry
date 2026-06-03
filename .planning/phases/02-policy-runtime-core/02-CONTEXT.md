@@ -15,6 +15,7 @@ Phase 2 delivers the **pure-function Policy Runtime**: the side-effect-free core
 5. **`Decision` discriminated union + `EvaluationResult`** — deterministic, traceable runtime output (DEC-02).
 
 **Phase 2 IS:**
+
 - `src/modules/runtime/{domain, application, ports, adapters, schema, index.ts, README.md}` scaffolded under the same module shape as `directory/` (Phase 1).
 - Canonical JSON Schema document at `src/modules/runtime/schema/policy-content.schema.json` — the source-of-truth artifact shared by runtime, lifecycle (Phase 3), and Monaco (Phase 6).
 - Defining the shape that fills `PolicyVersion.content` (currently `unknown` per Phase 1 D-12).
@@ -22,6 +23,7 @@ Phase 2 delivers the **pure-function Policy Runtime**: the side-effect-free core
 - 100% test coverage on validator, evaluator, decision emission (engineering.md hard rule).
 
 **Phase 2 IS NOT:**
+
 - `PolicyRuntimeService` orchestration (Phase 4) — that wraps the runtime with `TenantContext` + persistence + audit.
 - Draft/publish/immutability/rollback lifecycle (Phase 3) — that layer **reuses** `SchemaValidatorPort` at its boundaries.
 - Audit persistence of `evaluationTrace` (Phase 4, AUD-02).
@@ -128,9 +130,9 @@ Phase 2 delivers the **pure-function Policy Runtime**: the side-effect-free core
   - **Shape:**
     ```ts
     type Decision =
-      | { kind: 'auto-approve' }
-      | { kind: 'auto-reject' }
-      | { kind: 'request-approval'; targetRoleId: RoleId };
+      | { kind: "auto-approve" }
+      | { kind: "auto-reject" }
+      | { kind: "request-approval"; targetRoleId: RoleId };
     ```
   - `PolicyContent` stores `Decision` objects directly inside each rule (and as `defaultDecision`).
   - The evaluator returns the matched `Decision` object **unchanged**.
@@ -143,7 +145,7 @@ Phase 2 delivers the **pure-function Policy Runtime**: the side-effect-free core
     ```ts
     type EvaluationResult = {
       decision: Decision;
-      matchedRuleId: RuleId | null;       // null when defaultDecision fires
+      matchedRuleId: RuleId | null; // null when defaultDecision fires
       evaluationTrace: Array<{
         ruleId: RuleId;
         matched: boolean;
@@ -179,28 +181,33 @@ The following are not locked — the planner and researcher may pick concrete ap
 </decisions>
 
 <canonical_refs>
+
 ## Canonical References
 
 **Downstream agents (researcher, planner) MUST read these before planning or implementing.**
 
 ### Vision & Architecture
+
 - `.planning/PROJECT.md` — Project vision, runtime formula `Policy + EvaluationContext → Decision`, Concept Hierarchy, Key Decisions, Hexagonal + Modular Monolith architecture, domain-neutrality + no-`eval()` constraints.
 - `.planning/PROJECT.md` §"Concept Hierarchy" — canonical mental model; **Runtime is #4, Decision is #5** (Decision is a type owned by Runtime per D-31, not a separate module).
 - `.planning/PROJECT.md` §"Constraints" — no `eval()`, no `any`, Pure TS, 100% coverage on policy engine; **TenantContext is application-layer envelope (Phase 4), not the pure runtime function (Phase 2)**.
 - `.planning/PROJECT.md` §"Key Decisions" — "JSON Schema Validation Belongs in Runtime Core", "Decision Consumers Are External to the Runtime", "convex/ HARD RULE".
 
 ### Requirements (Active for Phase 2)
+
 - `.planning/REQUIREMENTS.md` §CTX (CTX-01, CTX-02) — `EvaluationContext` as first-class, domain-neutral.
 - `.planning/REQUIREMENTS.md` §RUN (RUN-01, RUN-02, RUN-03) — structured JSON rule schemas, safe Pure-TS evaluator, native JSON Schema validation as prerequisite to evaluation.
 - `.planning/REQUIREMENTS.md` §DEC (DEC-02) — Auto-Approve / Auto-Reject / Request-Approval; Decision type is **open**.
 - `.planning/REQUIREMENTS.md` §"v2 Requirements" — RUN-04 (AND/OR/NOT) is **explicitly out of scope** for v1; D-25 leaves the schema door open for it.
 
 ### Phase Plan & Success Criteria
+
 - `.planning/ROADMAP.md` §"Phase 2: Policy Runtime Core" — phase goal, dependencies (Phase 1), success criteria (6 items), plan breakdown (02-01, 02-02, 02-03).
 
 ### Phase 1 Inheritance (HARD constraints)
+
 - `.planning/phases/01-core-platform-foundations/01-CONTEXT.md` — entire file is the inherited contract. Specifically:
-  - **D-08 (Module Boundary Rule):** *"Cross-module imports are ALLOWED. Cross-module coupling is NOT."* — `runtime/` MUST expose only via its barrel `index.ts`; consumers MUST NOT deep-import. Add ESLint zone for `runtime/` mirroring the existing zones.
+  - **D-08 (Module Boundary Rule):** _"Cross-module imports are ALLOWED. Cross-module coupling is NOT."_ — `runtime/` MUST expose only via its barrel `index.ts`; consumers MUST NOT deep-import. Add ESLint zone for `runtime/` mirroring the existing zones.
   - **D-09 (Logical Tenant Isolation):** runtime is pure and tenant-agnostic; tenant scoping happens in Phase 4 `PolicyRuntimeService`.
   - **D-12 (Phase 1 Skeleton Tables):** `PolicyVersion.content` is intentionally `unknown` at Phase 1; **Phase 2 defines its shape** via the JSON Schema artifact (D-23).
   - **D-13 (Domain Entities = Plain TS Interfaces):** no classes; `PolicyContent`, `Rule`, `Predicate`, `Decision`, `EvaluationResult` are interfaces / union types.
@@ -213,21 +220,25 @@ The following are not locked — the planner and researcher may pick concrete ap
 - `src/modules/directory/application/tenant-context.ts` — reference shape; Phase 2 does NOT consume it (kept here for context only).
 
 ### Engineering Standards (HARD constraints)
+
 - `docs/engineering.md` §"Testing Requirements" — **Policy Engine: 100% coverage** (validator, evaluator, decision emission). Vitest stack already wired in Phase 1.
 - `docs/engineering.md` §"Code Quality" — TS strict mode, no `any`, **no `eval()`, no dynamic code execution**, prefer deterministic logic + pure functions + explicit types.
 - `docs/engineering.md` §"Architecture Rules" — Policy Engine isolated from UI; no hardcoded approval logic, tenant-specific conditions, or special-case business logic.
 - `docs/engineering.md` §"MVP Principle" — no premature scale optimization, no unnecessary abstractions, boring solutions.
 
 ### External References
+
 - **Ajv** (https://ajv.js.org/) — JSON Schema 2020-12 implementation. Pin version in `package.json`. Researcher should confirm latest stable + verify draft-2020-12 support is enabled by default (or via `import Ajv from 'ajv/dist/2020.js'`).
 - **JSON Schema Spec (draft 2020-12)** (https://json-schema.org/draft/2020-12/schema) — canonical reference for `policy-content.schema.json`.
 
 </canonical_refs>
 
 <code_context>
+
 ## Existing Code Insights
 
 ### Reusable Assets
+
 - **Module skeleton pattern from Phase 1.** `src/modules/directory/{domain, application, ports, adapters, index.ts, README.md}` is the template — `runtime/` mirrors this shape exactly (+ a new `schema/` sibling for the JSON Schema artifact per D-23).
 - **Branded ID pattern:** `src/modules/directory/domain/ids.ts` defines the pattern (`type X = string & { readonly __brand: 'X' }` + factory function `x(value: string): X`). Replicate in `src/modules/runtime/domain/ids.ts` for `RuleId`.
 - **Custom error pattern:** `src/modules/directory/application/errors.ts` defines tagged custom error classes (e.g., `RoleNotFoundError`, `ManagerCycleError`). Replicate in `src/modules/runtime/application/errors.ts` for `ValidationError` and `EvaluationError` (with the structured codes from D-28).
@@ -235,12 +246,14 @@ The following are not locked — the planner and researcher may pick concrete ap
 - **Cross-module imports via barrel:** `src/modules/policy/domain/policy.ts` already imports `TenantId` from `@/modules/directory/index.js` — the same pattern applies to `Decision`'s `request-approval` variant importing `RoleId`.
 
 ### Established Patterns
+
 - **D-08 enforcement via ESLint `import/no-restricted-paths`:** existing zones cover `directory/`, `policy/`, `audit/`. Phase 2 MUST add a `runtime/` zone matching the same syntax. Researcher should grep `eslint.config.*` for the existing zone definitions.
 - **`unknown` for forward-deferred shapes:** `src/modules/policy/domain/policy-version.ts` line 13 explicitly uses `content: unknown` with a comment that "Phase 2 owns the shape." This is the contract Phase 2 fulfills.
 - **Vitest unit tests with `__tests__` co-location:** Phase 1 established the test layout; replicate for `runtime/`.
 - **ES module `.js` extensions in imports:** Phase 1 code uses `from "./ids.js"` (Node ESM convention). Phase 2 MUST follow.
 
 ### Integration Points
+
 - **`PolicyVersion.content` shape contract.** Phase 2's `policy-content.schema.json` (D-23) defines what JSON shape a published `PolicyVersion.content` MUST conform to. The `policy/` module's TypeScript field stays `unknown` in Phase 2; Phase 3 (lifecycle) is where the validator is invoked on save/publish. Researcher: confirm we don't accidentally couple `policy/` → `runtime/` in Phase 2 — Phase 3 is the right time.
 - **Composition root for tests.** Constructor-injected `SchemaValidatorPort` (D-22) means tests instantiate `new AjvSchemaValidator(/* opts */)` and inject it. Phase 4 will do the production composition.
 - **No Convex involvement in Phase 2.** Schema validator + evaluator are pure functions / pure adapters. Convex handlers (Phase 4+) will instantiate the validator and call evaluation services.
@@ -253,17 +266,17 @@ The following are not locked — the planner and researcher may pick concrete ap
 
 - **"Validation is infrastructure" is a stake-in-the-ground principle** (D-21, D-22). The runtime application layer never knows about Ajv. Schema validator port lives in `runtime/ports/`, Ajv adapter in `runtime/adapters/ajv/`. Any future engine swap is a one-adapter change. Repeat this principle in the `runtime/README.md`.
 
-- **JSON Schema documents are versioned product artifacts** (D-23). `runtime/schema/policy-content.schema.json` is NOT a build output, NOT a generated file — it is *the* canonical specification, version-controlled, reviewed in PRs like source code. TypeScript types are derived from it, not the other way around.
+- **JSON Schema documents are versioned product artifacts** (D-23). `runtime/schema/policy-content.schema.json` is NOT a build output, NOT a generated file — it is _the_ canonical specification, version-controlled, reviewed in PRs like source code. TypeScript types are derived from it, not the other way around.
 
 - **Predicate failure ≠ contract violation** (D-28). The semantic boundary is sharp and intentional:
-  - *Predicate false* = field exists, types valid, comparison evaluates `false` → skip rule, try next.
-  - *Contract violation* = missing field / type mismatch / unsupported operator → throw `EvaluationError` with a structured code (`MISSING_FIELD`, `TYPE_MISMATCH`, `UNSUPPORTED_OPERATOR`). Callers (Phase 4 `PolicyRuntimeService`) decide whether to record-and-reject or surface the error.
+  - _Predicate false_ = field exists, types valid, comparison evaluates `false` → skip rule, try next.
+  - _Contract violation_ = missing field / type mismatch / unsupported operator → throw `EvaluationError` with a structured code (`MISSING_FIELD`, `TYPE_MISMATCH`, `UNSUPPORTED_OPERATOR`). Callers (Phase 4 `PolicyRuntimeService`) decide whether to record-and-reject or surface the error.
 
 - **Decision metadata is variant-specific, never an untyped bag** (D-29). Adding a new decision kind = adding a new union variant with its own typed fields. No `metadata: Record<string, unknown>` shortcut, even "temporarily."
 
 - **"Avoid creating modules that only contain type definitions"** (D-31). Module split is driven by independent behavior, not by entity granularity. Phase 5 will create `decision/` only when consumers/dispatching/projections demand it.
 
-- **Tagged-discriminator predicate from day one** (D-25). The `{ "type": "compare", ... }` envelope exists at v1 specifically so v2's `{ "type": "and", "conditions": [...] }` and `{ "type": "or", ... }` can be added without breaking the root predicate position in the schema. Future-proofing the *shape* without implementing the *behavior*.
+- **Tagged-discriminator predicate from day one** (D-25). The `{ "type": "compare", ... }` envelope exists at v1 specifically so v2's `{ "type": "and", "conditions": [...] }` and `{ "type": "or", ... }` can be added without breaking the root predicate position in the schema. Future-proofing the _shape_ without implementing the _behavior_.
 
 - **Tagline for `runtime/README.md`:** "Pure functions over EvaluationContext. No `TenantContext`, no Convex, no consumers — just `Policy → Decision`."
 
@@ -290,5 +303,5 @@ These came up implicitly during discussion as natural follow-ons. None are scope
 
 ---
 
-*Phase: 2-Policy Runtime Core*
-*Context gathered: 2026-06-01*
+_Phase: 2-Policy Runtime Core_
+_Context gathered: 2026-06-01_

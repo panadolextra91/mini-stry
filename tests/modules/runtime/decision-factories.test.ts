@@ -8,7 +8,7 @@ describe("Decision factories", () => {
     const d = autoApprove();
     expect(d.kind).toBe("auto-approve");
     expect(Object.keys(d)).toEqual(["kind"]);
-    
+
     // Distinct instances
     const d2 = autoApprove();
     expect(d).not.toBe(d2);
@@ -19,7 +19,7 @@ describe("Decision factories", () => {
     const d = autoReject();
     expect(d.kind).toBe("auto-reject");
     expect(Object.keys(d)).toEqual(["kind"]);
-    
+
     const d2 = autoReject();
     expect(d).not.toBe(d2);
     expect(d).toEqual(d2);
@@ -30,7 +30,7 @@ describe("Decision factories", () => {
     expect(d.kind).toBe("request-approval");
     expect((d as { targetRoleId: string }).targetRoleId).toBe("ROLE-X");
     expect(Object.keys(d).sort()).toEqual(["kind", "targetRoleId"].sort());
-    
+
     const d2 = requestApproval(roleId("ROLE-X"));
     expect(d).not.toBe(d2);
     expect(d).toEqual(d2);

@@ -19,16 +19,17 @@ const ACTOR = userId("user_actor");
 
 function alwaysValidValidator(): SchemaValidatorPort {
   return {
-    validate: () => ({ ok: true, value: {} } as ValidationResult),
+    validate: () => ({ ok: true, value: {} }) as ValidationResult,
   };
 }
 
 function alwaysInvalidValidator(msg = "invalid field"): SchemaValidatorPort {
   return {
-    validate: () => ({
-      ok: false,
-      errors: [new ValidationError("INVALID", "/rules", msg)],
-    } as ValidationResult),
+    validate: () =>
+      ({
+        ok: false,
+        errors: [new ValidationError("INVALID", "/rules", msg)],
+      }) as ValidationResult,
   };
 }
 
@@ -36,7 +37,10 @@ describe("PolicyService", () => {
   describe("createPolicy", () => {
     it("creates a policy with name, requestType, and null activeVersionId", async () => {
       const { policyService } = setupPolicy(alwaysValidValidator());
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Travel Policy", requestType: "travel_request" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Travel Policy",
+        requestType: "travel_request",
+      });
 
       expect(policy.name).toBe("Travel Policy");
       expect(policy.requestType).toBe("travel_request");
@@ -49,7 +53,10 @@ describe("PolicyService", () => {
   describe("createDraft", () => {
     it("creates a draft version with validation on save", async () => {
       const { policyService } = setupPolicy(alwaysValidValidator());
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Draft Test", requestType: "draft_test" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Draft Test",
+        requestType: "draft_test",
+      });
       const content = { rules: [] };
 
       const draft = await policyService.createDraft(TENANT_A, policy.id, content, ACTOR);
@@ -66,7 +73,10 @@ describe("PolicyService", () => {
 
     it("stores validation errors when content is invalid", async () => {
       const { policyService } = setupPolicy(alwaysInvalidValidator());
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Invalid Draft", requestType: "invalid_draft" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Invalid Draft",
+        requestType: "invalid_draft",
+      });
 
       const draft = await policyService.createDraft(TENANT_A, policy.id, { bad: true }, ACTOR);
 
@@ -77,19 +87,25 @@ describe("PolicyService", () => {
 
     it("throws DraftAlreadyExistsError when a draft already exists", async () => {
       const { policyService } = setupPolicy(alwaysValidValidator());
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Dup Draft", requestType: "dup_draft" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Dup Draft",
+        requestType: "dup_draft",
+      });
       await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
 
-      await expect(
-        policyService.createDraft(TENANT_A, policy.id, {}, ACTOR),
-      ).rejects.toThrow(DraftAlreadyExistsError);
+      await expect(policyService.createDraft(TENANT_A, policy.id, {}, ACTOR)).rejects.toThrow(
+        DraftAlreadyExistsError,
+      );
     });
 
     it("emits DraftCreated event", async () => {
       const { policyService, dispatcher } = setupPolicy(alwaysValidValidator());
       const handler = vi.fn();
       dispatcher.on("DraftCreated", handler);
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Event Test", requestType: "event_test" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Event Test",
+        requestType: "event_test",
+      });
 
       await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
 
@@ -105,15 +121,13 @@ describe("PolicyService", () => {
   describe("saveDraft", () => {
     it("saves draft with new content and increments revision", async () => {
       const { policyService } = setupPolicy(alwaysValidValidator());
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Save Test", requestType: "save_test" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Save Test",
+        requestType: "save_test",
+      });
       const draft = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
 
-      const saved = await policyService.saveDraft(
-        TENANT_A,
-        draft.id,
-        { rules: [{ id: "r1" }] },
-        0,
-      );
+      const saved = await policyService.saveDraft(TENANT_A, draft.id, { rules: [{ id: "r1" }] }, 0);
 
       expect(saved.revision).toBe(1);
       expect(saved.content).toEqual({ rules: [{ id: "r1" }] });
@@ -122,7 +136,10 @@ describe("PolicyService", () => {
     it("runs validation on every save", async () => {
       const validator = alwaysInvalidValidator("bad field");
       const { policyService } = setupPolicy(validator);
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Val Save", requestType: "val_save" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Val Save",
+        requestType: "val_save",
+      });
       const draft = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
 
       const saved = await policyService.saveDraft(TENANT_A, draft.id, { bad: true }, 0);
@@ -141,32 +158,41 @@ describe("PolicyService", () => {
 
     it("throws ImmutableVersionError when saving published version", async () => {
       const { policyService } = setupPolicy(alwaysValidValidator());
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Immutable Test", requestType: "immutable_test" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Immutable Test",
+        requestType: "immutable_test",
+      });
       const draft = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
       await policyService.publishDraft(TENANT_A, draft.id);
 
-      await expect(
-        policyService.saveDraft(TENANT_A, draft.id, {}, 0),
-      ).rejects.toThrow(ImmutableVersionError);
+      await expect(policyService.saveDraft(TENANT_A, draft.id, {}, 0)).rejects.toThrow(
+        ImmutableVersionError,
+      );
     });
 
     it("throws ConflictError on revision mismatch", async () => {
       const { policyService } = setupPolicy(alwaysValidValidator());
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Conflict Test", requestType: "conflict_test" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Conflict Test",
+        requestType: "conflict_test",
+      });
       const draft = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
 
       await policyService.saveDraft(TENANT_A, draft.id, { v: 1 }, 0);
 
-      await expect(
-        policyService.saveDraft(TENANT_A, draft.id, { v: 2 }, 0),
-      ).rejects.toThrow(ConflictError);
+      await expect(policyService.saveDraft(TENANT_A, draft.id, { v: 2 }, 0)).rejects.toThrow(
+        ConflictError,
+      );
     });
 
     it("emits DraftUpdated event", async () => {
       const { policyService, dispatcher } = setupPolicy(alwaysValidValidator());
       const handler = vi.fn();
       dispatcher.on("DraftUpdated", handler);
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Update Event", requestType: "update_event" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Update Event",
+        requestType: "update_event",
+      });
       const draft = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
 
       await policyService.saveDraft(TENANT_A, draft.id, { x: 1 }, 0);
@@ -182,7 +208,10 @@ describe("PolicyService", () => {
   describe("publishDraft", () => {
     it("publishes valid draft and updates activeVersionId", async () => {
       const { policyService, policyRepo } = setupPolicy(alwaysValidValidator());
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Publish Test", requestType: "publish_test" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Publish Test",
+        requestType: "publish_test",
+      });
       const draft = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
 
       const published = await policyService.publishDraft(TENANT_A, draft.id);
@@ -196,23 +225,29 @@ describe("PolicyService", () => {
 
     it("throws InvalidPublishError when validation status is invalid", async () => {
       const { policyService } = setupPolicy(alwaysInvalidValidator());
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Invalid Publish", requestType: "invalid_publish" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Invalid Publish",
+        requestType: "invalid_publish",
+      });
       const draft = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
 
-      await expect(
-        policyService.publishDraft(TENANT_A, draft.id),
-      ).rejects.toThrow(InvalidPublishError);
+      await expect(policyService.publishDraft(TENANT_A, draft.id)).rejects.toThrow(
+        InvalidPublishError,
+      );
     });
 
     it("throws ImmutableVersionError when re-publishing", async () => {
       const { policyService } = setupPolicy(alwaysValidValidator());
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Re-Publish", requestType: "re_publish" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Re-Publish",
+        requestType: "re_publish",
+      });
       const draft = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
       await policyService.publishDraft(TENANT_A, draft.id);
 
-      await expect(
-        policyService.publishDraft(TENANT_A, draft.id),
-      ).rejects.toThrow(ImmutableVersionError);
+      await expect(policyService.publishDraft(TENANT_A, draft.id)).rejects.toThrow(
+        ImmutableVersionError,
+      );
     });
 
     it("throws DraftNotFoundError for nonexistent version", async () => {
@@ -227,7 +262,10 @@ describe("PolicyService", () => {
       const { policyService, dispatcher } = setupPolicy(alwaysValidValidator());
       const handler = vi.fn();
       dispatcher.on("PolicyPublished", handler);
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Publish Event", requestType: "publish_event" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Publish Event",
+        requestType: "publish_event",
+      });
       const draft = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
 
       await policyService.publishDraft(TENANT_A, draft.id);
@@ -244,12 +282,25 @@ describe("PolicyService", () => {
   describe("rollback", () => {
     it("creates forward clone with content from target version", async () => {
       const { policyService } = setupPolicy(alwaysValidValidator());
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Rollback Test", requestType: "rollback_test" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Rollback Test",
+        requestType: "rollback_test",
+      });
 
-      const v1 = await policyService.createDraft(TENANT_A, policy.id, { rules: [{ id: "original" }] }, ACTOR);
+      const v1 = await policyService.createDraft(
+        TENANT_A,
+        policy.id,
+        { rules: [{ id: "original" }] },
+        ACTOR,
+      );
       await policyService.publishDraft(TENANT_A, v1.id);
 
-      const v2 = await policyService.createDraft(TENANT_A, policy.id, { rules: [{ id: "updated" }] }, ACTOR);
+      const v2 = await policyService.createDraft(
+        TENANT_A,
+        policy.id,
+        { rules: [{ id: "updated" }] },
+        ACTOR,
+      );
       await policyService.publishDraft(TENANT_A, v2.id);
 
       const v3 = await policyService.rollback(TENANT_A, policy.id, v1.id, ACTOR);
@@ -262,7 +313,10 @@ describe("PolicyService", () => {
 
     it("rollback draft can be published, updating activeVersionId", async () => {
       const { policyService, policyRepo } = setupPolicy(alwaysValidValidator());
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Rollback Publish", requestType: "rollback_publish" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Rollback Publish",
+        requestType: "rollback_publish",
+      });
 
       const v1 = await policyService.createDraft(TENANT_A, policy.id, { v: 1 }, ACTOR);
       await policyService.publishDraft(TENANT_A, v1.id);
@@ -280,7 +334,10 @@ describe("PolicyService", () => {
 
     it("version numbers strictly increase", async () => {
       const { policyService } = setupPolicy(alwaysValidValidator());
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Version Numbers", requestType: "version_numbers" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Version Numbers",
+        requestType: "version_numbers",
+      });
 
       const v1 = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
       expect(v1.versionNumber).toBe(1);
@@ -296,21 +353,27 @@ describe("PolicyService", () => {
 
     it("throws DraftAlreadyExistsError when draft exists", async () => {
       const { policyService } = setupPolicy(alwaysValidValidator());
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Dup Rollback", requestType: "dup_rollback" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Dup Rollback",
+        requestType: "dup_rollback",
+      });
 
       const v1 = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
       await policyService.publishDraft(TENANT_A, v1.id);
 
       await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
 
-      await expect(
-        policyService.rollback(TENANT_A, policy.id, v1.id, ACTOR),
-      ).rejects.toThrow(DraftAlreadyExistsError);
+      await expect(policyService.rollback(TENANT_A, policy.id, v1.id, ACTOR)).rejects.toThrow(
+        DraftAlreadyExistsError,
+      );
     });
 
     it("throws VersionNotFoundError for missing target", async () => {
       const { policyService } = setupPolicy(alwaysValidValidator());
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Missing Target", requestType: "missing_target" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Missing Target",
+        requestType: "missing_target",
+      });
 
       await expect(
         policyService.rollback(TENANT_A, policy.id, policyVersionId("nope"), ACTOR),
@@ -321,7 +384,10 @@ describe("PolicyService", () => {
       const { policyService, dispatcher } = setupPolicy(alwaysValidValidator());
       const handler = vi.fn();
       dispatcher.on("DraftCreated", handler);
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Rollback Event", requestType: "rollback_event" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Rollback Event",
+        requestType: "rollback_event",
+      });
 
       const v1 = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
       await policyService.publishDraft(TENANT_A, v1.id);
@@ -338,7 +404,10 @@ describe("PolicyService", () => {
 
     it("clones validationStatus from source (no re-validation)", async () => {
       const { policyService } = setupPolicy(alwaysValidValidator());
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Clone Validation", requestType: "clone_validation" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Clone Validation",
+        requestType: "clone_validation",
+      });
 
       const v1 = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
       await policyService.publishDraft(TENANT_A, v1.id);
@@ -353,7 +422,10 @@ describe("PolicyService", () => {
   describe("getActiveVersion", () => {
     it("returns null when no version published", async () => {
       const { policyService } = setupPolicy(alwaysValidValidator());
-      const policy = await policyService.createPolicy(TENANT_A, { name: "No Active", requestType: "no_active" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "No Active",
+        requestType: "no_active",
+      });
 
       const active = await policyService.getActiveVersion(TENANT_A, policy.id);
       expect(active).toBeNull();
@@ -361,7 +433,10 @@ describe("PolicyService", () => {
 
     it("returns active version after publish", async () => {
       const { policyService } = setupPolicy(alwaysValidValidator());
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Active Test", requestType: "active_test" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Active Test",
+        requestType: "active_test",
+      });
       const draft = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
       await policyService.publishDraft(TENANT_A, draft.id);
 
@@ -375,12 +450,15 @@ describe("PolicyService", () => {
   describe("tenant isolation", () => {
     it("tenant B cannot access tenant A's draft", async () => {
       const { policyService } = setupPolicy(alwaysValidValidator());
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Isolated", requestType: "isolated" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Isolated",
+        requestType: "isolated",
+      });
       const draft = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
 
-      await expect(
-        policyService.saveDraft(TENANT_B, draft.id, {}, 0),
-      ).rejects.toThrow(DraftNotFoundError);
+      await expect(policyService.saveDraft(TENANT_B, draft.id, {}, 0)).rejects.toThrow(
+        DraftNotFoundError,
+      );
     });
   });
 
@@ -388,11 +466,20 @@ describe("PolicyService", () => {
     it("create → draft → save → publish", async () => {
       const { policyService, dispatcher } = setupPolicy(alwaysValidValidator());
       const events: string[] = [];
-      dispatcher.on("DraftCreated", () => { events.push("DraftCreated"); });
-      dispatcher.on("DraftUpdated", () => { events.push("DraftUpdated"); });
-      dispatcher.on("PolicyPublished", () => { events.push("PolicyPublished"); });
+      dispatcher.on("DraftCreated", () => {
+        events.push("DraftCreated");
+      });
+      dispatcher.on("DraftUpdated", () => {
+        events.push("DraftUpdated");
+      });
+      dispatcher.on("PolicyPublished", () => {
+        events.push("PolicyPublished");
+      });
 
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Full Lifecycle", requestType: "full_lifecycle" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Full Lifecycle",
+        requestType: "full_lifecycle",
+      });
       const draft = await policyService.createDraft(TENANT_A, policy.id, { rules: [] }, ACTOR);
       await policyService.saveDraft(TENANT_A, draft.id, { rules: [{ id: "r1" }] }, 0);
       const published = await policyService.publishDraft(TENANT_A, draft.id);
@@ -405,7 +492,10 @@ describe("PolicyService", () => {
   describe("requestType", () => {
     it("persists requestType on created policy", async () => {
       const { policyService } = setupPolicy(alwaysValidValidator());
-      const policy = await policyService.createPolicy(TENANT_A, { name: "RT Policy", requestType: "leave_request" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "RT Policy",
+        requestType: "leave_request",
+      });
 
       expect(policy.requestType).toBe("leave_request");
     });
@@ -423,14 +513,20 @@ describe("PolicyService", () => {
       const { policyService } = setupPolicy(alwaysValidValidator());
       await policyService.createPolicy(TENANT_A, { name: "A", requestType: "shared_type" });
 
-      const policyB = await policyService.createPolicy(TENANT_B, { name: "B", requestType: "shared_type" });
+      const policyB = await policyService.createPolicy(TENANT_B, {
+        name: "B",
+        requestType: "shared_type",
+      });
       expect(policyB.requestType).toBe("shared_type");
       expect(policyB.tenantId).toBe(TENANT_B.tenantId);
     });
 
     it("findByRequestType returns matching tenant-scoped policy", async () => {
       const { policyService } = setupPolicy(alwaysValidValidator());
-      const created = await policyService.createPolicy(TENANT_A, { name: "Find Test", requestType: "find_type" });
+      const created = await policyService.createPolicy(TENANT_A, {
+        name: "Find Test",
+        requestType: "find_type",
+      });
 
       const found = await policyService.findByRequestType(TENANT_A, "find_type");
       expect(found).not.toBeNull();

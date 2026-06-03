@@ -10,7 +10,7 @@ export class ConvexPolicyRepository implements PolicyRepositoryPort {
   constructor(private readonly db: MutationCtx["db"] | QueryCtx["db"]) {}
 
   async create(ctx: TenantContext, input: { name: string; requestType: string }): Promise<Policy> {
-    if (!('insert' in this.db)) throw new Error("Mutations require MutationCtx");
+    if (!("insert" in this.db)) throw new Error("Mutations require MutationCtx");
     const id = await this.db.insert("policies", {
       tenantId: fromTenantId(ctx.tenantId),
       name: input.name,
@@ -46,7 +46,7 @@ export class ConvexPolicyRepository implements PolicyRepositoryPort {
     id: PolicyId,
     versionId: PolicyVersionId,
   ): Promise<Policy> {
-    if (!('patch' in this.db)) throw new Error("Mutations require MutationCtx");
+    if (!("patch" in this.db)) throw new Error("Mutations require MutationCtx");
     const existing = await this.db.get(fromPolicyId(id));
     if (!existing || existing.tenantId !== fromTenantId(ctx.tenantId)) {
       throw new Error(`Policy ${id} not found in tenant ${ctx.tenantId}`);
@@ -57,4 +57,3 @@ export class ConvexPolicyRepository implements PolicyRepositoryPort {
     return toPolicyDomain(doc);
   }
 }
-

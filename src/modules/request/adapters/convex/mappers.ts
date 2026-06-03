@@ -1,4 +1,7 @@
-import { requestEvaluationId as buildRequestEvaluationId, type RequestEvaluationId } from "../../domain/ids.js";
+import {
+  requestEvaluationId as buildRequestEvaluationId,
+  type RequestEvaluationId,
+} from "../../domain/ids.js";
 import type { RequestEvaluation } from "../../domain/request-evaluation.js";
 import type { RequestEvaluationStatus } from "../../domain/request-evaluation-status.js";
 import type { Doc, Id } from "../../../../../convex/_generated/dataModel.js";
@@ -17,14 +20,16 @@ export const fromRequestEvaluationId = (brand: RequestEvaluationId): Id<"request
 export const toRequestEvaluationDomain = (doc: Doc<"requestEvaluations">): RequestEvaluation => ({
   id: toRequestEvaluationId(doc._id),
   tenantId: toTenantId(doc.tenantId),
-  requesterId: (doc as Record<string, unknown>).requesterId ? toUserId((doc as Record<string, unknown>).requesterId as Id<"users">) : null,
+  requesterId: (doc as Record<string, unknown>).requesterId
+    ? toUserId((doc as Record<string, unknown>).requesterId as Id<"users">)
+    : null,
   requestType: doc.requestType,
   requestInput: doc.requestInput as EvaluationContext,
   policyVersionId: toPolicyVersionId(doc.policyVersionId),
   decision: doc.decision as Decision | null,
   trace: doc.trace.map((t) => ({ ruleId: ruleId(t.ruleId), matched: t.matched })),
   status: doc.status as RequestEvaluationStatus,
-  errorCode: (doc.errorCode as EvaluationErrorCode | null),
+  errorCode: doc.errorCode as EvaluationErrorCode | null,
   fieldPath: doc.fieldPath,
   createdAt: doc.createdAt,
 });

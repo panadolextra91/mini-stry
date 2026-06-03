@@ -23,6 +23,10 @@ export type {
 export { InMemoryRequestEvaluationRepository } from "./adapters/memory/in-memory-request-evaluation-repository.js";
 // Convex adapters
 export { ConvexRequestEvaluationRepository } from "./adapters/convex/convex-request-evaluation-repository.js";
-export { toRequestEvaluationDomain, toRequestEvaluationId, fromRequestEvaluationId } from "./adapters/convex/mappers.js";
+export {
+  toRequestEvaluationDomain,
+  toRequestEvaluationId,
+  fromRequestEvaluationId,
+} from "./adapters/convex/mappers.js";
 // Re-export EventDispatcher from shared
 export { EventDispatcher } from "@/shared/event-dispatcher.js";

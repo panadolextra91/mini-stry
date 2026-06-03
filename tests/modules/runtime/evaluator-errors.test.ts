@@ -1,8 +1,20 @@
 import { describe, it, expect } from "vitest";
-import { evaluate, EvaluationError, autoApprove, autoReject, ruleId } from "@/modules/runtime/index.js";
+import {
+  evaluate,
+  EvaluationError,
+  autoApprove,
+  autoReject,
+  ruleId,
+} from "@/modules/runtime/index.js";
 import type { Operator, JsonValue, Decision, Rule, Predicate } from "@/modules/runtime/index.js";
 
-const r = (id: string, field: string, op: Operator, value: JsonValue, decision: Decision): Rule => ({
+const r = (
+  id: string,
+  field: string,
+  op: Operator,
+  value: JsonValue,
+  decision: Decision,
+): Rule => ({
   id: ruleId(id),
   when: { type: "compare", field, op, value },
   decision,
@@ -14,7 +26,7 @@ describe("evaluate — fail-fast error paths", () => {
       rules: [r("R1", "x", "eq", 5, autoApprove())],
       defaultDecision: autoReject(),
     };
-    
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let caughtError: any = null;
     try {
@@ -22,7 +34,7 @@ describe("evaluate — fail-fast error paths", () => {
     } catch (e) {
       caughtError = e;
     }
-    
+
     expect(caughtError).toBeInstanceOf(EvaluationError);
     expect(caughtError.code).toBe("MISSING_FIELD");
   });
@@ -32,7 +44,7 @@ describe("evaluate — fail-fast error paths", () => {
       rules: [r("R1", "x", "gt", 5, autoApprove())],
       defaultDecision: autoReject(),
     };
-    
+
     try {
       evaluate(policy, { x: "hello" });
       expect.fail("should throw");
@@ -49,11 +61,11 @@ describe("evaluate — fail-fast error paths", () => {
           id: ruleId("R1"),
           when: { type: "compare", field: "x", op: "invalid" as Operator, value: 5 } as Predicate,
           decision: autoApprove(),
-        }
+        },
       ],
       defaultDecision: autoReject(),
     };
-    
+
     try {
       evaluate(policy, { x: 5 });
       expect.fail("should throw");
@@ -70,11 +82,11 @@ describe("evaluate — fail-fast error paths", () => {
           id: ruleId("R1"),
           when: { type: "and", predicates: [] } as unknown as Predicate,
           decision: autoApprove(),
-        }
+        },
       ],
       defaultDecision: autoReject(),
     };
-    
+
     try {
       evaluate(policy, {});
       expect.fail("should throw");
@@ -91,11 +103,11 @@ describe("evaluate — fail-fast error paths", () => {
           id: ruleId("R1"),
           when: {} as Predicate,
           decision: autoApprove(),
-        }
+        },
       ],
       defaultDecision: autoReject(),
     };
-    
+
     try {
       evaluate(policy, {});
       expect.fail("should throw");

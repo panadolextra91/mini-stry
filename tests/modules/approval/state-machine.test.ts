@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { transitionTask, deriveChainStatus, InvalidTaskTransitionError } from "@/modules/approval/domain/state-machine.js";
+import {
+  transitionTask,
+  deriveChainStatus,
+  InvalidTaskTransitionError,
+} from "@/modules/approval/domain/state-machine.js";
 
 describe("state-machine", () => {
   describe("transitionTask", () => {

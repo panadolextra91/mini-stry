@@ -1,5 +1,10 @@
 import { describe, it, expect, expectTypeOf } from "vitest";
-import { AjvSchemaValidator, ValidationError, type PolicyContent, autoApprove } from "@/modules/runtime/index.js";
+import {
+  AjvSchemaValidator,
+  ValidationError,
+  type PolicyContent,
+  autoApprove,
+} from "@/modules/runtime/index.js";
 
 describe("AjvSchemaValidator", () => {
   it("constructs without throwing (compiles schema)", () => {
@@ -19,7 +24,7 @@ describe("AjvSchemaValidator", () => {
     const v = new AjvSchemaValidator();
     const validFixture = { rules: [], defaultDecision: autoApprove() };
     const r = v.validate(validFixture);
-    
+
     expect(r.ok).toBe(true);
     if (r.ok) {
       expect(r.value).toBe(validFixture);
@@ -31,12 +36,12 @@ describe("AjvSchemaValidator", () => {
     const v = new AjvSchemaValidator();
     const invalidFixture = { rules: [], defaultDecision: { kind: "unknown" } };
     const r = v.validate(invalidFixture);
-    
+
     expect(r.ok).toBe(false);
     if (!r.ok) {
       expect("value" in r).toBe(false);
       expect(r.errors.length).toBeGreaterThan(0);
-      
+
       for (const e of r.errors) {
         expect(e).toBeInstanceOf(ValidationError);
         expect(typeof e.code).toBe("string");

@@ -12,7 +12,7 @@ export class InMemoryTenantRepository implements TenantRepositoryPort {
     const tenant: Tenant = {
       id,
       name: input.name,
-      createdAt: Date.now()
+      createdAt: Date.now(),
     };
     this.tenants.set(id, tenant);
     return tenant;

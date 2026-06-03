@@ -1,4 +1,11 @@
-import { tenantId as buildTenantId, userId as buildUserId, roleId as buildRoleId, type TenantId, type UserId, type RoleId } from "../../domain/ids.js";
+import {
+  tenantId as buildTenantId,
+  userId as buildUserId,
+  roleId as buildRoleId,
+  type TenantId,
+  type UserId,
+  type RoleId,
+} from "../../domain/ids.js";
 import type { Tenant } from "../../domain/tenant.js";
 import type { User } from "../../domain/user.js";
 import type { Role } from "../../domain/role.js";

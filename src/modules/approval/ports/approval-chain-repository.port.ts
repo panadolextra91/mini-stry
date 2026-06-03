@@ -12,6 +12,13 @@ export interface CreateApprovalChainInput {
 export interface ApprovalChainRepositoryPort {
   create(ctx: TenantContext, input: CreateApprovalChainInput): Promise<ApprovalChain>;
   findById(ctx: TenantContext, id: ApprovalChainId): Promise<ApprovalChain | null>;
-  findByRequestEvaluationId(ctx: TenantContext, id: RequestEvaluationId): Promise<ApprovalChain | null>;
-  updateStatus(ctx: TenantContext, id: ApprovalChainId, status: ChainStatus): Promise<ApprovalChain>;
+  findByRequestEvaluationId(
+    ctx: TenantContext,
+    id: RequestEvaluationId,
+  ): Promise<ApprovalChain | null>;
+  updateStatus(
+    ctx: TenantContext,
+    id: ApprovalChainId,
+    status: ChainStatus,
+  ): Promise<ApprovalChain>;
 }

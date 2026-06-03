@@ -2,13 +2,19 @@ import type { TenantContext } from "@/modules/directory/index.js";
 import type { RequestEvaluationId } from "../../domain/ids.js";
 import { requestEvaluationId as buildRequestEvaluationId } from "../../domain/ids.js";
 import type { RequestEvaluation } from "../../domain/request-evaluation.js";
-import type { CreateRequestEvaluationInput, RequestEvaluationRepositoryPort } from "../../ports/request-evaluation-repository.port.js";
+import type {
+  CreateRequestEvaluationInput,
+  RequestEvaluationRepositoryPort,
+} from "../../ports/request-evaluation-repository.port.js";
 
 export class InMemoryRequestEvaluationRepository implements RequestEvaluationRepositoryPort {
   private readonly records = new Map<RequestEvaluationId, RequestEvaluation>();
   private idCounter = 1;
 
-  async create(ctx: TenantContext, input: CreateRequestEvaluationInput): Promise<RequestEvaluation> {
+  async create(
+    ctx: TenantContext,
+    input: CreateRequestEvaluationInput,
+  ): Promise<RequestEvaluation> {
     const id = buildRequestEvaluationId(`eval_${this.idCounter++}`);
     const record: RequestEvaluation = {
       id,

@@ -7,7 +7,10 @@ export class RoutingError extends Error {
     public readonly targetRoleId: RoleId,
     message?: string,
   ) {
-    super(message ?? `Could not route approval for requester ${requesterId} targeting role ${targetRoleId}`);
+    super(
+      message ??
+        `Could not route approval for requester ${requesterId} targeting role ${targetRoleId}`,
+    );
     this.name = "RoutingError";
   }
 }

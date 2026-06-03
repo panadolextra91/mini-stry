@@ -14,7 +14,7 @@ export class ConvexPolicyVersionRepository implements PolicyVersionRepositoryPor
   constructor(private readonly db: MutationCtx["db"] | QueryCtx["db"]) {}
 
   async create(ctx: TenantContext, input: CreateDraftInput): Promise<PolicyVersion> {
-    if (!('insert' in this.db)) throw new Error("Mutations require MutationCtx");
+    if (!("insert" in this.db)) throw new Error("Mutations require MutationCtx");
     const id = await this.db.insert("policyVersions", {
       tenantId: fromTenantId(ctx.tenantId),
       policyId: fromPolicyId(input.policyId),
@@ -47,9 +47,11 @@ export class ConvexPolicyVersionRepository implements PolicyVersionRepositoryPor
   }
 
   async findDraftByPolicy(ctx: TenantContext, policyId: PolicyId): Promise<PolicyVersion | null> {
-    const doc = await this.db.query("policyVersions")
+    const doc = await this.db
+      .query("policyVersions")
       .withIndex("by_tenant_policy_status", (q) =>
-        q.eq("tenantId", fromTenantId(ctx.tenantId))
+        q
+          .eq("tenantId", fromTenantId(ctx.tenantId))
           .eq("policyId", fromPolicyId(policyId))
           .eq("status", "draft"),
       )
@@ -57,8 +59,12 @@ export class ConvexPolicyVersionRepository implements PolicyVersionRepositoryPor
     return doc ? toPolicyVersionDomain(doc) : null;
   }
 
-  async update(ctx: TenantContext, id: PolicyVersionId, patch: UpdateDraftPatch): Promise<PolicyVersion> {
-    if (!('patch' in this.db)) throw new Error("Mutations require MutationCtx");
+  async update(
+    ctx: TenantContext,
+    id: PolicyVersionId,
+    patch: UpdateDraftPatch,
+  ): Promise<PolicyVersion> {
+    if (!("patch" in this.db)) throw new Error("Mutations require MutationCtx");
     const existing = await this.db.get(fromPolicyVersionId(id));
     if (!existing || existing.tenantId !== fromTenantId(ctx.tenantId)) {
       throw new Error(`PolicyVersion ${id} not found in tenant ${ctx.tenantId}`);
@@ -93,10 +99,10 @@ export class ConvexPolicyVersionRepository implements PolicyVersionRepositoryPor
    * within a single persistence transaction to prevent race conditions.
    */
   async getNextVersionNumber(ctx: TenantContext, policyId: PolicyId): Promise<number> {
-    const docs = await this.db.query("policyVersions")
+    const docs = await this.db
+      .query("policyVersions")
       .withIndex("by_tenant_policy_version", (q) =>
-        q.eq("tenantId", fromTenantId(ctx.tenantId))
-          .eq("policyId", fromPolicyId(policyId)),
+        q.eq("tenantId", fromTenantId(ctx.tenantId)).eq("policyId", fromPolicyId(policyId)),
       )
       .collect();
 

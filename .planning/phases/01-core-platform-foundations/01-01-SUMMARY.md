@@ -46,6 +46,7 @@ Initialized a greenfield repository with a runnable TypeScript, ESLint, and Vite
 **Files created**: 9
 
 ## Versions Installed
+
 - convex@1.39.1
 - convex-helpers@0.1.118
 - typescript@5.9.3
@@ -59,7 +60,9 @@ Initialized a greenfield repository with a runnable TypeScript, ESLint, and Vite
 - @types/node@22
 
 ## Lint Zones Added
+
 Seven `no-restricted-paths` zones were successfully configured:
+
 1. `directory` module boundaries
 2. `policy` module boundaries
 3. `audit` module boundaries
@@ -69,10 +72,13 @@ Seven `no-restricted-paths` zones were successfully configured:
 7. `convex/` barrel discipline for services and error types
 
 ## Verification Results
-`npm test && npm run lint && npm run typecheck` all execute successfully (green) on the empty project structure. 
+
+`npm test && npm run lint && npm run typecheck` all execute successfully (green) on the empty project structure.
 
 ## Deviations from Plan
+
 None - plan executed exactly as written. The npm installation succeeded with `--legacy-peer-deps`, preventing the need for the `eslint-plugin-import-x` fallback.
 
 ## Self-Check: PASSED
+
 Ready for 01-02-PLAN.md.

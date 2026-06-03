@@ -52,6 +52,7 @@ Successfully scaffolded the Pure-TS domain layer for directory, policy, and audi
 **Files created**: 20
 
 ## Branded IDs
+
 1. `TenantId`
 2. `UserId`
 3. `RoleId`
@@ -60,6 +61,7 @@ Successfully scaffolded the Pure-TS domain layer for directory, policy, and audi
 6. `AuditLogId`
 
 ## User Entity Field Shapes
+
 ```typescript
 interface User {
   readonly id: UserId;
@@ -78,6 +80,7 @@ interface User {
 ```
 
 ## Error Classes
+
 - `RoleNameAlreadyExistsError`
 - `EmailAlreadyExistsError`
 - `RoleNotFoundError`
@@ -86,13 +89,16 @@ interface User {
 - `ManagerCycleError`
 
 ## Curated Barrels
+
 - **directory**: Exports Entities (Tenant, User, Role), Branded IDs/Factories, TenantContext, Repository Ports, and the 6 Error Classes.
 - **policy**: Exports Entities (Policy, PolicyVersion) and Branded IDs/Factories.
 - **audit**: Exports Entities (AuditLog) and Branded IDs/Factories.
 
 ## Verification Results
+
 `npm run lint && npm run typecheck` are both green.
 The cross-module barrel-import test (policy and audit modules importing `TenantId` from `@/modules/directory/index.js`) lints clean, successfully exercising ESLint Zone boundaries.
 
 ## Self-Check: PASSED
+
 Ready for 01-03-PLAN.md.

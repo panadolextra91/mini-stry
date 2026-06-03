@@ -8,16 +8,11 @@ import type {
 } from "../../ports/policy-version-repository.port.js";
 import { policyVersionId as buildPolicyVersionId } from "../../domain/ids.js";
 
-export class InMemoryPolicyVersionRepository
-  implements PolicyVersionRepositoryPort
-{
+export class InMemoryPolicyVersionRepository implements PolicyVersionRepositoryPort {
   private readonly versions = new Map<PolicyVersionId, PolicyVersion>();
   private idCounter = 1;
 
-  async create(
-    ctx: TenantContext,
-    input: CreateDraftInput,
-  ): Promise<PolicyVersion> {
+  async create(ctx: TenantContext, input: CreateDraftInput): Promise<PolicyVersion> {
     const id = buildPolicyVersionId(`pv_${this.idCounter++}`);
     const version: PolicyVersion = {
       id,
@@ -38,20 +33,14 @@ export class InMemoryPolicyVersionRepository
     return version;
   }
 
-  async findById(
-    ctx: TenantContext,
-    id: PolicyVersionId,
-  ): Promise<PolicyVersion | null> {
+  async findById(ctx: TenantContext, id: PolicyVersionId): Promise<PolicyVersion | null> {
     const version = this.versions.get(id);
     if (!version) return null;
     if (version.tenantId !== ctx.tenantId) return null;
     return version;
   }
 
-  async findDraftByPolicy(
-    ctx: TenantContext,
-    policyId: PolicyId,
-  ): Promise<PolicyVersion | null> {
+  async findDraftByPolicy(ctx: TenantContext, policyId: PolicyId): Promise<PolicyVersion | null> {
     for (const version of this.versions.values()) {
       if (
         version.tenantId === ctx.tenantId &&
@@ -75,28 +64,18 @@ export class InMemoryPolicyVersionRepository
       ...version,
       content: patch.content !== undefined ? patch.content : version.content,
       validationStatus:
-        patch.validationStatus !== undefined
-          ? patch.validationStatus
-          : version.validationStatus,
+        patch.validationStatus !== undefined ? patch.validationStatus : version.validationStatus,
       validationErrors:
-        patch.validationErrors !== undefined
-          ? patch.validationErrors
-          : version.validationErrors,
+        patch.validationErrors !== undefined ? patch.validationErrors : version.validationErrors,
       revision: patch.revision,
       status: patch.status !== undefined ? patch.status : version.status,
-      publishedAt:
-        patch.publishedAt !== undefined
-          ? patch.publishedAt
-          : version.publishedAt,
+      publishedAt: patch.publishedAt !== undefined ? patch.publishedAt : version.publishedAt,
     };
     this.versions.set(id, updated);
     return updated;
   }
 
-  async getNextVersionNumber(
-    ctx: TenantContext,
-    policyId: PolicyId,
-  ): Promise<number> {
+  async getNextVersionNumber(ctx: TenantContext, policyId: PolicyId): Promise<number> {
     let max = 0;
     for (const version of this.versions.values()) {
       if (

@@ -1,19 +1,26 @@
 import type { TenantContext } from "@/modules/directory/index.js";
 import type { RequestEvaluationId } from "../../domain/ids.js";
 import type { RequestEvaluation } from "../../domain/request-evaluation.js";
-import type { CreateRequestEvaluationInput, RequestEvaluationRepositoryPort } from "../../ports/request-evaluation-repository.port.js";
+import type {
+  CreateRequestEvaluationInput,
+  RequestEvaluationRepositoryPort,
+} from "../../ports/request-evaluation-repository.port.js";
 import type { MutationCtx, QueryCtx } from "../../../../../convex/_generated/server.js";
-import { fromTenantId } from "@/modules/directory/adapters/convex/mappers.js";
+import { fromTenantId, fromUserId } from "@/modules/directory/adapters/convex/mappers.js";
 import { fromPolicyVersionId } from "@/modules/policy/adapters/convex/mappers.js";
 import { fromRequestEvaluationId, toRequestEvaluationDomain } from "./mappers.js";
 
 export class ConvexRequestEvaluationRepository implements RequestEvaluationRepositoryPort {
   constructor(private readonly db: MutationCtx["db"] | QueryCtx["db"]) {}
 
-  async create(ctx: TenantContext, input: CreateRequestEvaluationInput): Promise<RequestEvaluation> {
-    if (!('insert' in this.db)) throw new Error("Mutations require MutationCtx");
+  async create(
+    ctx: TenantContext,
+    input: CreateRequestEvaluationInput,
+  ): Promise<RequestEvaluation> {
+    if (!("insert" in this.db)) throw new Error("Mutations require MutationCtx");
     const id = await this.db.insert("requestEvaluations", {
       tenantId: fromTenantId(ctx.tenantId),
+      requesterId: input.requesterId ? fromUserId(input.requesterId) : null,
       requestType: input.requestType,
       requestInput: input.requestInput,
       policyVersionId: fromPolicyVersionId(input.policyVersionId),
@@ -24,6 +31,7 @@ export class ConvexRequestEvaluationRepository implements RequestEvaluationRepos
       fieldPath: input.fieldPath,
       createdAt: Date.now(),
     });
+
     const doc = await this.db.get(id);
     if (!doc) throw new Error("RequestEvaluation creation failed");
     return toRequestEvaluationDomain(doc);

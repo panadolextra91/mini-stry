@@ -25,19 +25,9 @@ export interface UpdateDraftPatch {
 
 export interface PolicyVersionRepositoryPort {
   create(ctx: TenantContext, input: CreateDraftInput): Promise<PolicyVersion>;
-  findById(
-    ctx: TenantContext,
-    id: PolicyVersionId,
-  ): Promise<PolicyVersion | null>;
-  findDraftByPolicy(
-    ctx: TenantContext,
-    policyId: PolicyId,
-  ): Promise<PolicyVersion | null>;
-  update(
-    ctx: TenantContext,
-    id: PolicyVersionId,
-    patch: UpdateDraftPatch,
-  ): Promise<PolicyVersion>;
+  findById(ctx: TenantContext, id: PolicyVersionId): Promise<PolicyVersion | null>;
+  findDraftByPolicy(ctx: TenantContext, policyId: PolicyId): Promise<PolicyVersion | null>;
+  update(ctx: TenantContext, id: PolicyVersionId, patch: UpdateDraftPatch): Promise<PolicyVersion>;
   /**
    * Returns the next available version number for a policy.
    *
@@ -46,8 +36,5 @@ export interface PolicyVersionRepositoryPort {
    * version numbers atomically within a single persistence transaction to
    * prevent race conditions under concurrent writes.
    */
-  getNextVersionNumber(
-    ctx: TenantContext,
-    policyId: PolicyId,
-  ): Promise<number>;
+  getNextVersionNumber(ctx: TenantContext, policyId: PolicyId): Promise<number>;
 }

@@ -33,6 +33,10 @@ export {
   UnauthorizedApproverError,
 } from "./application/errors.js";
 
+// Application services
+export { ApprovalRoutingService } from "./application/approval-routing-service.js";
+export { ApprovalAuditSubscriber } from "./application/approval-audit-subscriber.js";
+
 // Repository ports
 export type {
   CreateApprovalChainInput,
@@ -46,6 +50,16 @@ export type {
 // Memory adapters
 export { InMemoryApprovalChainRepository } from "./adapters/memory/in-memory-approval-chain-repository.js";
 export { InMemoryApprovalTaskRepository } from "./adapters/memory/in-memory-approval-task-repository.js";
+
+// Convex adapters
+export { ConvexApprovalChainRepository } from "./adapters/convex/convex-approval-chain-repository.js";
+export { ConvexApprovalTaskRepository } from "./adapters/convex/convex-approval-task-repository.js";
+export {
+  toApprovalChainDomain,
+  fromApprovalChainId,
+  toApprovalTaskDomain,
+  fromApprovalTaskId,
+} from "./adapters/convex/mappers.js";
 
 // Re-exports
 export { EventDispatcher } from "@/shared/event-dispatcher.js";

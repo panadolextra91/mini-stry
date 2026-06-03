@@ -1,7 +1,13 @@
 import { describe, it, expect } from "vitest";
 import { setupRequest } from "../../_helpers/in-memory-fakes.js";
 import { TENANT_A } from "../../_helpers/tenant-context-fixture.js";
-import { AjvSchemaValidator, ruleId, autoApprove, autoReject, validateAndEvaluate } from "@/modules/runtime/index.js";
+import {
+  AjvSchemaValidator,
+  ruleId,
+  autoApprove,
+  autoReject,
+  validateAndEvaluate,
+} from "@/modules/runtime/index.js";
 import { userId } from "@/modules/directory/index.js";
 
 const ACTOR = userId("user_actor");
@@ -22,7 +28,10 @@ describe("Deterministic Replay (D-42)", () => {
     const { runtimeService, policyService } = setupRequest(validator);
 
     // Seed policy
-    const policy = await policyService.createPolicy(TENANT_A, { name: "Replay Test", requestType: "replay_request" });
+    const policy = await policyService.createPolicy(TENANT_A, {
+      name: "Replay Test",
+      requestType: "replay_request",
+    });
     const draft = await policyService.createDraft(TENANT_A, policy.id, VALID_CONTENT, ACTOR);
     await policyService.publishDraft(TENANT_A, draft.id);
 
@@ -44,7 +53,7 @@ describe("Deterministic Replay (D-42)", () => {
 
     // Assert decision matches
     expect(replayed.decision).toEqual(original.decision);
-    
+
     // Assert evaluation trace matches
     expect(replayed.evaluationTrace).toEqual(original.trace);
 

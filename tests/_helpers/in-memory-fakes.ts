@@ -7,10 +7,21 @@ import { InMemoryPolicyVersionRepository } from "@/modules/policy/adapters/memor
 import { PolicyService, EventDispatcher } from "@/modules/policy/index.js";
 import type { PolicyEventMap } from "@/modules/policy/index.js";
 import type { SchemaValidatorPort } from "@/modules/runtime/index.js";
-import { InMemoryAuditLogRepository, AuditEventSubscriber, RequestAuditSubscriber } from "@/modules/audit/index.js";
+import {
+  InMemoryAuditLogRepository,
+  AuditEventSubscriber,
+  RequestAuditSubscriber,
+} from "@/modules/audit/index.js";
 import { InMemoryRequestEvaluationRepository } from "@/modules/request/adapters/memory/in-memory-request-evaluation-repository.js";
 import { PolicyRuntimeService } from "@/modules/request/index.js";
 import type { RequestEventMap } from "@/modules/request/index.js";
+import {
+  InMemoryApprovalChainRepository,
+  InMemoryApprovalTaskRepository,
+  ApprovalRoutingService,
+  ApprovalAuditSubscriber,
+} from "@/modules/approval/index.js";
+import type { ApprovalEventMap } from "@/modules/approval/index.js";
 
 export function setupDirectory() {
   const tenantRepo = new InMemoryTenantRepository();
@@ -18,7 +29,7 @@ export function setupDirectory() {
   const userRepo = new InMemoryUserRepository();
   const roleService = new RoleService(roleRepo);
   const userService = new UserService(userRepo, roleRepo);
-  
+
   return { tenantRepo, roleRepo, userRepo, roleService, userService };
 }
 
@@ -29,18 +40,19 @@ export function setupPolicy(validator: SchemaValidatorPort) {
   const auditRepo = new InMemoryAuditLogRepository();
   // Wired via constructor side-effect — must instantiate but result unused
   void new AuditEventSubscriber(auditRepo, dispatcher);
-  const policyService = new PolicyService(
-    policyRepo,
-    versionRepo,
-    validator,
-    dispatcher,
-  );
+  const policyService = new PolicyService(policyRepo, versionRepo, validator, dispatcher);
 
   return { policyRepo, versionRepo, policyService, dispatcher, auditRepo };
 }
 
 export function setupRequest(validator: SchemaValidatorPort) {
-  const { policyRepo, versionRepo, policyService, dispatcher: policyDispatcher, auditRepo } = setupPolicy(validator);
+  const {
+    policyRepo,
+    versionRepo,
+    policyService,
+    dispatcher: policyDispatcher,
+    auditRepo,
+  } = setupPolicy(validator);
   const evalRepo = new InMemoryRequestEvaluationRepository();
   const requestDispatcher = new EventDispatcher<RequestEventMap>();
   // Wired via constructor side-effect — must instantiate but result unused
@@ -61,5 +73,40 @@ export function setupRequest(validator: SchemaValidatorPort) {
     evalRepo,
     requestDispatcher,
     runtimeService,
+  };
+}
+
+export function setupApproval(validator: SchemaValidatorPort) {
+  const directorySetup = setupDirectory();
+  const requestSetup = setupRequest(validator);
+
+  const chainRepo = new InMemoryApprovalChainRepository();
+  const taskRepo = new InMemoryApprovalTaskRepository();
+  const approvalDispatcher = new EventDispatcher<ApprovalEventMap>();
+
+  // Wire approval audit subscriber
+  void new ApprovalAuditSubscriber(requestSetup.auditRepo, approvalDispatcher);
+
+  const routingService = new ApprovalRoutingService(
+    chainRepo,
+    taskRepo,
+    directorySetup.userRepo,
+    directorySetup.roleRepo,
+    requestSetup.evalRepo,
+    approvalDispatcher,
+  );
+
+  // Wire RequestEvaluated event subscription
+  requestSetup.requestDispatcher.on("RequestEvaluated", (e) => {
+    return routingService.onRequestEvaluated({ tenantId: e.tenantId }, e);
+  });
+
+  return {
+    ...directorySetup,
+    ...requestSetup,
+    chainRepo,
+    taskRepo,
+    approvalDispatcher,
+    routingService,
   };
 }

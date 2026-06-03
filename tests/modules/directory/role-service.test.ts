@@ -1,7 +1,11 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { setupDirectory } from "../../_helpers/in-memory-fakes.js";
 import { TENANT_A, TENANT_B } from "../../_helpers/tenant-context-fixture.js";
-import { RoleNameAlreadyExistsError, RoleNotFoundError, roleId } from "@/modules/directory/index.js";
+import {
+  RoleNameAlreadyExistsError,
+  RoleNotFoundError,
+  roleId,
+} from "@/modules/directory/index.js";
 
 describe("RoleService", () => {
   let { roleService } = setupDirectory();
@@ -21,7 +25,9 @@ describe("RoleService", () => {
 
     it("rejects duplicate name in same tenant", async () => {
       await roleService.createRole(TENANT_A, { name: "admin" });
-      await expect(roleService.createRole(TENANT_A, { name: "admin" })).rejects.toThrow(RoleNameAlreadyExistsError);
+      await expect(roleService.createRole(TENANT_A, { name: "admin" })).rejects.toThrow(
+        RoleNameAlreadyExistsError,
+      );
     });
 
     it("allows same name in different tenant", async () => {
@@ -69,13 +75,17 @@ describe("RoleService", () => {
     });
 
     it("throws RoleNotFoundError if missing", async () => {
-      await expect(roleService.renameRole(TENANT_A, roleId("not-real"), "new")).rejects.toThrow(RoleNotFoundError);
+      await expect(roleService.renameRole(TENANT_A, roleId("not-real"), "new")).rejects.toThrow(
+        RoleNotFoundError,
+      );
     });
 
     it("throws RoleNameAlreadyExistsError on collision", async () => {
       await roleService.createRole(TENANT_A, { name: "r1" });
       const r2 = await roleService.createRole(TENANT_A, { name: "r2" });
-      await expect(roleService.renameRole(TENANT_A, r2.id, "r1")).rejects.toThrow(RoleNameAlreadyExistsError);
+      await expect(roleService.renameRole(TENANT_A, r2.id, "r1")).rejects.toThrow(
+        RoleNameAlreadyExistsError,
+      );
     });
   });
 
@@ -88,7 +98,9 @@ describe("RoleService", () => {
     });
 
     it("throws RoleNotFoundError if missing", async () => {
-      await expect(roleService.deleteRole(TENANT_A, roleId("not-real"))).rejects.toThrow(RoleNotFoundError);
+      await expect(roleService.deleteRole(TENANT_A, roleId("not-real"))).rejects.toThrow(
+        RoleNotFoundError,
+      );
     });
   });
 });

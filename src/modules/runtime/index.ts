@@ -8,8 +8,17 @@ export type { Decision } from "./domain/decision.js";
 export { autoApprove, autoReject, requestApproval } from "./domain/decision.js";
 export type { TraceEntry, EvaluationResult } from "./domain/evaluation-result.js";
 
-export type { SchemaValidatorPort, ValidationResult, ValidationSuccess, ValidationFailure } from "./ports/schema-validator.port.js";
-export { ValidationError, EvaluationError, PolicySchemaInvalidError } from "./application/errors.js";
+export type {
+  SchemaValidatorPort,
+  ValidationResult,
+  ValidationSuccess,
+  ValidationFailure,
+} from "./ports/schema-validator.port.js";
+export {
+  ValidationError,
+  EvaluationError,
+  PolicySchemaInvalidError,
+} from "./application/errors.js";
 export type { EvaluationErrorCode } from "./application/errors.js";
 export { AjvSchemaValidator } from "./adapters/ajv/ajv-schema-validator.js";
 

@@ -1,10 +1,7 @@
 import { vi } from "vitest";
 import type { MutationCtx, QueryCtx } from "../../convex/_generated/server.js";
 
-type DbMethods = Pick<
-  MutationCtx["db"],
-  "get" | "insert" | "patch" | "delete" | "query"
->;
+type DbMethods = Pick<MutationCtx["db"], "get" | "insert" | "patch" | "delete" | "query">;
 
 export type FakeDb = {
   [K in keyof DbMethods]: ReturnType<typeof vi.fn>;

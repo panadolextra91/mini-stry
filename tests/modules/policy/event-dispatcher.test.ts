@@ -34,9 +34,15 @@ describe("EventDispatcher", () => {
   it("calls handlers in registration order", async () => {
     const dispatcher = new EventDispatcher<TestEventMap>();
     const order: number[] = [];
-    dispatcher.on("Ping", () => { order.push(1); });
-    dispatcher.on("Ping", () => { order.push(2); });
-    dispatcher.on("Ping", () => { order.push(3); });
+    dispatcher.on("Ping", () => {
+      order.push(1);
+    });
+    dispatcher.on("Ping", () => {
+      order.push(2);
+    });
+    dispatcher.on("Ping", () => {
+      order.push(3);
+    });
 
     await dispatcher.emit("Ping", { value: 0 });
 

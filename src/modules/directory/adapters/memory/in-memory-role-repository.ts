@@ -14,7 +14,7 @@ export class InMemoryRoleRepository implements RoleRepositoryPort {
       id,
       tenantId: ctx.tenantId,
       name: input.name,
-      createdAt: Date.now()
+      createdAt: Date.now(),
     };
     this.roles.set(id, role);
     return role;

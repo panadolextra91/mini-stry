@@ -36,7 +36,10 @@ export class ManagerNotFoundError extends Error {
 }
 
 export class ManagerCycleError extends Error {
-  constructor(public readonly userId: UserId, public readonly managerId: UserId) {
+  constructor(
+    public readonly userId: UserId,
+    public readonly managerId: UserId,
+  ) {
     super(`Assigning ${managerId} as manager of ${userId} would create a cycle`);
     this.name = "ManagerCycleError";
   }

@@ -4,7 +4,8 @@ import type { Doc, Id } from "../../../../../convex/_generated/dataModel.js";
 import { toTenantId } from "@/modules/directory/adapters/convex/mappers.js";
 
 export const toAuditLogId = (raw: Id<"auditLogs">): AuditLogId => buildAuditLogId(raw);
-export const fromAuditLogId = (brand: AuditLogId): Id<"auditLogs"> => brand as string as Id<"auditLogs">;
+export const fromAuditLogId = (brand: AuditLogId): Id<"auditLogs"> =>
+  brand as string as Id<"auditLogs">;
 
 export const toAuditLogDomain = (doc: Doc<"auditLogs">): AuditLog => ({
   id: toAuditLogId(doc._id),

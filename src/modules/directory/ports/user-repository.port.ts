@@ -3,7 +3,10 @@ import type { User } from "../domain/user.js";
 import type { TenantContext } from "../application/tenant-context.js";
 
 export interface UserRepositoryPort {
-  create(ctx: TenantContext, input: { email: string; name: string | null; roleId: RoleId; managerId: UserId | null }): Promise<User>;
+  create(
+    ctx: TenantContext,
+    input: { email: string; name: string | null; roleId: RoleId; managerId: UserId | null },
+  ): Promise<User>;
   findById(ctx: TenantContext, id: UserId): Promise<User | null>;
   findByEmail(ctx: TenantContext, email: string): Promise<User | null>;
   listByTenant(ctx: TenantContext): Promise<User[]>;

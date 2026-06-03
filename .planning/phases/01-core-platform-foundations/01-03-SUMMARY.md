@@ -36,6 +36,7 @@ Defined the complete Phase 1 Convex persistence schema implementing D-09 logical
 **Files created**: 6 (plus generated code)
 
 ## Tables Defined (6 total)
+
 1. `tenants`
 2. `users`
 3. `roles`
@@ -44,6 +45,7 @@ Defined the complete Phase 1 Convex persistence schema implementing D-09 logical
 6. `auditLogs`
 
 ## Indexes Added
+
 - `users`:
   - `by_tenant_email`: `["tenantId", "email"]`
   - `by_tenant_role`: `["tenantId", "roleId"]`
@@ -60,6 +62,7 @@ Defined the complete Phase 1 Convex persistence schema implementing D-09 logical
   - `by_tenant_created`: `["tenantId", "createdAt"]`
 
 ## Convex Auth Fields Reserved (on `users`)
+
 - `email: v.string()`
 - `image: v.optional(v.string())`
 - `emailVerificationTime: v.optional(v.number())`
@@ -67,14 +70,18 @@ Defined the complete Phase 1 Convex persistence schema implementing D-09 logical
 - `phone: v.optional(v.string())`
 
 ## Shape Confirmations
+
 - `policyVersions.content` is confirmed as `v.any()`
 - `auditLogs.eventType` is confirmed as `v.string()` (open string)
 
 ## Codegen Output
+
 `npx convex dev --once` run in anonymous agent mode successfully bootstrapped the backend, provisioned the schema, and produced both `convex/_generated/dataModel.d.ts` and `convex/_generated/server.d.ts`.
 
 ## Deviations from Pattern 1
+
 None. The schema implements Pattern 1 verbatim and aligns completely with Phase 1 requirements.
 
 ## Self-Check: PASSED
+
 Ready for 01-04-PLAN.md.

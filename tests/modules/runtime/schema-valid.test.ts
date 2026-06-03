@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { AjvSchemaValidator, autoApprove, autoReject, requestApproval, ruleId } from "@/modules/runtime/index.js";
+import {
+  AjvSchemaValidator,
+  autoApprove,
+  autoReject,
+  requestApproval,
+  ruleId,
+} from "@/modules/runtime/index.js";
 
 describe("AjvSchemaValidator - valid schemas", () => {
   it("Smallest valid policy: empty rules array + an auto-approve defaultDecision", () => {

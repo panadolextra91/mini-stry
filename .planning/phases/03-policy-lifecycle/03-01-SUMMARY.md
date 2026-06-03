@@ -45,11 +45,13 @@ PolicyService core lifecycle — typed domain contracts, validation-on-save, opt
 ## What Was Built
 
 ### Domain Layer
+
 - **PolicyVersionStatus** (`draft | published`) and **ValidationStatus** (`valid | invalid | unchecked`) type aliases
 - **PolicyEventMap** with 3 typed events: `DraftCreated`, `DraftUpdated`, `PolicyPublished`. No `PolicyRolledBack` — rollback is inferred from `DraftCreated.rollbackFromVersionId`
 - **PolicyVersion** extended with: `status`, `validationStatus`, `validationErrors`, `revision`, `rollbackFromVersionId`, `createdBy`, `createdAt`
 
 ### Application Layer
+
 - **PolicyService** with 4 operations: `createPolicy`, `createDraft`, `saveDraft`, `publishDraft`
   - D-32: One draft per policy enforced via `DraftAlreadyExistsError`
   - D-34: Validation runs on every save via `SchemaValidatorPort`; publish gate requires `valid`
@@ -58,14 +60,17 @@ PolicyService core lifecycle — typed domain contracts, validation-on-save, opt
 - **Error classes** (6): `PolicyNotFoundError`, `DraftNotFoundError`, `VersionNotFoundError`, `ImmutableVersionError`, `InvalidPublishError`, `ConflictError`, `DraftAlreadyExistsError`
 
 ### Ports & Adapters
+
 - **PolicyRepositoryPort** (3 methods): `create`, `findById`, `updateActiveVersion`
 - **PolicyVersionRepositoryPort** (5 methods): `create`, `findById`, `findDraftByPolicy`, `update`, `getNextVersionNumber`
 - **InMemoryPolicyRepository** and **InMemoryPolicyVersionRepository** — in-memory fakes with tenant isolation
 
 ### Infrastructure
+
 - **EventDispatcher\<EventMap\>** — generic typed dispatcher with sequential handler execution, no external messaging
 
 ### Tests
+
 - **EventDispatcher**: 6 tests (handler invocation, ordering, async sequential, type isolation)
 - **PolicyService**: 18 tests (lifecycle, validation, concurrency, errors, tenant isolation, full flow)
 - **Total**: 24 new tests, all passing. Full suite: 142 tests, 0 failures.

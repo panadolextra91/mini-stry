@@ -10,23 +10,31 @@ describe("ConvexUserRepository", () => {
     const mockDb = createFakeMutationDb();
     mockDb.insert.mockResolvedValue("user_123");
     mockDb.get.mockImplementation(async () => {
-      return { 
-        _id: "user_123", 
-        tenantId: fromTenantId(TENANT_A.tenantId), 
+      return {
+        _id: "user_123",
+        tenantId: fromTenantId(TENANT_A.tenantId),
         email: "u@u.com",
         name: "u",
         roleId: fromRoleId(roleId("role_1")),
         managerId: null,
-        createdAt: 1234 
+        createdAt: 1234,
       };
     });
 
     const repo = new ConvexUserRepository(asMutationDb(mockDb));
-    const user = await repo.create(TENANT_A, { email: "u@u.com", name: "u", roleId: roleId("role_1"), managerId: null });
-    
-    expect(mockDb.insert).toHaveBeenCalledWith("users", expect.objectContaining({
-      email: "u@u.com"
-    }));
+    const user = await repo.create(TENANT_A, {
+      email: "u@u.com",
+      name: "u",
+      roleId: roleId("role_1"),
+      managerId: null,
+    });
+
+    expect(mockDb.insert).toHaveBeenCalledWith(
+      "users",
+      expect.objectContaining({
+        email: "u@u.com",
+      }),
+    );
     expect(user.id).toBe("user_123");
   });
 });

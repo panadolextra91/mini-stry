@@ -3,17 +3,26 @@ import type { User } from "../domain/user.js";
 import type { TenantContext } from "./tenant-context.js";
 import type { UserRepositoryPort } from "../ports/user-repository.port.js";
 import type { RoleRepositoryPort } from "../ports/role-repository.port.js";
-import { EmailAlreadyExistsError, RoleNotFoundError, UserNotFoundError, ManagerNotFoundError, ManagerCycleError } from "./errors.js";
+import {
+  EmailAlreadyExistsError,
+  RoleNotFoundError,
+  UserNotFoundError,
+  ManagerNotFoundError,
+  ManagerCycleError,
+} from "./errors.js";
 
 const MAX_MANAGER_CHAIN_DEPTH = 50;
 
 export class UserService {
   constructor(
     private readonly userRepo: UserRepositoryPort,
-    private readonly roleRepo: RoleRepositoryPort
+    private readonly roleRepo: RoleRepositoryPort,
   ) {}
 
-  async createUser(ctx: TenantContext, input: { email: string; name: string | null; roleId: RoleId; managerId: UserId | null }): Promise<User> {
+  async createUser(
+    ctx: TenantContext,
+    input: { email: string; name: string | null; roleId: RoleId; managerId: UserId | null },
+  ): Promise<User> {
     const existingEmail = await this.userRepo.findByEmail(ctx, input.email);
     if (existingEmail) {
       throw new EmailAlreadyExistsError(input.email);
@@ -46,7 +55,11 @@ export class UserService {
     return this.userRepo.listByTenant(ctx);
   }
 
-  async updateUserProfile(ctx: TenantContext, id: UserId, input: { name: string | null }): Promise<User> {
+  async updateUserProfile(
+    ctx: TenantContext,
+    id: UserId,
+    input: { name: string | null },
+  ): Promise<User> {
     const user = await this.userRepo.findById(ctx, id);
     if (!user) {
       throw new UserNotFoundError(id);
@@ -94,7 +107,9 @@ export class UserService {
       }
 
       if (depth >= MAX_MANAGER_CHAIN_DEPTH) {
-        throw new Error(`Assigning ${managerId} as manager of ${id} exceeds maximum chain depth of ${MAX_MANAGER_CHAIN_DEPTH} (data corruption protection)`);
+        throw new Error(
+          `Assigning ${managerId} as manager of ${id} exceeds maximum chain depth of ${MAX_MANAGER_CHAIN_DEPTH} (data corruption protection)`,
+        );
       }
 
       const cursorUser = await this.userRepo.findById(ctx, currentCursorId);

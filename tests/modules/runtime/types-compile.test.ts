@@ -1,14 +1,33 @@
 import type {
-  JsonScalar, JsonValue, EvaluationContext, Operator,
-  ComparePredicate, Predicate, Rule, PolicyContent,
-  Decision, TraceEntry, EvaluationResult, RuleId,
-  SchemaValidatorPort, ValidationResult, ValidationSuccess, ValidationFailure,
+  JsonScalar,
+  JsonValue,
+  EvaluationContext,
+  Operator,
+  ComparePredicate,
+  Predicate,
+  Rule,
+  PolicyContent,
+  Decision,
+  TraceEntry,
+  EvaluationResult,
+  RuleId,
+  SchemaValidatorPort,
+  ValidationResult,
+  ValidationSuccess,
+  ValidationFailure,
   EvaluationErrorCode,
 } from "@/modules/runtime/index.js";
 import {
-  ruleId, autoApprove, autoReject, requestApproval,
-  evaluate, validateAndEvaluate,
-  AjvSchemaValidator, ValidationError, EvaluationError, PolicySchemaInvalidError,
+  ruleId,
+  autoApprove,
+  autoReject,
+  requestApproval,
+  evaluate,
+  validateAndEvaluate,
+  AjvSchemaValidator,
+  ValidationError,
+  EvaluationError,
+  PolicySchemaInvalidError,
 } from "@/modules/runtime/index.js";
 import { roleId } from "@/modules/directory/index.js";
 import { describe, it, expect } from "vitest";
@@ -25,13 +44,24 @@ describe("runtime public surface", () => {
     const _predU: Predicate = _pred;
     const _rule: Rule = { id: _id, when: _pred, decision: autoApprove() };
     const _policy: PolicyContent = { rules: [_rule], defaultDecision: autoReject() };
-    const _decisionVariants: Decision[] = [autoApprove(), autoReject(), requestApproval(roleId("R"))];
+    const _decisionVariants: Decision[] = [
+      autoApprove(),
+      autoReject(),
+      requestApproval(roleId("R")),
+    ];
     const _trace: TraceEntry = { ruleId: _id, matched: true };
-    const _result: EvaluationResult = { decision: _decisionVariants[0]!, matchedRuleId: _id, evaluationTrace: [_trace] };
+    const _result: EvaluationResult = {
+      decision: _decisionVariants[0]!,
+      matchedRuleId: _id,
+      evaluationTrace: [_trace],
+    };
     const _validator: SchemaValidatorPort = new AjvSchemaValidator();
     // REFINEMENT: ValidationSuccess carries the typed PolicyContent payload.
     const _vrOk: ValidationSuccess = { ok: true, value: _policy };
-    const _vrErr: ValidationFailure = { ok: false, errors: [new ValidationError("test", "/", "msg")] };
+    const _vrErr: ValidationFailure = {
+      ok: false,
+      errors: [new ValidationError("test", "/", "msg")],
+    };
     const _vr: ValidationResult = _vrOk;
     const _errCode: EvaluationErrorCode = "MISSING_FIELD";
     const _veErr = new ValidationError("test", "/", "msg");
@@ -47,7 +77,15 @@ describe("runtime public surface", () => {
       void _narrowed;
     }
     // Silence unused-let lints
-    void _scalar; void _value; void _ctx; void _predU; void _policy;
-    void _result; void _vrOk; void _vrErr; void _evErr; void _psie;
+    void _scalar;
+    void _value;
+    void _ctx;
+    void _predU;
+    void _policy;
+    void _result;
+    void _vrOk;
+    void _vrErr;
+    void _evErr;
+    void _psie;
   });
 });

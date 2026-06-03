@@ -3,7 +3,10 @@ import type { ApprovalTaskId, ApprovalChainId } from "../../domain/ids.js";
 import { approvalTaskId as buildApprovalTaskId } from "../../domain/ids.js";
 import type { ApprovalTask } from "../../domain/approval-task.js";
 import type { TaskState } from "../../domain/approval-task-state.js";
-import type { CreateApprovalTaskInput, ApprovalTaskRepositoryPort } from "../../ports/approval-task-repository.port.js";
+import type {
+  CreateApprovalTaskInput,
+  ApprovalTaskRepositoryPort,
+} from "../../ports/approval-task-repository.port.js";
 
 export class InMemoryApprovalTaskRepository implements ApprovalTaskRepositoryPort {
   private readonly records = new Map<ApprovalTaskId, ApprovalTask>();
@@ -34,11 +37,15 @@ export class InMemoryApprovalTaskRepository implements ApprovalTaskRepositoryPor
 
   async findByChainId(ctx: TenantContext, id: ApprovalChainId): Promise<ApprovalTask[]> {
     return [...this.records.values()].filter(
-      (r) => r.tenantId === ctx.tenantId && r.chainId === id
+      (r) => r.tenantId === ctx.tenantId && r.chainId === id,
     );
   }
 
-  async updateState(ctx: TenantContext, id: ApprovalTaskId, state: TaskState): Promise<ApprovalTask> {
+  async updateState(
+    ctx: TenantContext,
+    id: ApprovalTaskId,
+    state: TaskState,
+  ): Promise<ApprovalTask> {
     const record = await this.findById(ctx, id);
     if (!record) {
       throw new Error(`Approval task ${id} not found in this tenant`);

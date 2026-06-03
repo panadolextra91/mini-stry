@@ -43,21 +43,26 @@ Implemented the core Directory module application services and persistence adapt
 **Files created**: 16
 
 ## Application Layer (Services)
+
 - `RoleService` and `UserService` were built in `src/modules/directory/application/`.
 - `UserService` includes manager cycle detection preventing assignment of an upstream manager as a subordinate.
 
 ## Adapters
+
 - Built `InMemory` fakes for unit testing logic decoupled from the database.
 - Built `Convex` adapters converting domain Entities to/from Convex `Doc` using `mappers.ts`. Boundary types are correctly enforced.
 - Created `convex/directory.ts` implementing endpoints utilizing dependency injection with `MutationCtx` and `QueryCtx`.
 
 ## Tests and Coverage
+
 - Achieved >90% coverage threshold globally.
 - Explicit tests added for Tenant Isolation, Manager Cycle Prevention, and all CRUD operations.
 
 ## Deployment & Indexing
+
 - Pushed schema to Convex successfully with `npx convex dev --once`.
 - Ran `npx gitnexus analyze`, which successfully indexed the system (459 nodes, 1,041 edges).
 
 ## Self-Check: PASSED
+
 Ready for Phase 2.

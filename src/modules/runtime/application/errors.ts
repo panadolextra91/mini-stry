@@ -9,10 +9,7 @@ export class ValidationError extends Error {
   }
 }
 
-export type EvaluationErrorCode =
-  | "MISSING_FIELD"
-  | "TYPE_MISMATCH"
-  | "UNSUPPORTED_OPERATOR";
+export type EvaluationErrorCode = "MISSING_FIELD" | "TYPE_MISMATCH" | "UNSUPPORTED_OPERATOR";
 
 export class EvaluationError extends Error {
   constructor(

@@ -16,13 +16,13 @@ created: 2026-06-03
 
 ## Test Infrastructure
 
-| Property | Value |
-|----------|-------|
-| **Framework** | Vitest 4.1.7 (already installed since Phase 1) |
-| **Config file** | none standalone — `vitest run` resolves `@/` alias via `tsconfig.json` paths (existing `tests/**` prove the mechanism) |
-| **Quick run command** | `npx vitest run tests/modules/request --reporter=dot` |
-| **Full suite command** | `npm test` (`vitest run --reporter=dot`) / `npm run test:coverage` |
-| **Estimated runtime** | ~5–15 seconds (unit, in-memory fakes) |
+| Property               | Value                                                                                                                  |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **Framework**          | Vitest 4.1.7 (already installed since Phase 1)                                                                         |
+| **Config file**        | none standalone — `vitest run` resolves `@/` alias via `tsconfig.json` paths (existing `tests/**` prove the mechanism) |
+| **Quick run command**  | `npx vitest run tests/modules/request --reporter=dot`                                                                  |
+| **Full suite command** | `npm test` (`vitest run --reporter=dot`) / `npm run test:coverage`                                                     |
+| **Estimated runtime**  | ~5–15 seconds (unit, in-memory fakes)                                                                                  |
 
 ---
 
@@ -39,17 +39,17 @@ created: 2026-06-03
 
 > Requirement-level map seeded from RESEARCH §Phase Requirements → Test Map. Task IDs are bound to plans during `/gsd:execute-phase`; the executor updates the Task ID / Status columns as Wave 0 stubs turn green.
 
-| Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
-|---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 01-01 | 01 | 1 | DEC-01 (success) | — | submit → resolve active version → evaluate → `RequestEvaluation{status:'completed', decision, trace}` | unit | `npx vitest run tests/modules/request/policy-runtime-service.test.ts -t "success" --reporter=dot` | ❌ W0 | ⬜ pending |
-| 01-01 | 01 | 1 | DEC-01 / D-41 (resolution failure) | — | unknown `requestType` / no active version → NO record, `ResolutionFailed` event, error thrown | unit | `npx vitest run tests/modules/request/policy-runtime-service.test.ts -t "resolution" --reporter=dot` | ❌ W0 | ⬜ pending |
-| 01-01 | 01 | 1 | DEC-01 / D-40 (contract violation) | — | `EvaluationError` → `RequestEvaluation{status:'failed', decision:null, errorCode, fieldPath}`, `EvaluationFailed` event, rethrow | unit | `npx vitest run tests/modules/request/policy-runtime-service.test.ts -t "contract" --reporter=dot` | ❌ W0 | ⬜ pending |
-| 02-01 | 02 | 2 | AUD-02 (by-reference audit) | — | each path writes correct `eventType` + reference envelope; NO content (D-37) | unit | `npx vitest run tests/modules/request/request-audit-subscriber.test.ts --reporter=dot` | ❌ W0 | ⬜ pending |
-| 02-01 | 02 | 2 | AUD-02 / D-42 (deterministic replay) | — | stored `trace` + immutable `content` + `requestInput` reproduce the decision | unit | `npx vitest run tests/modules/request/replay.test.ts --reporter=dot` | ❌ W0 | ⬜ pending |
-| 01-01 | 01 | 1 | CON-01 (tenant isolation) | tenant leak | a `RequestEvaluation`/resolution is never visible/usable across tenants | unit | `npx vitest run tests/modules/request -t "tenant" --reporter=dot` | ❌ W0 | ⬜ pending |
-| 01-01 | 01 | 1 | D-39 (`createPolicy` requestType) | — | `createPolicy` rejects duplicate `[tenantId, requestType]`; `requestType` persisted | unit | `npx vitest run tests/modules/policy/policy-service.test.ts -t "requestType" --reporter=dot` | ⚠️ extend existing | ⬜ pending |
+| Task ID | Plan | Wave | Requirement                          | Threat Ref  | Secure Behavior                                                                                                                  | Test Type | Automated Command                                                                                    | File Exists        | Status     |
+| ------- | ---- | ---- | ------------------------------------ | ----------- | -------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------- | ------------------ | ---------- |
+| 01-01   | 01   | 1    | DEC-01 (success)                     | —           | submit → resolve active version → evaluate → `RequestEvaluation{status:'completed', decision, trace}`                            | unit      | `npx vitest run tests/modules/request/policy-runtime-service.test.ts -t "success" --reporter=dot`    | ❌ W0              | ⬜ pending |
+| 01-01   | 01   | 1    | DEC-01 / D-41 (resolution failure)   | —           | unknown `requestType` / no active version → NO record, `ResolutionFailed` event, error thrown                                    | unit      | `npx vitest run tests/modules/request/policy-runtime-service.test.ts -t "resolution" --reporter=dot` | ❌ W0              | ⬜ pending |
+| 01-01   | 01   | 1    | DEC-01 / D-40 (contract violation)   | —           | `EvaluationError` → `RequestEvaluation{status:'failed', decision:null, errorCode, fieldPath}`, `EvaluationFailed` event, rethrow | unit      | `npx vitest run tests/modules/request/policy-runtime-service.test.ts -t "contract" --reporter=dot`   | ❌ W0              | ⬜ pending |
+| 02-01   | 02   | 2    | AUD-02 (by-reference audit)          | —           | each path writes correct `eventType` + reference envelope; NO content (D-37)                                                     | unit      | `npx vitest run tests/modules/request/request-audit-subscriber.test.ts --reporter=dot`               | ❌ W0              | ⬜ pending |
+| 02-01   | 02   | 2    | AUD-02 / D-42 (deterministic replay) | —           | stored `trace` + immutable `content` + `requestInput` reproduce the decision                                                     | unit      | `npx vitest run tests/modules/request/replay.test.ts --reporter=dot`                                 | ❌ W0              | ⬜ pending |
+| 01-01   | 01   | 1    | CON-01 (tenant isolation)            | tenant leak | a `RequestEvaluation`/resolution is never visible/usable across tenants                                                          | unit      | `npx vitest run tests/modules/request -t "tenant" --reporter=dot`                                    | ❌ W0              | ⬜ pending |
+| 01-01   | 01   | 1    | D-39 (`createPolicy` requestType)    | —           | `createPolicy` rejects duplicate `[tenantId, requestType]`; `requestType` persisted                                              | unit      | `npx vitest run tests/modules/policy/policy-service.test.ts -t "requestType" --reporter=dot`         | ⚠️ extend existing | ⬜ pending |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+_Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky_
 
 ---
 
@@ -66,8 +66,8 @@ created: 2026-06-03
 
 ## Manual-Only Verifications
 
-| Behavior | Requirement | Why Manual | Test Instructions |
-|----------|-------------|------------|-------------------|
+| Behavior                                                                                                      | Requirement     | Why Manual                                                                    | Test Instructions                                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------- | --------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Convex schema sync (`requestEvaluations` table + `policies.requestType` index) applies to the live deployment | DEC-01 / AUD-02 | Schema reaches the database via the Convex dev/deploy server, not a unit test | Run `npm run convex:dev` (or `npx convex dev`) and confirm the `requestEvaluations` table + new `policies` index appear without validation errors |
 
 ---

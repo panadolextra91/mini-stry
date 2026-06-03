@@ -1,5 +1,8 @@
 import type { AuditLog } from "../../domain/audit-log.js";
-import type { AuditLogRepositoryPort, CreateAuditLogInput } from "../../ports/audit-log-repository.port.js";
+import type {
+  AuditLogRepositoryPort,
+  CreateAuditLogInput,
+} from "../../ports/audit-log-repository.port.js";
 import type { TenantContext } from "@/modules/directory/index.js";
 import { auditLogId as buildAuditLogId } from "../../domain/ids.js";
 

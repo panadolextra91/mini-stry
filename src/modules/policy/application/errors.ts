@@ -56,18 +56,14 @@ export class ConflictError extends Error {
 
 export class DraftAlreadyExistsError extends Error {
   constructor(public readonly policyId: PolicyId) {
-    super(
-      `Policy ${policyId} already has an active draft — publish or discard it first`,
-    );
+    super(`Policy ${policyId} already has an active draft — publish or discard it first`);
     this.name = "DraftAlreadyExistsError";
   }
 }
 
 export class RequestTypeAlreadyExistsError extends Error {
   constructor(public readonly requestType: string) {
-    super(
-      `A policy with requestType "${requestType}" already exists in this tenant`,
-    );
+    super(`A policy with requestType "${requestType}" already exists in this tenant`);
     this.name = "RequestTypeAlreadyExistsError";
   }
 }

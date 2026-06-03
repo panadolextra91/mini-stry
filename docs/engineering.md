@@ -10,10 +10,10 @@ Business rule correctness is more important than feature count.
 
 Engineering decisions should prioritize:
 
-* correctness
-* maintainability
-* simplicity
-* testability
+- correctness
+- maintainability
+- simplicity
+- testability
 
 over speed of implementation.
 
@@ -27,28 +27,28 @@ No policy evaluation logic should be merged without tests.
 
 Required:
 
-* Unit Tests
-* Integration Tests for critical workflows
+- Unit Tests
+- Integration Tests for critical workflows
 
 Testing Stack:
 
-* Vitest
-* React Testing Library
+- Vitest
+- React Testing Library
 
 Coverage Targets:
 
-* Policy Engine: 100%
-* Policy Versioning: 100%
-* Approval Workflow Generation: 100%
-* Critical Business Logic: 90%+
+- Policy Engine: 100%
+- Policy Versioning: 100%
+- Approval Workflow Generation: 100%
+- Critical Business Logic: 90%+
 
 Examples:
 
-* policy evaluation
-* policy publishing
-* policy rollback
-* approver assignment
-* approval chain generation
+- policy evaluation
+- policy publishing
+- policy rollback
+- approver assignment
+- approval chain generation
 
 must have test coverage.
 
@@ -81,11 +81,11 @@ Deployment Targets:
 
 Frontend:
 
-* Vercel
+- Vercel
 
 Backend:
 
-* Convex
+- Convex
 
 ---
 
@@ -101,9 +101,9 @@ All business decisions should be evaluated by the policy engine.
 
 Avoid:
 
-* hardcoded approval logic
-* tenant-specific conditions
-* special-case business logic
+- hardcoded approval logic
+- tenant-specific conditions
+- special-case business logic
 
 Business behavior should always come from policies.
 
@@ -113,21 +113,21 @@ Business behavior should always come from policies.
 
 Requirements:
 
-* TypeScript strict mode
-* ESLint
-* Prettier
+- TypeScript strict mode
+- ESLint
+- Prettier
 
 No usage of:
 
-* any
-* eval()
-* dynamic code execution
+- any
+- eval()
+- dynamic code execution
 
 Prefer:
 
-* deterministic logic
-* pure functions
-* explicit types
+- deterministic logic
+- pure functions
+- explicit types
 
 ---
 

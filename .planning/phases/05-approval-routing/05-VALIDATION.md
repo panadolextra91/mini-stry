@@ -16,16 +16,17 @@ created: 2026-06-03
 
 ## Test Infrastructure
 
-| Property | Value |
-|----------|-------|
-| **Framework** | Vitest 4.1.7 (v8 coverage) |
-| **Config file** | `vitest.config.ts` (node env; `@` → `src` alias; includes `tests/**/*.test.ts` + `src/**/*.test.ts`) |
-| **Quick run command** | `npx vitest run tests/modules/approval --reporter=dot` |
-| **Full suite command** | `npm test` (`vitest run --reporter=dot`) |
-| **Coverage command** | `npm run test:coverage` |
-| **Estimated runtime** | ~10–30 seconds (fakes-only, no live Convex) |
+| Property               | Value                                                                                                |
+| ---------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Framework**          | Vitest 4.1.7 (v8 coverage)                                                                           |
+| **Config file**        | `vitest.config.ts` (node env; `@` → `src` alias; includes `tests/**/*.test.ts` + `src/**/*.test.ts`) |
+| **Quick run command**  | `npx vitest run tests/modules/approval --reporter=dot`                                               |
+| **Full suite command** | `npm test` (`vitest run --reporter=dot`)                                                             |
+| **Coverage command**   | `npm run test:coverage`                                                                              |
+| **Estimated runtime**  | ~10–30 seconds (fakes-only, no live Convex)                                                          |
 
 **Coverage targets (from `docs/engineering.md` + `vitest.config.ts`):**
+
 - `docs/engineering.md` line 42 mandates **"Approval Workflow Generation: 100%"** — stricter than the 90% global threshold. Routing resolution + state machine are 100% targets.
 - Recommend pinning `src/modules/approval/**` at 100% (matching the existing `src/modules/runtime/**` pin).
 - Coverage **excludes** `index.ts` barrels and `adapters/convex/**` — the 100% applies to `domain` + `application` + `adapters/memory`, all reachable via in-memory fakes.
@@ -47,30 +48,30 @@ created: 2026-06-03
 > plan tasks at planning time; `/gsd:validate-phase` / the nyquist-auditor reconcile this
 > table against the final PLAN.md task list.
 
-| Requirement | Behavior | Test Type | Automated Command | File Exists |
-|-------------|----------|-----------|-------------------|-------------|
-| DEC-03 | `request-approval` decision → chain+task materialized; non-request-approval ignored | unit (service+fakes) | `npx vitest run tests/modules/approval/routing-service.test.ts` | ❌ W0 |
-| DEC-03 (SC#1) | `request/` has no import of `approval/` (runtime stays agnostic) | static (eslint+grep) | `npm run lint` + `! grep -r "modules/approval" src/modules/request` | ❌ W0 |
-| DEC-03 (D-49) | Walk hit: first ancestor holding `targetRoleId` becomes approver | unit | routing-service.test.ts `describe("resolveApprover")` | ❌ W0 |
-| DEC-03 (D-49) | Walk miss: chain ends, no holder → `RoutingError`, no task created | unit | same | ❌ W0 |
-| DEC-03 (D-49) | Self-exclusion: walk starts at `requester.managerId`; requester never self-approves | unit | same | ❌ W0 |
-| DEC-03 (null path) | `requesterId === null` → `RoutingError("no requester")` before any walk; `ApprovalRoutingFailed` emitted; no chain; no rethrow (also keeps `userRepo.findById(UserId)` typecheck green) | unit | routing-service.test.ts | ❌ W0 |
-| DEC-03 (D-50) | Depth cap: >50 hops → `HierarchyTraversalError` | unit | same | ❌ W0 |
-| DEC-03 (D-50/SC#3) | Missing `targetRoleId` in registry → `RoleNotFoundError`, no walk | unit | same | ❌ W0 |
-| DEC-03 (D-51) | Task transitions PENDING→APPROVED / PENDING→REJECTED; terminal rejects further | unit (pure) | `npx vitest run tests/modules/approval/state-machine.test.ts` | ❌ W0 |
-| DEC-03 (D-51) | Chain status: any REJECTED→REJECTED; all APPROVED→APPROVED; else IN_PROGRESS | unit (pure) | same | ❌ W0 |
-| DEC-03 (D-52) | Auth guard: non-approver acting → `UnauthorizedApproverError` | unit | routing-service.test.ts `describe("act")` | ❌ W0 |
-| DEC-03 (D-52) | Idempotency: acting on terminal task → `TaskAlreadyResolvedError` | unit | same | ❌ W0 |
-| DEC-03 (D-44) | Immutability: changing `managerId` after creation does not alter stored `approverId` | unit | same | ❌ W0 |
-| DEC-03 | Same `evaluationRecordId` emitted twice → exactly one chain | unit | same | ❌ W0 |
-| DEC-03 (D-53) | Approve/Reject emits `ApprovalTaskApproved/Rejected`; audit subscriber writes by-reference (no content) | unit | `npx vitest run tests/modules/approval/approval-audit-subscriber.test.ts` | ❌ W0 |
-| DEC-03 (D-54) | Throwing subscriber does not stop siblings; `emit` does not reject | unit | extend `tests/modules/policy/event-dispatcher.test.ts` (+2 cases) | ⚠️ partial |
-| DEC-03 (D-54) | Routing failure → `ApprovalRoutingFailed` emitted + audited; `RequestEvaluation` still persisted | unit | routing-service.test.ts | ❌ W0 |
-| DEC-03 (D-48) | `submit()` threads `ctx.actorId → RequestEvaluation.requesterId` | unit | extend `tests/modules/request/policy-runtime-service.test.ts` | ⚠️ partial |
-| DEC-03 (live wiring) | `submitRequest` carries `actorId` arg → `tenantContext(tenantId, userId(actorId))` so live routing has a non-null requester | static (grep) | `grep -n "userId(args.actorId)" convex/request.ts` (Task 3) | ❌ W0 |
-| CON-01 | Cross-tenant: chain/task reads filtered by `ctx.tenantId` | unit | routing-service.test.ts + repo fakes | ❌ W0 |
+| Requirement          | Behavior                                                                                                                                                                                | Test Type            | Automated Command                                                         | File Exists |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ------------------------------------------------------------------------- | ----------- |
+| DEC-03               | `request-approval` decision → chain+task materialized; non-request-approval ignored                                                                                                     | unit (service+fakes) | `npx vitest run tests/modules/approval/routing-service.test.ts`           | ❌ W0       |
+| DEC-03 (SC#1)        | `request/` has no import of `approval/` (runtime stays agnostic)                                                                                                                        | static (eslint+grep) | `npm run lint` + `! grep -r "modules/approval" src/modules/request`       | ❌ W0       |
+| DEC-03 (D-49)        | Walk hit: first ancestor holding `targetRoleId` becomes approver                                                                                                                        | unit                 | routing-service.test.ts `describe("resolveApprover")`                     | ❌ W0       |
+| DEC-03 (D-49)        | Walk miss: chain ends, no holder → `RoutingError`, no task created                                                                                                                      | unit                 | same                                                                      | ❌ W0       |
+| DEC-03 (D-49)        | Self-exclusion: walk starts at `requester.managerId`; requester never self-approves                                                                                                     | unit                 | same                                                                      | ❌ W0       |
+| DEC-03 (null path)   | `requesterId === null` → `RoutingError("no requester")` before any walk; `ApprovalRoutingFailed` emitted; no chain; no rethrow (also keeps `userRepo.findById(UserId)` typecheck green) | unit                 | routing-service.test.ts                                                   | ❌ W0       |
+| DEC-03 (D-50)        | Depth cap: >50 hops → `HierarchyTraversalError`                                                                                                                                         | unit                 | same                                                                      | ❌ W0       |
+| DEC-03 (D-50/SC#3)   | Missing `targetRoleId` in registry → `RoleNotFoundError`, no walk                                                                                                                       | unit                 | same                                                                      | ❌ W0       |
+| DEC-03 (D-51)        | Task transitions PENDING→APPROVED / PENDING→REJECTED; terminal rejects further                                                                                                          | unit (pure)          | `npx vitest run tests/modules/approval/state-machine.test.ts`             | ❌ W0       |
+| DEC-03 (D-51)        | Chain status: any REJECTED→REJECTED; all APPROVED→APPROVED; else IN_PROGRESS                                                                                                            | unit (pure)          | same                                                                      | ❌ W0       |
+| DEC-03 (D-52)        | Auth guard: non-approver acting → `UnauthorizedApproverError`                                                                                                                           | unit                 | routing-service.test.ts `describe("act")`                                 | ❌ W0       |
+| DEC-03 (D-52)        | Idempotency: acting on terminal task → `TaskAlreadyResolvedError`                                                                                                                       | unit                 | same                                                                      | ❌ W0       |
+| DEC-03 (D-44)        | Immutability: changing `managerId` after creation does not alter stored `approverId`                                                                                                    | unit                 | same                                                                      | ❌ W0       |
+| DEC-03               | Same `evaluationRecordId` emitted twice → exactly one chain                                                                                                                             | unit                 | same                                                                      | ❌ W0       |
+| DEC-03 (D-53)        | Approve/Reject emits `ApprovalTaskApproved/Rejected`; audit subscriber writes by-reference (no content)                                                                                 | unit                 | `npx vitest run tests/modules/approval/approval-audit-subscriber.test.ts` | ❌ W0       |
+| DEC-03 (D-54)        | Throwing subscriber does not stop siblings; `emit` does not reject                                                                                                                      | unit                 | extend `tests/modules/policy/event-dispatcher.test.ts` (+2 cases)         | ⚠️ partial  |
+| DEC-03 (D-54)        | Routing failure → `ApprovalRoutingFailed` emitted + audited; `RequestEvaluation` still persisted                                                                                        | unit                 | routing-service.test.ts                                                   | ❌ W0       |
+| DEC-03 (D-48)        | `submit()` threads `ctx.actorId → RequestEvaluation.requesterId`                                                                                                                        | unit                 | extend `tests/modules/request/policy-runtime-service.test.ts`             | ⚠️ partial  |
+| DEC-03 (live wiring) | `submitRequest` carries `actorId` arg → `tenantContext(tenantId, userId(actorId))` so live routing has a non-null requester                                                             | static (grep)        | `grep -n "userId(args.actorId)" convex/request.ts` (Task 3)               | ❌ W0       |
+| CON-01               | Cross-tenant: chain/task reads filtered by `ctx.tenantId`                                                                                                                               | unit                 | routing-service.test.ts + repo fakes                                      | ❌ W0       |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+_Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky_
 
 > Note: the live `act()` Approve/Reject Convex mutation (`approveTask`/`rejectTask`) is deliberately deferred to Phase 6 with the approver inbox UI (CONTEXT). `act()` is fully covered as a service via fakes this phase; no live-handler row is expected for it in Phase 5.
 
@@ -91,11 +92,11 @@ created: 2026-06-03
 
 ## Manual-Only Verifications
 
-| Behavior | Requirement | Why Manual | Test Instructions |
-|----------|-------------|------------|-------------------|
-| Convex schema push for `approvalChains`/`approvalTasks` + `requestEvaluations.requesterId` | DEC-03 | Live Convex deploy is outside the Vitest fakes boundary (`adapters/convex/**` excluded from coverage) | Run the project's Convex push/dev command; confirm new tables + indexes exist and typecheck passes |
+| Behavior                                                                                   | Requirement | Why Manual                                                                                            | Test Instructions                                                                                  |
+| ------------------------------------------------------------------------------------------ | ----------- | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Convex schema push for `approvalChains`/`approvalTasks` + `requestEvaluations.requesterId` | DEC-03      | Live Convex deploy is outside the Vitest fakes boundary (`adapters/convex/**` excluded from coverage) | Run the project's Convex push/dev command; confirm new tables + indexes exist and typecheck passes |
 
-*All core business behaviors (routing resolution, state machine, audit, subscriber isolation) have automated verification via in-memory fakes.*
+_All core business behaviors (routing resolution, state machine, audit, subscriber isolation) have automated verification via in-memory fakes._
 
 ---
 

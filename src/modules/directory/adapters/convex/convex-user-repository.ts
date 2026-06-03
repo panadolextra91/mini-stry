@@ -8,8 +8,11 @@ import { fromTenantId, fromUserId, fromRoleId, userDocToEntity } from "./mappers
 export class ConvexUserRepository implements UserRepositoryPort {
   constructor(private readonly db: MutationCtx["db"] | QueryCtx["db"]) {}
 
-  async create(ctx: TenantContext, input: { email: string; name: string | null; roleId: RoleId; managerId: UserId | null }): Promise<User> {
-    if (!('insert' in this.db)) throw new Error("Mutations require MutationCtx");
+  async create(
+    ctx: TenantContext,
+    input: { email: string; name: string | null; roleId: RoleId; managerId: UserId | null },
+  ): Promise<User> {
+    if (!("insert" in this.db)) throw new Error("Mutations require MutationCtx");
     const id = await this.db.insert("users", {
       tenantId: fromTenantId(ctx.tenantId),
       email: input.email,
@@ -31,36 +34,41 @@ export class ConvexUserRepository implements UserRepositoryPort {
   }
 
   async findByEmail(ctx: TenantContext, email: string): Promise<User | null> {
-    const doc = await this.db.query("users")
-      .withIndex("by_tenant_email", q => q.eq("tenantId", fromTenantId(ctx.tenantId)).eq("email", email))
+    const doc = await this.db
+      .query("users")
+      .withIndex("by_tenant_email", (q) =>
+        q.eq("tenantId", fromTenantId(ctx.tenantId)).eq("email", email),
+      )
       .unique();
     return doc ? userDocToEntity(doc) : null;
   }
 
   async listByTenant(ctx: TenantContext): Promise<User[]> {
-    const docs = await this.db.query("users")
-      .withIndex("by_tenant_email", q => q.eq("tenantId", fromTenantId(ctx.tenantId)))
+    const docs = await this.db
+      .query("users")
+      .withIndex("by_tenant_email", (q) => q.eq("tenantId", fromTenantId(ctx.tenantId)))
       .collect();
     return docs.map(userDocToEntity);
   }
 
-  async updateProfile(ctx: TenantContext, id: UserId, input: { name: string | null }): Promise<User> {
-    if (!('patch' in this.db)) throw new Error("Mutations require MutationCtx");
+  async updateProfile(
+    ctx: TenantContext,
+    id: UserId,
+    input: { name: string | null },
+  ): Promise<User> {
+    if (!("patch" in this.db)) throw new Error("Mutations require MutationCtx");
     const existing = await this.db.get(fromUserId(id));
     if (!existing || existing.tenantId !== fromTenantId(ctx.tenantId)) {
       throw new Error(`User ${id} not found in tenant ${ctx.tenantId}`);
     }
-    await this.db.patch(
-      fromUserId(id),
-      input.name !== null ? { name: input.name } : {}
-    );
+    await this.db.patch(fromUserId(id), input.name !== null ? { name: input.name } : {});
     const doc = await this.db.get(fromUserId(id));
     if (!doc) throw new Error("User update failed");
     return userDocToEntity(doc);
   }
 
   async updateRole(ctx: TenantContext, id: UserId, roleId: RoleId): Promise<User> {
-    if (!('patch' in this.db)) throw new Error("Mutations require MutationCtx");
+    if (!("patch" in this.db)) throw new Error("Mutations require MutationCtx");
     const existing = await this.db.get(fromUserId(id));
     if (!existing || existing.tenantId !== fromTenantId(ctx.tenantId)) {
       throw new Error(`User ${id} not found in tenant ${ctx.tenantId}`);
@@ -72,7 +80,7 @@ export class ConvexUserRepository implements UserRepositoryPort {
   }
 
   async updateManagerId(ctx: TenantContext, id: UserId, managerId: UserId | null): Promise<User> {
-    if (!('patch' in this.db)) throw new Error("Mutations require MutationCtx");
+    if (!("patch" in this.db)) throw new Error("Mutations require MutationCtx");
     const existing = await this.db.get(fromUserId(id));
     if (!existing || existing.tenantId !== fromTenantId(ctx.tenantId)) {
       throw new Error(`User ${id} not found in tenant ${ctx.tenantId}`);
@@ -84,7 +92,7 @@ export class ConvexUserRepository implements UserRepositoryPort {
   }
 
   async delete(ctx: TenantContext, id: UserId): Promise<void> {
-    if (!('delete' in this.db)) throw new Error("Mutations require MutationCtx");
+    if (!("delete" in this.db)) throw new Error("Mutations require MutationCtx");
     const existing = await this.db.get(fromUserId(id));
     if (!existing || existing.tenantId !== fromTenantId(ctx.tenantId)) {
       throw new Error(`User ${id} not found in tenant ${ctx.tenantId}`);

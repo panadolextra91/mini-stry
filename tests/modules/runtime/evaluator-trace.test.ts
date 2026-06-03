@@ -2,7 +2,13 @@ import { describe, it, expect } from "vitest";
 import { evaluate, autoApprove, autoReject, ruleId } from "@/modules/runtime/index.js";
 import type { Operator, JsonValue, Decision, Rule } from "@/modules/runtime/index.js";
 
-const r = (id: string, field: string, op: Operator, value: JsonValue, decision: Decision): Rule => ({
+const r = (
+  id: string,
+  field: string,
+  op: Operator,
+  value: JsonValue,
+  decision: Decision,
+): Rule => ({
   id: ruleId(id),
   when: { type: "compare", field, op, value },
   decision,
@@ -19,7 +25,7 @@ describe("evaluate — trace correctness", () => {
       defaultDecision: autoReject(),
     };
     const result = evaluate(policy, { x: 3 });
-    
+
     expect(result.evaluationTrace.length).toBe(3);
     expect(result.evaluationTrace[0]!.matched).toBe(false);
     expect(result.evaluationTrace[1]!.matched).toBe(false);
@@ -36,12 +42,12 @@ describe("evaluate — trace correctness", () => {
       defaultDecision: autoReject(),
     };
     const result = evaluate(policy, { x: 1 });
-    
+
     expect(result.evaluationTrace.length).toBe(1);
     expect(result.evaluationTrace[0]!.ruleId).toBe(ruleId("R1"));
     expect(result.evaluationTrace[0]!.matched).toBe(true);
-    
-    const r3InTrace = result.evaluationTrace.find(t => t.ruleId === ruleId("R3"));
+
+    const r3InTrace = result.evaluationTrace.find((t) => t.ruleId === ruleId("R3"));
     expect(r3InTrace).toBeUndefined();
   });
 
@@ -55,12 +61,12 @@ describe("evaluate — trace correctness", () => {
       defaultDecision: autoReject(),
     };
     const result = evaluate(policy, { x: 99 });
-    
+
     expect(result.evaluationTrace.length).toBe(3);
-    expect(result.evaluationTrace.map(t => t.ruleId)).toEqual([
+    expect(result.evaluationTrace.map((t) => t.ruleId)).toEqual([
       ruleId("A"),
       ruleId("B"),
-      ruleId("C")
+      ruleId("C"),
     ]);
   });
 });

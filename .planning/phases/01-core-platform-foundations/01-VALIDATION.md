@@ -3,7 +3,7 @@ phase: 1
 slug: core-platform-foundations
 status: planned
 nyquist_compliant: false
-wave_0_complete: false  # plan 01-01 satisfies Wave 0 requirements when executed
+wave_0_complete: false # plan 01-01 satisfies Wave 0 requirements when executed
 created: 2026-05-31
 ---
 
@@ -15,13 +15,13 @@ created: 2026-05-31
 
 ## Test Infrastructure
 
-| Property | Value |
-|----------|-------|
-| **Framework** | vitest 4.x |
-| **Config file** | `vitest.config.ts` (created in Wave 0) |
-| **Quick run command** | `npx vitest run --reporter=dot` |
-| **Full suite command** | `npx vitest run --coverage` |
-| **Estimated runtime** | ~30 seconds (Phase 1 service unit tests + adapter mapping tests) |
+| Property               | Value                                                            |
+| ---------------------- | ---------------------------------------------------------------- |
+| **Framework**          | vitest 4.x                                                       |
+| **Config file**        | `vitest.config.ts` (created in Wave 0)                           |
+| **Quick run command**  | `npx vitest run --reporter=dot`                                  |
+| **Full suite command** | `npx vitest run --coverage`                                      |
+| **Estimated runtime**  | ~30 seconds (Phase 1 service unit tests + adapter mapping tests) |
 
 ---
 
@@ -36,18 +36,18 @@ created: 2026-05-31
 
 ## Per-Task Verification Map
 
-| Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
-|---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 01-01-T1 | 01-01 | 1 | bootstrap | T-1-01, T-1-02, T-1-04 | Version-pinned deps installed; .gitignore covers secrets | config | `node -e "require('./package.json')"` | created in task | ⬜ pending |
-| 01-01-T2 | 01-01 | 1 | bootstrap | T-1-05 | Strict TS + 90% coverage threshold + Prettier rules | config | `npx tsc --noEmit && npx prettier --check .` | created in task | ⬜ pending |
-| 01-01-T3 | 01-01 | 1 | bootstrap | T-1-03 | ESLint flat config enforces D-08 module boundaries (6 zones) | lint | `npx eslint . --max-warnings 0` | created in task | ⬜ pending |
-| 01-02-T1 | 01-02 | 2 | CON-01, CON-02, CON-03, CON-04 | T-1-06, T-1-08, T-1-10 | Domain layer pure TS, branded IDs, TenantContext readonly | type-check + lint | `npx tsc --noEmit && npx eslint src/modules/directory` | created in task | ⬜ pending |
-| 01-02-T2 | 01-02 | 2 | POL-05, POL-06, AUD-03 | T-1-07, T-1-09 | Skeleton entities; PolicyVersion.content is `unknown`; AuditLog.eventType open | type-check + lint | `npx tsc --noEmit && npx eslint src/modules/policy src/modules/audit` | created in task | ⬜ pending |
-| 01-03-T1 | 01-03 | 2 | CON-01, CON-02, CON-03, CON-04, POL-05, POL-06, AUD-03 | T-1-MT-01, T-1-RU-01, T-1-PV-01, T-1-AU-01 | tenant-prefixed composite indexes on every tenant-owned table; Convex Auth fields reserved; PolicyVersion.content is v.any() | schema + codegen | `npx convex codegen && grep -F by_tenant_email convex/schema.ts` | created in task | ⬜ pending |
-| 01-03-T2 | 01-03 | 2 | bootstrap (skeleton) | T-1-AT-01, T-1-BR-01 | convex/ HARD RULE documented; skeleton files do not contain business logic | lint | `npx eslint convex --max-warnings 0` | created in task | ⬜ pending |
-| 01-04-T1 | 01-04 | 3 | CON-01, CON-02, CON-03, CON-04 | T-1-MT-02, T-1-RP-01, T-1-MC-01, T-1-RU-02 | RoleService + UserService implement D-17 with tenant isolation, role-name uniqueness, cycle prevention; 90% coverage on critical paths | unit + coverage | `npx vitest run --coverage` | created in task | ⬜ pending |
-| 01-04-T2 | 01-04 | 3 | CON-01, CON-02, CON-03, CON-04 | T-1-BC-01, T-1-BD-01 | Convex adapters use by_tenant_* indexes; convex/directory.ts is pure DI per Pattern 9; ID mappers verified | unit (adapter mapping) + lint | `npx vitest run tests/modules/directory/convex-*.test.ts && npx eslint convex --max-warnings 0` | created in task | ⬜ pending |
-| 01-04-T3 | 01-04 | 3 | all Phase 1 | T-1-CV-01 | Convex schema pushed to live deployment; gitnexus index refreshed; full green build | manual + automated | `npm test && npm run lint && npm run typecheck && npx vitest run --coverage` | created in task | ⬜ pending |
+| Task ID  | Plan  | Wave | Requirement                                            | Threat Ref                                 | Secure Behavior                                                                                                                        | Test Type                     | Automated Command                                                                               | File Exists     | Status     |
+| -------- | ----- | ---- | ------------------------------------------------------ | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ----------------------------------------------------------------------------------------------- | --------------- | ---------- |
+| 01-01-T1 | 01-01 | 1    | bootstrap                                              | T-1-01, T-1-02, T-1-04                     | Version-pinned deps installed; .gitignore covers secrets                                                                               | config                        | `node -e "require('./package.json')"`                                                           | created in task | ⬜ pending |
+| 01-01-T2 | 01-01 | 1    | bootstrap                                              | T-1-05                                     | Strict TS + 90% coverage threshold + Prettier rules                                                                                    | config                        | `npx tsc --noEmit && npx prettier --check .`                                                    | created in task | ⬜ pending |
+| 01-01-T3 | 01-01 | 1    | bootstrap                                              | T-1-03                                     | ESLint flat config enforces D-08 module boundaries (6 zones)                                                                           | lint                          | `npx eslint . --max-warnings 0`                                                                 | created in task | ⬜ pending |
+| 01-02-T1 | 01-02 | 2    | CON-01, CON-02, CON-03, CON-04                         | T-1-06, T-1-08, T-1-10                     | Domain layer pure TS, branded IDs, TenantContext readonly                                                                              | type-check + lint             | `npx tsc --noEmit && npx eslint src/modules/directory`                                          | created in task | ⬜ pending |
+| 01-02-T2 | 01-02 | 2    | POL-05, POL-06, AUD-03                                 | T-1-07, T-1-09                             | Skeleton entities; PolicyVersion.content is `unknown`; AuditLog.eventType open                                                         | type-check + lint             | `npx tsc --noEmit && npx eslint src/modules/policy src/modules/audit`                           | created in task | ⬜ pending |
+| 01-03-T1 | 01-03 | 2    | CON-01, CON-02, CON-03, CON-04, POL-05, POL-06, AUD-03 | T-1-MT-01, T-1-RU-01, T-1-PV-01, T-1-AU-01 | tenant-prefixed composite indexes on every tenant-owned table; Convex Auth fields reserved; PolicyVersion.content is v.any()           | schema + codegen              | `npx convex codegen && grep -F by_tenant_email convex/schema.ts`                                | created in task | ⬜ pending |
+| 01-03-T2 | 01-03 | 2    | bootstrap (skeleton)                                   | T-1-AT-01, T-1-BR-01                       | convex/ HARD RULE documented; skeleton files do not contain business logic                                                             | lint                          | `npx eslint convex --max-warnings 0`                                                            | created in task | ⬜ pending |
+| 01-04-T1 | 01-04 | 3    | CON-01, CON-02, CON-03, CON-04                         | T-1-MT-02, T-1-RP-01, T-1-MC-01, T-1-RU-02 | RoleService + UserService implement D-17 with tenant isolation, role-name uniqueness, cycle prevention; 90% coverage on critical paths | unit + coverage               | `npx vitest run --coverage`                                                                     | created in task | ⬜ pending |
+| 01-04-T2 | 01-04 | 3    | CON-01, CON-02, CON-03, CON-04                         | T-1-BC-01, T-1-BD-01                       | Convex adapters use by*tenant*\* indexes; convex/directory.ts is pure DI per Pattern 9; ID mappers verified                            | unit (adapter mapping) + lint | `npx vitest run tests/modules/directory/convex-*.test.ts && npx eslint convex --max-warnings 0` | created in task | ⬜ pending |
+| 01-04-T3 | 01-04 | 3    | all Phase 1                                            | T-1-CV-01                                  | Convex schema pushed to live deployment; gitnexus index refreshed; full green build                                                    | manual + automated            | `npm test && npm run lint && npm run typecheck && npx vitest run --coverage`                    | created in task | ⬜ pending |
 
 ---
 
@@ -66,25 +66,25 @@ created: 2026-05-31
 
 ## Manual-Only Verifications
 
-| Behavior | Requirement | Why Manual | Test Instructions |
-|----------|-------------|------------|-------------------|
+| Behavior                                                | Requirement                   | Why Manual                                                          | Test Instructions                                                              |
+| ------------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
 | Convex deploy / schema push reaches the live deployment | CON-01..04, POL-05/06, AUD-03 | Requires Convex CLI auth + dev deployment provisioned interactively | `npx convex dev` (interactive on first run); verify schema in Convex dashboard |
 
-*All other Phase 1 behaviors have automated verification (service unit tests, adapter mapping tests, lightweight Convex wiring smoke tests).*
+_All other Phase 1 behaviors have automated verification (service unit tests, adapter mapping tests, lightweight Convex wiring smoke tests)._
 
 ---
 
 ## Phase 1 Requirement → Validation Map
 
-| Req | Test Type | Test Layer | Coverage Threshold |
-|-----|-----------|------------|--------------------|
-| **CON-01** Logical tenant isolation | Unit + Adapter | Service (TenantContext rejects cross-tenant reads) + Repository (tenantId index queries) | 100% |
-| **CON-02** Dynamic roles per tenant | Unit + Adapter | RoleService.createRole + Repository [tenantId,name] uniqueness | 100% |
-| **CON-03** Stable roleId reference | Unit + Adapter | UserService.assignRole using roleId; rename does not break linkage | 100% |
-| **CON-04** Supervisor reporting line | Unit | UserService.setManager + cycle prevention (chain walk, depth-limited) | 100% |
-| **POL-05** PolicyEntity domain skeleton | Unit | Domain interface shape + adapter mapping | 90% |
-| **POL-06** PolicyVersionEntity domain skeleton | Unit | Domain interface shape (content field present but undefined) + adapter mapping | 90% |
-| **AUD-03** AuditLogEntity domain skeleton | Unit | Domain interface shape + adapter mapping + open eventType convention | 90% |
+| Req                                            | Test Type      | Test Layer                                                                               | Coverage Threshold |
+| ---------------------------------------------- | -------------- | ---------------------------------------------------------------------------------------- | ------------------ |
+| **CON-01** Logical tenant isolation            | Unit + Adapter | Service (TenantContext rejects cross-tenant reads) + Repository (tenantId index queries) | 100%               |
+| **CON-02** Dynamic roles per tenant            | Unit + Adapter | RoleService.createRole + Repository [tenantId,name] uniqueness                           | 100%               |
+| **CON-03** Stable roleId reference             | Unit + Adapter | UserService.assignRole using roleId; rename does not break linkage                       | 100%               |
+| **CON-04** Supervisor reporting line           | Unit           | UserService.setManager + cycle prevention (chain walk, depth-limited)                    | 100%               |
+| **POL-05** PolicyEntity domain skeleton        | Unit           | Domain interface shape + adapter mapping                                                 | 90%                |
+| **POL-06** PolicyVersionEntity domain skeleton | Unit           | Domain interface shape (content field present but undefined) + adapter mapping           | 90%                |
+| **AUD-03** AuditLogEntity domain skeleton      | Unit           | Domain interface shape + adapter mapping + open eventType convention                     | 90%                |
 
 ---
 

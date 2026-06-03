@@ -9,7 +9,7 @@ export class ConvexRoleRepository implements RoleRepositoryPort {
   constructor(private readonly db: MutationCtx["db"] | QueryCtx["db"]) {}
 
   async create(ctx: TenantContext, input: { name: string }): Promise<Role> {
-    if (!('insert' in this.db)) throw new Error("Mutations require MutationCtx");
+    if (!("insert" in this.db)) throw new Error("Mutations require MutationCtx");
     const id = await this.db.insert("roles", {
       tenantId: fromTenantId(ctx.tenantId),
       name: input.name,
@@ -28,21 +28,25 @@ export class ConvexRoleRepository implements RoleRepositoryPort {
   }
 
   async findByName(ctx: TenantContext, name: string): Promise<Role | null> {
-    const doc = await this.db.query("roles")
-      .withIndex("by_tenant_name", q => q.eq("tenantId", fromTenantId(ctx.tenantId)).eq("name", name))
+    const doc = await this.db
+      .query("roles")
+      .withIndex("by_tenant_name", (q) =>
+        q.eq("tenantId", fromTenantId(ctx.tenantId)).eq("name", name),
+      )
       .unique();
     return doc ? roleDocToEntity(doc) : null;
   }
 
   async listByTenant(ctx: TenantContext): Promise<Role[]> {
-    const docs = await this.db.query("roles")
-      .withIndex("by_tenant_name", q => q.eq("tenantId", fromTenantId(ctx.tenantId)))
+    const docs = await this.db
+      .query("roles")
+      .withIndex("by_tenant_name", (q) => q.eq("tenantId", fromTenantId(ctx.tenantId)))
       .collect();
     return docs.map(roleDocToEntity);
   }
 
   async rename(ctx: TenantContext, id: RoleId, newName: string): Promise<Role> {
-    if (!('patch' in this.db)) throw new Error("Mutations require MutationCtx");
+    if (!("patch" in this.db)) throw new Error("Mutations require MutationCtx");
     const existing = await this.db.get(fromRoleId(id));
     if (!existing || existing.tenantId !== fromTenantId(ctx.tenantId)) {
       throw new Error(`Role ${id} not found in tenant ${ctx.tenantId}`);
@@ -54,7 +58,7 @@ export class ConvexRoleRepository implements RoleRepositoryPort {
   }
 
   async delete(ctx: TenantContext, id: RoleId): Promise<void> {
-    if (!('delete' in this.db)) throw new Error("Mutations require MutationCtx");
+    if (!("delete" in this.db)) throw new Error("Mutations require MutationCtx");
     const existing = await this.db.get(fromRoleId(id));
     if (!existing || existing.tenantId !== fromTenantId(ctx.tenantId)) {
       throw new Error(`Role ${id} not found in tenant ${ctx.tenantId}`);

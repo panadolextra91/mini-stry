@@ -22,11 +22,11 @@ The actual product is the policy engine.
 
 Future use cases may include:
 
-* reimbursement approval
-* purchase approval
-* shift approval
-* internal workflow approval
-* any business process requiring rules and approvals
+- reimbursement approval
+- purchase approval
+- shift approval
+- internal workflow approval
+- any business process requiring rules and approvals
 
 ## Core Concepts
 
@@ -42,10 +42,10 @@ Role
 
 Examples:
 
-* employee
-* manager
-* hr_head
-* ceo
+- employee
+- manager
+- hr_head
+- ceo
 
 Policy
 
@@ -63,8 +63,8 @@ An action submitted by a user.
 
 Examples:
 
-* leave request
-* reimbursement request
+- leave request
+- reimbursement request
 
 Approval Task
 
@@ -88,10 +88,10 @@ apply_for: all
 
 rules:
 
-* if: leave_days <= 2
+- if: leave_days <= 2
   approve_by: manager
 
-* if: leave_days > 2
+- if: leave_days > 2
   approve_by: ceo
 
 The syntax does not need to be finalized.
@@ -102,26 +102,26 @@ The goal is human-readable business rules.
 
 Frontend:
 
-* React
-* TypeScript
-* shadcn/ui
-* Tailwind
+- React
+- TypeScript
+- shadcn/ui
+- Tailwind
 
 Backend:
 
-* Convex
+- Convex
 
 Authentication:
 
-* Convex Auth
+- Convex Auth
 
 Editor:
 
-* Monaco Editor
+- Monaco Editor
 
 Deployment:
 
-* Vercel
+- Vercel
 
 ## Design Constraints
 
@@ -129,21 +129,21 @@ This is an MVP.
 
 Do NOT build:
 
-* payroll
-* attendance
-* recruitment
-* performance reviews
-* employee directory features beyond what is required
+- payroll
+- attendance
+- recruitment
+- performance reviews
+- employee directory features beyond what is required
 
 Focus only on:
 
-* multi-tenancy
-* policy versioning
-* policy publishing
-* request submission
-* policy evaluation
-* approval workflow generation
-* audit logging
+- multi-tenancy
+- policy versioning
+- policy publishing
+- request submission
+- policy evaluation
+- approval workflow generation
+- audit logging
 
 ## Expected Output
 
@@ -162,10 +162,10 @@ Create:
 
 Optimize for:
 
-* fastest time to first usable version
-* minimal infrastructure
-* future extensibility
-* clean architecture
+- fastest time to first usable version
+- minimal infrastructure
+- future extensibility
+- clean architecture
 
 Avoid overengineering.
 Prefer boring solutions.

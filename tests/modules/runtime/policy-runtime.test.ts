@@ -5,7 +5,8 @@ import {
   PolicySchemaInvalidError,
   ValidationError,
   EvaluationError,
-  autoApprove, autoReject,
+  autoApprove,
+  autoReject,
   ruleId,
 } from "@/modules/runtime/index.js";
 import type { SchemaValidatorPort, PolicyContent } from "@/modules/runtime/index.js";
@@ -13,7 +14,13 @@ import type { SchemaValidatorPort, PolicyContent } from "@/modules/runtime/index
 describe("validateAndEvaluate composer", () => {
   it("Valid policy → returns EvaluationResult unchanged from evaluate()", () => {
     const policy = {
-      rules: [{ id: ruleId("R1"), when: { type: "compare" as const, field: "x", op: "gt" as const, value: 5 }, decision: autoApprove() }],
+      rules: [
+        {
+          id: ruleId("R1"),
+          when: { type: "compare" as const, field: "x", op: "gt" as const, value: 5 },
+          decision: autoApprove(),
+        },
+      ],
       defaultDecision: autoReject(),
     };
     const result = validateAndEvaluate(new AjvSchemaValidator(), policy, { x: 10 });
@@ -39,7 +46,13 @@ describe("validateAndEvaluate composer", () => {
 
   it("Invalid policy (unknown operator) → throws PolicySchemaInvalidError", () => {
     const policy = {
-      rules: [{ id: ruleId("R1"), when: { type: "compare", field: "x", op: "matches", value: 5 }, decision: autoApprove() }],
+      rules: [
+        {
+          id: ruleId("R1"),
+          when: { type: "compare", field: "x", op: "matches", value: 5 },
+          decision: autoApprove(),
+        },
+      ],
       defaultDecision: autoReject(),
     };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -50,13 +63,18 @@ describe("validateAndEvaluate composer", () => {
       caught = e;
     }
     expect(caught).toBeInstanceOf(PolicySchemaInvalidError);
-    const hasEnumError = caught.errors.some((e: ValidationError) => e.code === "enum" || e.code === "oneOf" || e.code === "anyOf");
+    const hasEnumError = caught.errors.some(
+      (e: ValidationError) => e.code === "enum" || e.code === "oneOf" || e.code === "anyOf",
+    );
     expect(hasEnumError).toBe(true);
   });
 
   it("Validator port respected (failure path)", () => {
     const fakeValidator: SchemaValidatorPort = {
-      validate: () => ({ ok: false, errors: [new ValidationError("custom", "/test", "forced failure")] })
+      validate: () => ({
+        ok: false,
+        errors: [new ValidationError("custom", "/test", "forced failure")],
+      }),
     };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let caught: any = null;
@@ -71,11 +89,17 @@ describe("validateAndEvaluate composer", () => {
 
   it("REFINEMENT — Validator port carries typed value through success branch", () => {
     const substitutePolicy: PolicyContent = {
-      rules: [{ id: ruleId("S1"), when: { type: "compare", field: "y", op: "eq", value: 1 }, decision: autoApprove() }],
-      defaultDecision: autoReject()
+      rules: [
+        {
+          id: ruleId("S1"),
+          when: { type: "compare", field: "y", op: "eq", value: 1 },
+          decision: autoApprove(),
+        },
+      ],
+      defaultDecision: autoReject(),
     };
     const fakeValidator: SchemaValidatorPort = {
-      validate: () => ({ ok: true, value: substitutePolicy })
+      validate: () => ({ ok: true, value: substitutePolicy }),
     };
     // Pass completely invalid input
     const result = validateAndEvaluate(fakeValidator, "completely invalid", { y: 1 });
@@ -86,7 +110,13 @@ describe("validateAndEvaluate composer", () => {
 
   it("Evaluator errors propagate after schema validation passes", () => {
     const policy = {
-      rules: [{ id: ruleId("R1"), when: { type: "compare" as const, field: "missing", op: "eq" as const, value: 5 }, decision: autoApprove() }],
+      rules: [
+        {
+          id: ruleId("R1"),
+          when: { type: "compare" as const, field: "missing", op: "eq" as const, value: 5 },
+          decision: autoApprove(),
+        },
+      ],
       defaultDecision: autoReject(),
     };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

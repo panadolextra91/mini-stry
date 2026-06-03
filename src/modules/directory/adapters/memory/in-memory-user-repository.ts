@@ -8,7 +8,10 @@ export class InMemoryUserRepository implements UserRepositoryPort {
   private readonly users = new Map<UserId, User>();
   private idCounter = 1;
 
-  async create(ctx: TenantContext, input: { email: string; name: string | null; roleId: RoleId; managerId: UserId | null }): Promise<User> {
+  async create(
+    ctx: TenantContext,
+    input: { email: string; name: string | null; roleId: RoleId; managerId: UserId | null },
+  ): Promise<User> {
     const id = buildUserId(`user_${this.idCounter++}`);
     const user: User = {
       id,
@@ -21,7 +24,7 @@ export class InMemoryUserRepository implements UserRepositoryPort {
       emailVerificationTime: null,
       isAnonymous: null,
       phone: null,
-      createdAt: Date.now()
+      createdAt: Date.now(),
     };
     this.users.set(id, user);
     return user;
@@ -53,7 +56,11 @@ export class InMemoryUserRepository implements UserRepositoryPort {
     return result;
   }
 
-  async updateProfile(ctx: TenantContext, id: UserId, input: { name: string | null }): Promise<User> {
+  async updateProfile(
+    ctx: TenantContext,
+    id: UserId,
+    input: { name: string | null },
+  ): Promise<User> {
     const user = await this.findById(ctx, id);
     if (!user) throw new Error("User not found");
     const updated = { ...user, name: input.name };

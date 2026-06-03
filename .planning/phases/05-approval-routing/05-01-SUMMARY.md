@@ -70,6 +70,7 @@ completed: 2026-06-03
 - **Files created:** 10
 
 ## Accomplishments
+
 - Hardened `EventDispatcher` to isolate subscriber errors using try/catch wrapper per invocation and an `onError` logging hook, preventing throwing subscribers from crashing the dispatch pipeline (D-54).
 - Added optional `actorId` to `TenantContext` (D-48) and `requesterId` to `RequestEvaluation` (D-47), threading it through the policy runtime service submission process.
 - Designed and implemented the `approval/` domain types (entities, branded IDs, string unions, event map, pure state machine) under a strict ESLint module isolation zone (D-08).
@@ -85,6 +86,7 @@ Each task was committed atomically:
 3. **Task 3: Ports, memory fakes, barrel, README, ESLint zone** - `ff053e3` (feat)
 
 ## Files Created/Modified
+
 - `src/shared/event-dispatcher.ts` - Hardened event dispatcher with try/catch isolation and onError hooks.
 - `src/modules/directory/application/tenant-context.ts` - Added optional `actorId`.
 - `src/modules/request/domain/request-evaluation.ts` - Added `requesterId`.
@@ -94,11 +96,14 @@ Each task was committed atomically:
 - `eslint.config.js` - Registered `approval` restricted-paths module zone.
 
 ## Decisions Made
+
 - **Two-error split**: Threw domain-local `InvalidTaskTransitionError` inside `state-machine.ts` to keep the domain layer pure from application-layer errors (D-51/D-52). `TaskAlreadyResolvedError` is deferred to the application service pre-check.
 
 ## Deviations from Plan
+
 - **exactOptionalPropertyTypes**: The compiler failed on returning optional properties assigned to `undefined` in the `tenantContext` factory. Fixed by returning separate object literal forms depending on whether `actorId` is `undefined`.
 - **Convex Mapper Compilation**: The Convex request mapper needed mapping for `requesterId` to satisfy the domain interface constraint in 05-01 compile check. Handled by casting the Convex document and mapping requesterId dynamically.
 
 ## Next Phase Readiness
+
 - 05-01 is complete. Next step is 05-02: routing service, Convex schema, adapters, subscribers, and live integration.

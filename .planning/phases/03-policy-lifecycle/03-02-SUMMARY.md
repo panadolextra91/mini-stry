@@ -5,8 +5,16 @@ subsystem: policy/lifecycle + audit
 tags: [rollback, audit, convex, adapters]
 dependency_graph:
   requires: [03-01, runtime/schema-validator, directory/tenant-context, shared/event-dispatcher]
-  provides: [policy/rollback, policy/getActiveVersion, audit/subscriber, audit/ports, convex/adapters]
-  affects: [policy/policy-service, convex/schema, policy/index, audit/index, tests/_helpers/in-memory-fakes]
+  provides:
+    [policy/rollback, policy/getActiveVersion, audit/subscriber, audit/ports, convex/adapters]
+  affects:
+    [
+      policy/policy-service,
+      convex/schema,
+      policy/index,
+      audit/index,
+      tests/_helpers/in-memory-fakes,
+    ]
 tech_stack:
   added: []
   patterns: [forward-only-rollback, by-reference-audit, event-subscriber, convex-adapter]
@@ -46,15 +54,18 @@ Rollback-as-forward-clone, audit event subscribers, and Convex persistence adapt
 ## What Was Built
 
 ### Rollback (POL-04)
+
 - **PolicyService.rollback()**: Forward-only clone creating new draft (v_N+1) from target (v_M) with `rollbackFromVersionId` metadata
 - Validation not re-run on rollback — `validationStatus` and `validationErrors` cloned directly from source
 - Emits `DraftCreated` with `rollbackFromVersionId != null` (no separate PolicyRolledBack event)
 - DraftAlreadyExistsError if active draft exists; VersionNotFoundError if target missing
 
 ### Active Version (POL-04)
+
 - **PolicyService.getActiveVersion()**: Returns current active version via `Policy.activeVersionId`, or null
 
 ### Audit Event Subscriber (AUD-01)
+
 - **AuditEventSubscriber**: Constructor-wired to all 3 PolicyEventMap events via EventDispatcher.on()
 - `DraftCreated` → `policy.draft_created` (includes `rollbackFromVersionId`)
 - `DraftUpdated` → `policy.draft_updated`
@@ -62,20 +73,24 @@ Rollback-as-forward-clone, audit event subscribers, and Convex persistence adapt
 - By-reference payloads (D-37): tenantId, policyId, policyVersionId, versionNumber, actorId — never content
 
 ### Audit Infrastructure
+
 - **AuditLogRepositoryPort**: `create` + `findByTenant` (append-only, no update/delete)
 - **InMemoryAuditLogRepository**: Test fake with tenant isolation
 
 ### Convex Schema
+
 - policyVersions: 6 new fields (status, validationStatus, validationErrors, revision, rollbackFromVersionId, createdBy)
 - New index: `by_tenant_policy_status` on `[tenantId, policyId, status]`
 
 ### Convex Adapters
+
 - **ConvexPolicyRepository**: 3 methods (create, findById, updateActiveVersion)
 - **ConvexPolicyVersionRepository**: 5 methods with `findDraftByPolicy` using status index
 - **ConvexAuditLogRepository**: 2 methods with `by_tenant_created` index
 - All mappers: `toPolicyDomain`, `toPolicyVersionDomain` (with ValidationError reconstruction), `toAuditLogDomain`
 
 ### Tests
+
 - **PolicyService**: 27 tests (7 rollback + 2 getActiveVersion added to existing 18)
 - **AuditEventSubscriber**: 7 tests (event types, rollback inference, lifecycle, D-37, tenant scoping)
 - **Total**: 158 tests across 21 files, all passing

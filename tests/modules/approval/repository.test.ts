@@ -91,12 +91,25 @@ describe("approval repository and domain components", () => {
       const foundByB = await repo.findById(TENANT_B, created.id);
       expect(foundByB).toBeNull();
 
-      const foundByEvalB = await repo.findByRequestEvaluationId(TENANT_B, requestEvaluationId("eval_1"));
+      const foundByEvalB = await repo.findByRequestEvaluationId(
+        TENANT_B,
+        requestEvaluationId("eval_1"),
+      );
       expect(foundByEvalB).toBeNull();
 
-      await expect(
-        repo.updateStatus(TENANT_B, created.id, "APPROVED")
-      ).rejects.toThrow();
+      await expect(repo.updateStatus(TENANT_B, created.id, "APPROVED")).rejects.toThrow();
+    });
+
+    it("returns null or throws error for nonexistent chain", async () => {
+      const repo = new InMemoryApprovalChainRepository();
+      const nonExistentId = approvalChainId("nonexistent");
+
+      const found = await repo.findById(TENANT_A, nonExistentId);
+      expect(found).toBeNull();
+
+      await expect(repo.updateStatus(TENANT_A, nonExistentId, "APPROVED")).rejects.toThrow(
+        "not found in this tenant",
+      );
     });
   });
 
@@ -150,9 +163,19 @@ describe("approval repository and domain components", () => {
       const foundByChainB = await repo.findByChainId(TENANT_B, approvalChainId("chain_1"));
       expect(foundByChainB).toHaveLength(0);
 
-      await expect(
-        repo.updateState(TENANT_B, created.id, "APPROVED")
-      ).rejects.toThrow();
+      await expect(repo.updateState(TENANT_B, created.id, "APPROVED")).rejects.toThrow();
+    });
+
+    it("returns null or throws error for nonexistent task", async () => {
+      const repo = new InMemoryApprovalTaskRepository();
+      const nonExistentId = approvalTaskId("nonexistent");
+
+      const found = await repo.findById(TENANT_A, nonExistentId);
+      expect(found).toBeNull();
+
+      await expect(repo.updateState(TENANT_A, nonExistentId, "APPROVED")).rejects.toThrow(
+        "not found in this tenant",
+      );
     });
   });
 });

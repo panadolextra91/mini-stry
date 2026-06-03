@@ -29,7 +29,10 @@ describe("PolicyRuntimeService", () => {
       const { runtimeService, policyService, evalRepo } = setupRequest(new AjvSchemaValidator());
 
       // Seed a policy with an active published version
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Expense Policy", requestType: "expense_request" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Expense Policy",
+        requestType: "expense_request",
+      });
       const draft = await policyService.createDraft(TENANT_A, policy.id, VALID_CONTENT, ACTOR);
       await policyService.publishDraft(TENANT_A, draft.id);
 
@@ -54,11 +57,16 @@ describe("PolicyRuntimeService", () => {
     });
 
     it("emits RequestEvaluated event on success", async () => {
-      const { runtimeService, policyService, requestDispatcher } = setupRequest(new AjvSchemaValidator());
+      const { runtimeService, policyService, requestDispatcher } = setupRequest(
+        new AjvSchemaValidator(),
+      );
       const handler = vi.fn();
       requestDispatcher.on("RequestEvaluated", handler);
 
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Event Test", requestType: "event_request" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Event Test",
+        requestType: "event_request",
+      });
       const draft = await policyService.createDraft(TENANT_A, policy.id, VALID_CONTENT, ACTOR);
       await policyService.publishDraft(TENANT_A, draft.id);
 
@@ -77,7 +85,10 @@ describe("PolicyRuntimeService", () => {
     it("returns default decision when no rule matches", async () => {
       const { runtimeService, policyService } = setupRequest(new AjvSchemaValidator());
 
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Default Test", requestType: "default_request" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Default Test",
+        requestType: "default_request",
+      });
       const draft = await policyService.createDraft(TENANT_A, policy.id, VALID_CONTENT, ACTOR);
       await policyService.publishDraft(TENANT_A, draft.id);
 
@@ -129,7 +140,10 @@ describe("PolicyRuntimeService", () => {
       const { runtimeService, policyService } = setupRequest(new AjvSchemaValidator());
 
       // Create a policy but don't publish any version
-      await policyService.createPolicy(TENANT_A, { name: "No Active", requestType: "no_active_request" });
+      await policyService.createPolicy(TENANT_A, {
+        name: "No Active",
+        requestType: "no_active_request",
+      });
 
       await expect(
         runtimeService.submit(TENANT_A, {
@@ -140,11 +154,16 @@ describe("PolicyRuntimeService", () => {
     });
 
     it("emits ResolutionFailed event when no active version exists", async () => {
-      const { runtimeService, policyService, requestDispatcher } = setupRequest(new AjvSchemaValidator());
+      const { runtimeService, policyService, requestDispatcher } = setupRequest(
+        new AjvSchemaValidator(),
+      );
       const handler = vi.fn();
       requestDispatcher.on("ResolutionFailed", handler);
 
-      await policyService.createPolicy(TENANT_A, { name: "No Version", requestType: "no_version_request" });
+      await policyService.createPolicy(TENANT_A, {
+        name: "No Version",
+        requestType: "no_version_request",
+      });
 
       try {
         await runtimeService.submit(TENANT_A, {
@@ -183,7 +202,10 @@ describe("PolicyRuntimeService", () => {
     it("throws EvaluationError and creates failed record when field is missing", async () => {
       const { runtimeService, policyService, evalRepo } = setupRequest(new AjvSchemaValidator());
 
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Missing Field", requestType: "missing_field_request" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Missing Field",
+        requestType: "missing_field_request",
+      });
       const draft = await policyService.createDraft(TENANT_A, policy.id, VALID_CONTENT, ACTOR);
       await policyService.publishDraft(TENANT_A, draft.id);
 
@@ -205,11 +227,16 @@ describe("PolicyRuntimeService", () => {
     });
 
     it("emits EvaluationFailed event on contract violation", async () => {
-      const { runtimeService, policyService, requestDispatcher } = setupRequest(new AjvSchemaValidator());
+      const { runtimeService, policyService, requestDispatcher } = setupRequest(
+        new AjvSchemaValidator(),
+      );
       const handler = vi.fn();
       requestDispatcher.on("EvaluationFailed", handler);
 
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Eval Fail", requestType: "eval_fail_request" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Eval Fail",
+        requestType: "eval_fail_request",
+      });
       const draft = await policyService.createDraft(TENANT_A, policy.id, VALID_CONTENT, ACTOR);
       await policyService.publishDraft(TENANT_A, draft.id);
 
@@ -232,7 +259,10 @@ describe("PolicyRuntimeService", () => {
     it("rethrows EvaluationError after persisting failed record (D-40)", async () => {
       const { runtimeService, policyService } = setupRequest(new AjvSchemaValidator());
 
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Rethrow", requestType: "rethrow_request" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Rethrow",
+        requestType: "rethrow_request",
+      });
       const draft = await policyService.createDraft(TENANT_A, policy.id, VALID_CONTENT, ACTOR);
       await policyService.publishDraft(TENANT_A, draft.id);
 
@@ -257,7 +287,10 @@ describe("PolicyRuntimeService", () => {
       const { runtimeService, policyService } = setupRequest(new AjvSchemaValidator());
 
       // Seed in tenant A
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Isolation", requestType: "isolated_request" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Isolation",
+        requestType: "isolated_request",
+      });
       const draft = await policyService.createDraft(TENANT_A, policy.id, VALID_CONTENT, ACTOR);
       await policyService.publishDraft(TENANT_A, draft.id);
 
@@ -275,7 +308,10 @@ describe("PolicyRuntimeService", () => {
     it("persists only {ruleId, matched} in trace (D-42 minimal trace)", async () => {
       const { runtimeService, policyService } = setupRequest(new AjvSchemaValidator());
 
-      const policy = await policyService.createPolicy(TENANT_A, { name: "Trace Test", requestType: "trace_request" });
+      const policy = await policyService.createPolicy(TENANT_A, {
+        name: "Trace Test",
+        requestType: "trace_request",
+      });
       const draft = await policyService.createDraft(TENANT_A, policy.id, VALID_CONTENT, ACTOR);
       await policyService.publishDraft(TENANT_A, draft.id);
 

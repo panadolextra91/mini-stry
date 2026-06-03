@@ -2,7 +2,10 @@ import type { TaskState } from "./approval-task-state.js";
 import type { ChainStatus } from "./approval-status.js";
 
 export class InvalidTaskTransitionError extends Error {
-  constructor(public readonly state: string, public readonly action: string) {
+  constructor(
+    public readonly state: string,
+    public readonly action: string,
+  ) {
     super(`Cannot transition task in state "${state}" with action "${action}"`);
     this.name = "InvalidTaskTransitionError";
   }

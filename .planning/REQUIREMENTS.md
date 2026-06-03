@@ -60,7 +60,7 @@ Requirements for the initial release (MVP). Each maps to a corresponding roadmap
 ### Advanced Evaluation
 
 - **RUN-04**: Support logical operators (`AND`, `OR`, `NOT`) inside JSON policy rules.
-- **DEC-04**: Support parallel approval groups (e.g., approval required by *any two* managers).
+- **DEC-04**: Support parallel approval groups (e.g., approval required by _any two_ managers).
 - **DEC-05**: Support SLA deadlines and auto-escalation or auto-approval rules.
 - **DEC-06**: Additional Decision Consumers (notifications, webhook dispatch, calendar posting) plugged on top of the same Decision stream.
 
@@ -73,44 +73,44 @@ Requirements for the initial release (MVP). Each maps to a corresponding roadmap
 
 ## Out of Scope
 
-| Feature | Reason |
-|---------|--------|
+| Feature                                  | Reason                                                                         |
+| ---------------------------------------- | ------------------------------------------------------------------------------ |
 | Custom DSL compiler, Lexers, and Parsers | Overengineering for the MVP. Standard JSON policies are completely sufficient. |
-| Attendance Tracking & Timesheets | High complexity, HR-specific feature, not core to the policy runtime. |
-| Payroll Processing | Highly regulated, HR-specific, requires dedicated calculation engines. |
-| Performance Reviews & Directories | HR features that do not showcase policy execution. |
+| Attendance Tracking & Timesheets         | High complexity, HR-specific feature, not core to the policy runtime.          |
+| Payroll Processing                       | Highly regulated, HR-specific, requires dedicated calculation engines.         |
+| Performance Reviews & Directories        | HR features that do not showcase policy execution.                             |
 
 ---
 
 ## Traceability
 
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| CON-01 | Phase 1: Core Platform Foundations | ✓ Completed |
-| CON-02 | Phase 1: Core Platform Foundations | ✓ Completed |
-| CON-03 | Phase 1: Core Platform Foundations | ✓ Completed |
-| CON-04 | Phase 1: Core Platform Foundations | ✓ Completed |
-| POL-05 | Phase 1: Core Platform Foundations | ✓ Completed |
-| POL-06 | Phase 1: Core Platform Foundations | ✓ Completed |
-| AUD-03 | Phase 1: Core Platform Foundations | ✓ Completed |
-| CTX-01 | Phase 2: Policy Runtime Core | ✓ Completed |
-| CTX-02 | Phase 2: Policy Runtime Core | ✓ Completed |
-| RUN-01 | Phase 2: Policy Runtime Core | ✓ Completed |
-| RUN-02 | Phase 2: Policy Runtime Core | ✓ Completed |
-| RUN-03 | Phase 2: Policy Runtime Core | ✓ Completed |
-| DEC-02 | Phase 2: Policy Runtime Core | ✓ Completed |
-| POL-01 | Phase 3: Policy Lifecycle | Complete |
-| POL-02 | Phase 3: Policy Lifecycle | Complete |
-| POL-03 | Phase 3: Policy Lifecycle | Complete |
-| POL-04 | Phase 3: Policy Lifecycle | Complete |
-| AUD-01 | Phase 3: Policy Lifecycle | Complete |
-| DEC-01 | Phase 4: Request Runtime | Complete |
-| AUD-02 | Phase 4: Request Runtime | Complete |
-| DEC-03 | Phase 5: Approval Routing (Reference Decision Consumer) | Pending |
-| UI-01 | Phase 6: Admin Portal & UI Dashboard | Pending |
-| UI-02 | Phase 6: Admin Portal & UI Dashboard | Pending |
-| UI-03 | Phase 6: Admin Portal & UI Dashboard | Pending |
-| UI-04 | Phase 6: Admin Portal & UI Dashboard | Pending |
+| Requirement | Phase                                                   | Status      |
+| ----------- | ------------------------------------------------------- | ----------- |
+| CON-01      | Phase 1: Core Platform Foundations                      | ✓ Completed |
+| CON-02      | Phase 1: Core Platform Foundations                      | ✓ Completed |
+| CON-03      | Phase 1: Core Platform Foundations                      | ✓ Completed |
+| CON-04      | Phase 1: Core Platform Foundations                      | ✓ Completed |
+| POL-05      | Phase 1: Core Platform Foundations                      | ✓ Completed |
+| POL-06      | Phase 1: Core Platform Foundations                      | ✓ Completed |
+| AUD-03      | Phase 1: Core Platform Foundations                      | ✓ Completed |
+| CTX-01      | Phase 2: Policy Runtime Core                            | ✓ Completed |
+| CTX-02      | Phase 2: Policy Runtime Core                            | ✓ Completed |
+| RUN-01      | Phase 2: Policy Runtime Core                            | ✓ Completed |
+| RUN-02      | Phase 2: Policy Runtime Core                            | ✓ Completed |
+| RUN-03      | Phase 2: Policy Runtime Core                            | ✓ Completed |
+| DEC-02      | Phase 2: Policy Runtime Core                            | ✓ Completed |
+| POL-01      | Phase 3: Policy Lifecycle                               | Complete    |
+| POL-02      | Phase 3: Policy Lifecycle                               | Complete    |
+| POL-03      | Phase 3: Policy Lifecycle                               | Complete    |
+| POL-04      | Phase 3: Policy Lifecycle                               | Complete    |
+| AUD-01      | Phase 3: Policy Lifecycle                               | Complete    |
+| DEC-01      | Phase 4: Request Runtime                                | Complete    |
+| AUD-02      | Phase 4: Request Runtime                                | Complete    |
+| DEC-03      | Phase 5: Approval Routing (Reference Decision Consumer) | Pending     |
+| UI-01       | Phase 6: Admin Portal & UI Dashboard                    | Pending     |
+| UI-02       | Phase 6: Admin Portal & UI Dashboard                    | Pending     |
+| UI-03       | Phase 6: Admin Portal & UI Dashboard                    | Pending     |
+| UI-04       | Phase 6: Admin Portal & UI Dashboard                    | Pending     |
 
 **Coverage:**
 
@@ -132,5 +132,6 @@ Requirements for the initial release (MVP). Each maps to a corresponding roadmap
 - Phase 5 title updated to clarify it is a Reference Decision Consumer, not the runtime's purpose.
 
 ---
-*Requirements defined: 2026-05-31*
-*Last updated: 2026-06-03 — Phase 4 requirements (DEC-01, AUD-02) marked Completed; 20/25 total validated; 5 reqs remain across Phase 5-6.*
+
+_Requirements defined: 2026-05-31_
+_Last updated: 2026-06-03 — Phase 4 requirements (DEC-01, AUD-02) marked Completed; 20/25 total validated; 5 reqs remain across Phase 5-6._
