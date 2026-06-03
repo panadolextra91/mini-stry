@@ -54,6 +54,12 @@ export default tseslint.config(
               message: "Cross-module deep imports forbidden. Import from '@/modules/request' (barrel) instead — Module Boundary Rule (D-08)."
             },
             {
+              target: "./src/modules/!(approval)/**/*",
+              from: "./src/modules/approval/{domain,application,adapters}/**/*",
+              except: ["**/approval/adapters/convex/mappers.ts"],
+              message: "Cross-module deep imports forbidden. Import from '@/modules/approval' (barrel) instead — Module Boundary Rule (D-08)."
+            },
+            {
               target: "./src/modules/*/domain/**/*",
               from: "./src/modules/*/{application,adapters}/**/*",
               message: "Domain layer must remain pure — no application or adapter imports."

@@ -49,6 +49,7 @@ export class PolicyRuntimeService {
 
       // (3a) SUCCESS
       const record = await this.evalRepo.create(ctx, {
+        requesterId: ctx.actorId ?? null,
         requestType: input.requestType,
         requestInput: input.context,
         policyVersionId: version.id,
@@ -70,6 +71,7 @@ export class PolicyRuntimeService {
       // (3b) CONTRACT VIOLATION — EvaluationError only
       if (err instanceof EvaluationError) {
         const record = await this.evalRepo.create(ctx, {
+          requesterId: ctx.actorId ?? null,
           requestType: input.requestType,
           requestInput: input.context,
           policyVersionId: version.id,

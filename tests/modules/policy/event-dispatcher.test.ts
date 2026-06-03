@@ -80,4 +80,34 @@ describe("EventDispatcher", () => {
     expect(pingHandler).toHaveBeenCalledOnce();
     expect(pongHandler).not.toHaveBeenCalled();
   });
+
+  it("isolates throwing handler so sibling handlers still execute", async () => {
+    const dispatcher = new EventDispatcher<TestEventMap>();
+    const siblingHandler = vi.fn();
+
+    dispatcher.on("Ping", () => {
+      throw new Error("Broken handler");
+    });
+    dispatcher.on("Ping", siblingHandler);
+
+    // Should not throw/reject
+    await expect(dispatcher.emit("Ping", { value: 1 })).resolves.not.toThrow();
+    expect(siblingHandler).toHaveBeenCalledOnce();
+  });
+
+  it("triggers onError hook when a handler throws", async () => {
+    const dispatcher = new EventDispatcher<TestEventMap>();
+    const errorHook = vi.fn();
+    dispatcher.onError = errorHook;
+
+    const testError = new Error("Broken handler");
+    dispatcher.on("Ping", () => {
+      throw testError;
+    });
+
+    await dispatcher.emit("Ping", { value: 1 });
+
+    expect(errorHook).toHaveBeenCalledOnce();
+    expect(errorHook).toHaveBeenCalledWith("Ping", testError);
+  });
 });

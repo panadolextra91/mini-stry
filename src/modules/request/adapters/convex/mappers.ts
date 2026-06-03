@@ -2,7 +2,7 @@ import { requestEvaluationId as buildRequestEvaluationId, type RequestEvaluation
 import type { RequestEvaluation } from "../../domain/request-evaluation.js";
 import type { RequestEvaluationStatus } from "../../domain/request-evaluation-status.js";
 import type { Doc, Id } from "../../../../../convex/_generated/dataModel.js";
-import { toTenantId } from "@/modules/directory/adapters/convex/mappers.js";
+import { toTenantId, toUserId } from "@/modules/directory/adapters/convex/mappers.js";
 import { toPolicyVersionId } from "@/modules/policy/adapters/convex/mappers.js";
 import type { Decision, EvaluationContext, EvaluationErrorCode } from "@/modules/runtime/index.js";
 import { ruleId } from "@/modules/runtime/index.js";
@@ -17,6 +17,7 @@ export const fromRequestEvaluationId = (brand: RequestEvaluationId): Id<"request
 export const toRequestEvaluationDomain = (doc: Doc<"requestEvaluations">): RequestEvaluation => ({
   id: toRequestEvaluationId(doc._id),
   tenantId: toTenantId(doc.tenantId),
+  requesterId: (doc as Record<string, unknown>).requesterId ? toUserId((doc as Record<string, unknown>).requesterId as Id<"users">) : null,
   requestType: doc.requestType,
   requestInput: doc.requestInput as EvaluationContext,
   policyVersionId: toPolicyVersionId(doc.policyVersionId),

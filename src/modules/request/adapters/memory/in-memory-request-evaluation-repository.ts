@@ -13,6 +13,7 @@ export class InMemoryRequestEvaluationRepository implements RequestEvaluationRep
     const record: RequestEvaluation = {
       id,
       tenantId: ctx.tenantId,
+      requesterId: input.requesterId,
       requestType: input.requestType,
       requestInput: input.requestInput,
       policyVersionId: input.policyVersionId,

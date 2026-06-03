@@ -1,4 +1,4 @@
-import type { TenantId } from "../domain/ids.js";
+import type { TenantId, UserId } from "../domain/ids.js";
 
 /**
  * TenantContext is the first-class operational envelope (D-19).
@@ -7,6 +7,12 @@ import type { TenantId } from "../domain/ids.js";
  */
 export interface TenantContext {
   readonly tenantId: TenantId;
+  readonly actorId?: UserId;
 }
 
-export const tenantContext = (tenantId: TenantId): TenantContext => ({ tenantId });
+export const tenantContext = (tenantId: TenantId, actorId?: UserId): TenantContext => {
+  if (actorId === undefined) {
+    return { tenantId };
+  }
+  return { tenantId, actorId };
+};
