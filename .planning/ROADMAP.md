@@ -123,8 +123,8 @@ The runtime stays domain-neutral. Approval routing is one consumer among many; i
 
 **Plans**: 2 plans
 
-- [ ] 04-01: Implement request submission handlers (EvaluationContext intake) and PolicyRuntimeService orchestration logic.
-- [ ] 04-02: Implement step-by-step path tracer and record outcomes to AuditLogs.
+- [ ] 04-01-PLAN.md — request/ module + PolicyRuntimeService.submit (3 outcome paths) + policies.requestType ripple + requestEvaluations table (DEC-01)
+- [ ] 04-02-PLAN.md — RequestAuditSubscriber (by-reference request.* audit) + deterministic replay test + thin convex/request.ts handlers (AUD-02)
 
 ### Phase 5: Approval Routing (Reference Decision Consumer)
 

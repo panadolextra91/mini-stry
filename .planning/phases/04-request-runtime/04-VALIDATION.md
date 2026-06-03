@@ -41,13 +41,13 @@ created: 2026-06-03
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| TBD | 01 | — | DEC-01 (success) | — | submit → resolve active version → evaluate → `RequestEvaluation{status:'completed', decision, trace}` | unit | `npx vitest run tests/modules/request/policy-runtime-service.test.ts -t "success" --reporter=dot` | ❌ W0 | ⬜ pending |
-| TBD | 01 | — | DEC-01 / D-41 (resolution failure) | — | unknown `requestType` / no active version → NO record, `ResolutionFailed` event, error thrown | unit | `npx vitest run tests/modules/request/policy-runtime-service.test.ts -t "resolution" --reporter=dot` | ❌ W0 | ⬜ pending |
-| TBD | 01 | — | DEC-01 / D-40 (contract violation) | — | `EvaluationError` → `RequestEvaluation{status:'failed', decision:null, errorCode, fieldPath}`, `EvaluationFailed` event, rethrow | unit | `npx vitest run tests/modules/request/policy-runtime-service.test.ts -t "contract" --reporter=dot` | ❌ W0 | ⬜ pending |
-| TBD | 02 | — | AUD-02 (by-reference audit) | — | each path writes correct `eventType` + reference envelope; NO content (D-37) | unit | `npx vitest run tests/modules/request/request-audit-subscriber.test.ts --reporter=dot` | ❌ W0 | ⬜ pending |
-| TBD | 02 | — | AUD-02 / D-42 (deterministic replay) | — | stored `trace` + immutable `content` + `requestInput` reproduce the decision | unit | `npx vitest run tests/modules/request/replay.test.ts --reporter=dot` | ❌ W0 | ⬜ pending |
-| TBD | 01 | — | CON-01 (tenant isolation) | tenant leak | a `RequestEvaluation`/resolution is never visible/usable across tenants | unit | `npx vitest run tests/modules/request -t "tenant" --reporter=dot` | ❌ W0 | ⬜ pending |
-| TBD | 01 | — | D-39 (`createPolicy` requestType) | — | `createPolicy` rejects duplicate `[tenantId, requestType]`; `requestType` persisted | unit | `npx vitest run tests/modules/policy/policy-service.test.ts -t "requestType" --reporter=dot` | ⚠️ extend existing | ⬜ pending |
+| 01-01 | 01 | 1 | DEC-01 (success) | — | submit → resolve active version → evaluate → `RequestEvaluation{status:'completed', decision, trace}` | unit | `npx vitest run tests/modules/request/policy-runtime-service.test.ts -t "success" --reporter=dot` | ❌ W0 | ⬜ pending |
+| 01-01 | 01 | 1 | DEC-01 / D-41 (resolution failure) | — | unknown `requestType` / no active version → NO record, `ResolutionFailed` event, error thrown | unit | `npx vitest run tests/modules/request/policy-runtime-service.test.ts -t "resolution" --reporter=dot` | ❌ W0 | ⬜ pending |
+| 01-01 | 01 | 1 | DEC-01 / D-40 (contract violation) | — | `EvaluationError` → `RequestEvaluation{status:'failed', decision:null, errorCode, fieldPath}`, `EvaluationFailed` event, rethrow | unit | `npx vitest run tests/modules/request/policy-runtime-service.test.ts -t "contract" --reporter=dot` | ❌ W0 | ⬜ pending |
+| 02-01 | 02 | 2 | AUD-02 (by-reference audit) | — | each path writes correct `eventType` + reference envelope; NO content (D-37) | unit | `npx vitest run tests/modules/request/request-audit-subscriber.test.ts --reporter=dot` | ❌ W0 | ⬜ pending |
+| 02-01 | 02 | 2 | AUD-02 / D-42 (deterministic replay) | — | stored `trace` + immutable `content` + `requestInput` reproduce the decision | unit | `npx vitest run tests/modules/request/replay.test.ts --reporter=dot` | ❌ W0 | ⬜ pending |
+| 01-01 | 01 | 1 | CON-01 (tenant isolation) | tenant leak | a `RequestEvaluation`/resolution is never visible/usable across tenants | unit | `npx vitest run tests/modules/request -t "tenant" --reporter=dot` | ❌ W0 | ⬜ pending |
+| 01-01 | 01 | 1 | D-39 (`createPolicy` requestType) | — | `createPolicy` rejects duplicate `[tenantId, requestType]`; `requestType` persisted | unit | `npx vitest run tests/modules/policy/policy-service.test.ts -t "requestType" --reporter=dot` | ⚠️ extend existing | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
