@@ -46,6 +46,11 @@ export default tseslint.config(
               message: "Cross-module deep imports forbidden. Import from '@/modules/runtime' (barrel) instead — Module Boundary Rule (D-08)."
             },
             {
+              target: "./src/modules/!(request)/**/*",
+              from: "./src/modules/request/{domain,application,adapters}/**/*",
+              message: "Cross-module deep imports forbidden. Import from '@/modules/request' (barrel) instead — Module Boundary Rule (D-08)."
+            },
+            {
               target: "./src/modules/*/domain/**/*",
               from: "./src/modules/*/{application,adapters}/**/*",
               message: "Domain layer must remain pure — no application or adapter imports."

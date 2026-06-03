@@ -15,7 +15,7 @@ function alwaysValidValidator(): SchemaValidatorPort {
 describe("AuditEventSubscriber", () => {
   it("creates audit record on DraftCreated", async () => {
     const { policyService, auditRepo } = setupPolicy(alwaysValidValidator());
-    const policy = await policyService.createPolicy(TENANT_A, { name: "Audit Draft" });
+    const policy = await policyService.createPolicy(TENANT_A, { name: "Audit Draft", requestType: "audit_draft" });
     await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
 
     const logs = await auditRepo.findByTenant(TENANT_A);
@@ -27,7 +27,7 @@ describe("AuditEventSubscriber", () => {
 
   it("creates audit record with rollbackFromVersionId on rollback", async () => {
     const { policyService, auditRepo } = setupPolicy(alwaysValidValidator());
-    const policy = await policyService.createPolicy(TENANT_A, { name: "Audit Rollback" });
+    const policy = await policyService.createPolicy(TENANT_A, { name: "Audit Rollback", requestType: "audit_rollback" });
 
     const v1 = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
     await policyService.publishDraft(TENANT_A, v1.id);
@@ -51,7 +51,7 @@ describe("AuditEventSubscriber", () => {
 
   it("creates audit record on DraftUpdated", async () => {
     const { policyService, auditRepo } = setupPolicy(alwaysValidValidator());
-    const policy = await policyService.createPolicy(TENANT_A, { name: "Audit Update" });
+    const policy = await policyService.createPolicy(TENANT_A, { name: "Audit Update", requestType: "audit_update" });
     const draft = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
     await policyService.saveDraft(TENANT_A, draft.id, { v: 2 }, 0);
 
@@ -64,7 +64,7 @@ describe("AuditEventSubscriber", () => {
 
   it("creates audit record on PolicyPublished", async () => {
     const { policyService, auditRepo } = setupPolicy(alwaysValidValidator());
-    const policy = await policyService.createPolicy(TENANT_A, { name: "Audit Publish" });
+    const policy = await policyService.createPolicy(TENANT_A, { name: "Audit Publish", requestType: "audit_publish" });
     const draft = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
     await policyService.publishDraft(TENANT_A, draft.id);
 
@@ -77,7 +77,7 @@ describe("AuditEventSubscriber", () => {
 
   it("full lifecycle produces correct audit records", async () => {
     const { policyService, auditRepo } = setupPolicy(alwaysValidValidator());
-    const policy = await policyService.createPolicy(TENANT_A, { name: "Full Audit" });
+    const policy = await policyService.createPolicy(TENANT_A, { name: "Full Audit", requestType: "full_audit" });
 
     // v1: create → save → publish
     const v1 = await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
@@ -103,7 +103,7 @@ describe("AuditEventSubscriber", () => {
 
   it("audit payloads contain tenantId but NOT content (D-37 by-reference)", async () => {
     const { policyService, auditRepo } = setupPolicy(alwaysValidValidator());
-    const policy = await policyService.createPolicy(TENANT_A, { name: "D-37 Test" });
+    const policy = await policyService.createPolicy(TENANT_A, { name: "D-37 Test", requestType: "d37_test" });
     const draft = await policyService.createDraft(TENANT_A, policy.id, { sensitiveData: true }, ACTOR);
     await policyService.publishDraft(TENANT_A, draft.id);
 
@@ -121,7 +121,7 @@ describe("AuditEventSubscriber", () => {
 
   it("audit records scoped by tenant", async () => {
     const { policyService, auditRepo } = setupPolicy(alwaysValidValidator());
-    const policy = await policyService.createPolicy(TENANT_A, { name: "Scoped" });
+    const policy = await policyService.createPolicy(TENANT_A, { name: "Scoped", requestType: "scoped" });
     await policyService.createDraft(TENANT_A, policy.id, {}, ACTOR);
 
     const logs = await auditRepo.findByTenant(TENANT_A);

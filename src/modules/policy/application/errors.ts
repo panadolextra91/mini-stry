@@ -62,3 +62,12 @@ export class DraftAlreadyExistsError extends Error {
     this.name = "DraftAlreadyExistsError";
   }
 }
+
+export class RequestTypeAlreadyExistsError extends Error {
+  constructor(public readonly requestType: string) {
+    super(
+      `A policy with requestType "${requestType}" already exists in this tenant`,
+    );
+    this.name = "RequestTypeAlreadyExistsError";
+  }
+}

@@ -8,6 +8,9 @@ import { PolicyService, EventDispatcher } from "@/modules/policy/index.js";
 import type { PolicyEventMap } from "@/modules/policy/index.js";
 import type { SchemaValidatorPort } from "@/modules/runtime/index.js";
 import { InMemoryAuditLogRepository, AuditEventSubscriber } from "@/modules/audit/index.js";
+import { InMemoryRequestEvaluationRepository } from "@/modules/request/adapters/memory/in-memory-request-evaluation-repository.js";
+import { PolicyRuntimeService } from "@/modules/request/index.js";
+import type { RequestEventMap } from "@/modules/request/index.js";
 
 export function setupDirectory() {
   const tenantRepo = new InMemoryTenantRepository();
@@ -34,4 +37,27 @@ export function setupPolicy(validator: SchemaValidatorPort) {
   );
 
   return { policyRepo, versionRepo, policyService, dispatcher, auditRepo };
+}
+
+export function setupRequest(validator: SchemaValidatorPort) {
+  const { policyRepo, versionRepo, policyService, dispatcher: policyDispatcher, auditRepo } = setupPolicy(validator);
+  const evalRepo = new InMemoryRequestEvaluationRepository();
+  const requestDispatcher = new EventDispatcher<RequestEventMap>();
+  const runtimeService = new PolicyRuntimeService(
+    policyService,
+    validator,
+    evalRepo,
+    requestDispatcher,
+  );
+
+  return {
+    policyRepo,
+    versionRepo,
+    policyService,
+    policyDispatcher,
+    auditRepo,
+    evalRepo,
+    requestDispatcher,
+    runtimeService,
+  };
 }

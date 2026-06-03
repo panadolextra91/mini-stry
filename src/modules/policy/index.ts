@@ -23,6 +23,7 @@ export {
   InvalidPublishError,
   ConflictError,
   DraftAlreadyExistsError,
+  RequestTypeAlreadyExistsError,
 } from "./application/errors.js";
 // Repository ports
 export type { PolicyRepositoryPort } from "./ports/policy-repository.port.js";

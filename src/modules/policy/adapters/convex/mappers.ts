@@ -19,6 +19,7 @@ export const toPolicyDomain = (doc: Doc<"policies">): Policy => ({
   id: toPolicyId(doc._id),
   tenantId: toTenantId(doc.tenantId),
   name: doc.name,
+  requestType: doc.requestType,
   activeVersionId: doc.activeVersionId ? toPolicyVersionId(doc.activeVersionId) : null,
   createdAt: doc.createdAt,
 });

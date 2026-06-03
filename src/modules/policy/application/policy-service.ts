@@ -14,6 +14,7 @@ import {
   ImmutableVersionError,
   InvalidPublishError,
   ConflictError,
+  RequestTypeAlreadyExistsError,
 } from "./errors.js";
 
 export class PolicyService {
@@ -26,9 +27,21 @@ export class PolicyService {
 
   async createPolicy(
     ctx: TenantContext,
-    input: { name: string },
+    input: { name: string; requestType: string },
   ): Promise<Policy> {
+    // Application-layer [tenantId, requestType] uniqueness (Convex indexes don't enforce uniqueness)
+    const existing = await this.policyRepo.findByRequestType(ctx, input.requestType);
+    if (existing) {
+      throw new RequestTypeAlreadyExistsError(input.requestType);
+    }
     return this.policyRepo.create(ctx, input);
+  }
+
+  async findByRequestType(
+    ctx: TenantContext,
+    requestType: string,
+  ): Promise<Policy | null> {
+    return this.policyRepo.findByRequestType(ctx, requestType);
   }
 
   async createDraft(

@@ -9,11 +9,12 @@ import { fromPolicyId, fromPolicyVersionId, toPolicyDomain } from "./mappers.js"
 export class ConvexPolicyRepository implements PolicyRepositoryPort {
   constructor(private readonly db: MutationCtx["db"] | QueryCtx["db"]) {}
 
-  async create(ctx: TenantContext, input: { name: string }): Promise<Policy> {
+  async create(ctx: TenantContext, input: { name: string; requestType: string }): Promise<Policy> {
     if (!('insert' in this.db)) throw new Error("Mutations require MutationCtx");
     const id = await this.db.insert("policies", {
       tenantId: fromTenantId(ctx.tenantId),
       name: input.name,
+      requestType: input.requestType,
       activeVersionId: null,
       createdAt: Date.now(),
     });
@@ -26,6 +27,17 @@ export class ConvexPolicyRepository implements PolicyRepositoryPort {
     const doc = await this.db.get(fromPolicyId(id));
     if (!doc) return null;
     if (doc.tenantId !== fromTenantId(ctx.tenantId)) return null;
+    return toPolicyDomain(doc);
+  }
+
+  async findByRequestType(ctx: TenantContext, requestType: string): Promise<Policy | null> {
+    const doc = await this.db
+      .query("policies")
+      .withIndex("by_tenant_request_type", (q) =>
+        q.eq("tenantId", fromTenantId(ctx.tenantId)).eq("requestType", requestType),
+      )
+      .unique();
+    if (!doc) return null;
     return toPolicyDomain(doc);
   }
 
@@ -45,3 +57,4 @@ export class ConvexPolicyRepository implements PolicyRepositoryPort {
     return toPolicyDomain(doc);
   }
 }
+

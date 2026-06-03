@@ -5,6 +5,7 @@ export interface Policy {
   readonly id: PolicyId;
   readonly tenantId: TenantId;
   readonly name: string;
+  readonly requestType: string;
   readonly activeVersionId: PolicyVersionId | null;
   readonly createdAt: number; // epoch ms
 }

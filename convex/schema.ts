@@ -45,9 +45,12 @@ export default defineSchema({
   policies: defineTable({
     tenantId: v.id("tenants"),
     name: v.string(),
+    requestType: v.string(),
     activeVersionId: v.union(v.id("policyVersions"), v.null()),
     createdAt: v.number(),
-  }).index("by_tenant_name", ["tenantId", "name"]),
+  })
+    .index("by_tenant_name", ["tenantId", "name"])
+    .index("by_tenant_request_type", ["tenantId", "requestType"]),
 
   policyVersions: defineTable({
     tenantId: v.id("tenants"),
@@ -73,4 +76,19 @@ export default defineSchema({
     payload: v.any(),
     createdAt: v.number(),
   }).index("by_tenant_created", ["tenantId", "createdAt"]),
+
+  requestEvaluations: defineTable({
+    tenantId: v.id("tenants"),
+    requestType: v.string(),
+    requestInput: v.any(),
+    policyVersionId: v.id("policyVersions"),
+    decision: v.union(v.any(), v.null()),
+    trace: v.array(v.object({ ruleId: v.string(), matched: v.boolean() })),
+    status: v.string(), // 'completed' | 'failed'
+    errorCode: v.union(v.string(), v.null()),
+    fieldPath: v.union(v.string(), v.null()),
+    createdAt: v.number(),
+  })
+    .index("by_tenant_created", ["tenantId", "createdAt"])
+    .index("by_tenant_request_type", ["tenantId", "requestType"]),
 });

@@ -8,12 +8,13 @@ export class InMemoryPolicyRepository implements PolicyRepositoryPort {
   private readonly policies = new Map<PolicyId, Policy>();
   private idCounter = 1;
 
-  async create(ctx: TenantContext, input: { name: string }): Promise<Policy> {
+  async create(ctx: TenantContext, input: { name: string; requestType: string }): Promise<Policy> {
     const id = buildPolicyId(`policy_${this.idCounter++}`);
     const policy: Policy = {
       id,
       tenantId: ctx.tenantId,
       name: input.name,
+      requestType: input.requestType,
       activeVersionId: null,
       createdAt: Date.now(),
     };
@@ -28,6 +29,15 @@ export class InMemoryPolicyRepository implements PolicyRepositoryPort {
     return policy;
   }
 
+  async findByRequestType(ctx: TenantContext, requestType: string): Promise<Policy | null> {
+    for (const policy of this.policies.values()) {
+      if (policy.tenantId === ctx.tenantId && policy.requestType === requestType) {
+        return policy;
+      }
+    }
+    return null;
+  }
+
   async updateActiveVersion(
     ctx: TenantContext,
     id: PolicyId,
@@ -40,3 +50,4 @@ export class InMemoryPolicyRepository implements PolicyRepositoryPort {
     return updated;
   }
 }
+
