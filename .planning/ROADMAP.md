@@ -141,8 +141,13 @@ The runtime stays domain-neutral. Approval routing is one consumer among many; i
 
 **Plans**: 2 plans
 
-- [ ] 05-01: Implement role and supervisor reporting hierarchy dynamic resolvers.
-- [ ] 05-02: Implement sequential approval task generator and step-by-step approval state machine, subscribed to runtime Decisions.
+**Wave 1**
+
+- [ ] 05-01-PLAN.md — approval/ module foundation (branded IDs, entities, pure state machine, events, errors, ports, in-memory fakes, ESLint zone) + additive ripples: EventDispatcher D-54 hardening, TenantContext.actorId, RequestEvaluation.requesterId threading.
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [ ] 05-02-PLAN.md — ApprovalRoutingService (manager-walk resolver + materialize + idempotency + failure-swallow + Approve/Reject state machine), approval.* by-reference audit subscriber, Convex adapters/mappers/schema (approvalChains/approvalTasks + requesterId), thin DI subscription on "RequestEvaluated", and live Convex push.
 
 ### Phase 6: Admin Portal & UI Dashboard
 
