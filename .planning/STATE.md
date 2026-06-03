@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Phase 3 executed. Draft→publish lifecycle, rollback-as-forward-clone, audit event subscribers, Convex adapters. 158 tests, tsc clean.
-stopped_at: Phase 2 closed (02-01 + 02-02 + 02-03 SUMMARY.md shipped; runtime barrel complete)
-last_updated: "2026-06-02T04:04:18.158Z"
-last_activity: 2026-06-02
+status: Phase 4 context gathered. 5 decisions locked (D-38..D-42): dedicated RequestEvaluation table + by-ref audit, Policy.requestType routing key, EvaluationError→failed record+rethrow, resolution failure=precondition (no record), minimal replay-based trace.
+stopped_at: Phase 4 context gathered (04-CONTEXT.md + 04-DISCUSSION-LOG.md committed)
+last_updated: "2026-06-03T00:00:00.000Z"
+last_activity: 2026-06-03
 progress:
   total_phases: 6
   completed_phases: 3
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-06-01 after Phase 2 completion)
 ## Current Position
 
 Phase: 4 of 6 (request runtime)
-Plan: Not started
-Status: Phase 3 executed. Draft→publish lifecycle, rollback-as-forward-clone, audit event subscribers, Convex adapters. 158 tests, tsc clean.
-Last activity: 2026-06-02
+Plan: Not started — context gathered, ready to plan
+Status: Phase 4 context gathered. 5 decisions locked (D-38..D-42). Ready for /gsd:plan-phase 4.
+Last activity: 2026-06-03
 
 Progress: [██████████░░░░░░░░░░] 50% (3/6 phases · 9/9 plans for shipped phases)
 
@@ -94,6 +94,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-01T00:00:00.000Z
-Stopped at: Phase 2 closed (02-01 + 02-02 + 02-03 SUMMARY.md shipped; runtime barrel complete)
-Resume file: .planning/ROADMAP.md (next: `/gsd:verify-work 2` then `/gsd:discuss-phase 3`)
+Last session: 2026-06-03T00:00:00.000Z
+Stopped at: Phase 4 context gathered (04-CONTEXT.md + 04-DISCUSSION-LOG.md committed)
+Resume file: .planning/phases/04-request-runtime/04-CONTEXT.md (next: `/gsd:plan-phase 4`)
