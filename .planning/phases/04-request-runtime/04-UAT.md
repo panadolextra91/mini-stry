@@ -1,9 +1,9 @@
 ---
-status: diagnosed
+status: complete
 phase: 04-request-runtime
 source: [04-01-SUMMARY.md, 04-02-SUMMARY.md]
 started: 2026-06-03T07:00:38Z
-updated: 2026-06-03T07:08:00Z
+updated: 2026-06-03T07:30:00Z
 ---
 
 ## Current Test
@@ -14,9 +14,8 @@ updated: 2026-06-03T07:08:00Z
 
 ### 1. Cold Start Smoke Test (Convex schema sync)
 expected: Run `npm run convex:dev` from clean state — server boots, `requestEvaluations` table + `policies.by_tenant_request_type` index sync, no schema validation errors.
-result: issue
-reported: "`npx convex codegen` fails to bundle: Could not resolve 'node:url' / 'node:path' / 'node:fs' from src/modules/runtime/adapters/ajv/ajv-schema-validator.ts. convex/request.ts instantiates AjvSchemaValidator, pulling Node-only filesystem APIs into the Convex V8 bundle. convex dev/deploy cannot build the submitRequest function."
-severity: blocker
+result: pass
+note: "Initially FAILED (blocker) — `convex codegen` could not bundle (node:url/path/fs in ajv-schema-validator.ts) and, once bundling was fixed, its typecheck failed on unresolved `@/` aliases. Both resolved (see Gaps → status: resolved). `npx convex codegen` now exits 0 (bundles + typechecks); 180/180 tests, typecheck, and lint remain green."
 
 ### 2. Submit a request → Decision (DEC-01 success)
 expected: submitRequest returns a RequestEvaluation status 'completed' with decision + trace; record persisted and retrievable.
@@ -45,8 +44,8 @@ result: pass
 ## Summary
 
 total: 7
-passed: 6
-issues: 1
+passed: 7
+issues: 0
 pending: 0
 skipped: 0
 blocked: 0
@@ -55,7 +54,8 @@ blocked: 0
 
 <!-- YAML format for plan-phase --gaps consumption -->
 - truth: "The submitRequest Convex handler can be bundled and run in the Convex runtime (convex dev/deploy/codegen succeeds), so submitted EvaluationContexts actually execute end-to-end in production (DEC-01 success criterion 1)."
-  status: failed
+  status: resolved
+  resolution: "Fixed in-session. (1) ajv-schema-validator.ts now imports the JSON schema as a module (`import policyContentSchema ... with { type: 'json' }`) instead of readFileSync+fileURLToPath+path — removes node:fs/url/path so the Convex V8 bundle builds; tsconfig.json gained `resolveJsonModule: true`. (2) convex/tsconfig.json gained `baseUrl: '..'` + `paths: {'@/*': ['src/*']}` (and resolveJsonModule) so the Convex typecheck resolves the `@/` alias used transitively by src modules (pre-existing config debt since Phase 1, surfaced once bundling was fixed). Verified: `npx convex codegen` exits 0, `npm test` 180/180, typecheck 0, lint 0."
   reason: "User reported: `npx convex codegen` fails — Could not resolve node:url / node:path / node:fs from ajv-schema-validator.ts. The Phase 4 thin handler convex/request.ts is the first Convex function to instantiate AjvSchemaValidator, pulling Node-only filesystem APIs into the Convex V8 isolate bundle, which cannot resolve them."
   severity: blocker
   test: 1

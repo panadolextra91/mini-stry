@@ -11,6 +11,14 @@
     "jsx": "react-jsx",
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+
+    /* Resolve the project's `@/*` path alias (mirrors the root tsconfig) so the
+     * Convex typecheck can follow imports from convex/*.ts into ../src/** where
+     * modules reference each other via `@/modules/...`. Without this, `convex
+     * codegen`/`dev`/`deploy` typecheck fails with TS2307 on every `@/` import. */
+    "baseUrl": "..",
+    "paths": { "@/*": ["src/*"] },
 
     /* These compiler options are required by Convex */
     "target": "ESNext",

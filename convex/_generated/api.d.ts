@@ -12,6 +12,7 @@ import type * as _branded from "../_branded.js";
 import type * as audit from "../audit.js";
 import type * as directory from "../directory.js";
 import type * as policy from "../policy.js";
+import type * as request from "../request.js";
 
 import type {
   ApiFromModules,
@@ -24,6 +25,7 @@ declare const fullApi: ApiFromModules<{
   audit: typeof audit;
   directory: typeof directory;
   policy: typeof policy;
+  request: typeof request;
 }>;
 
 /**
