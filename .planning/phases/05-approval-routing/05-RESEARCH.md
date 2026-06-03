@@ -411,14 +411,16 @@ export type ApprovalEventMap = {
 | A4 | Module name `approval/` (not `routing/`). | Standard Stack / Structure | LOW — explicit Claude discretion; trivially renamed if user prefers `routing/`. |
 | A5 | `actorId`/`requesterId` typed as `UserId` (directory brand), not a new `RequesterId` brand. | Pitfall 2 | LOW — unifies comparison with `User.id`; a separate brand is possible but adds casts. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Where exactly does the Convex composition root subscribe the routing service?**
+> Both questions are resolved and the recommendations are implemented in the Phase 5 plans (05-02 T3 subscribes routing inside `submitRequest` sharing `ctx.db`; 05-02 T1 swallows routing errors, emits `ApprovalRoutingFailed`, never rethrows).
+
+1. **Where exactly does the Convex composition root subscribe the routing service?** — RESOLVED: subscribe inside `submitRequest`, sharing the mutation `ctx.db` (Option below).
    - What we know: `convex/request.ts` `submitRequest` is the seam; it already builds the `requestDispatcher` and `RequestAuditSubscriber`.
    - What's unclear: whether routing subscribes inside the **same** `submitRequest` mutation (so routing runs synchronously within submit) or in a separate handler/scheduled function.
    - Recommendation: Subscribe inside `submitRequest` (synchronous, in-process — matches the existing audit subscriber and the "synchronous in-process by-reference" pattern). Because routing reads/writes Convex via the same `ctx.db`, it must run within the mutation's transaction. Plan should make the routing service's repos use the mutation `ctx.db` (same as `ConvexRequestEvaluationRepository`).
 
-2. **Does routing run in the same Convex transaction as `submit()` (so a routing DB write commits atomically with the evaluation)?**
+2. **Does routing run in the same Convex transaction as `submit()` (so a routing DB write commits atomically with the evaluation)?** — RESOLVED: Option (a) — routing runs in-transaction but the service swallows its own errors (emits `ApprovalRoutingFailed`, never rethrows), with EventDispatcher hardening (D-54) as defense-in-depth, so the persisted `RequestEvaluation` is never rolled back.
    - What we know: Convex mutations are transactional; the dispatcher fires synchronously inside the mutation handler.
    - What's unclear: D-54 says routing failure must NOT roll back the persisted `RequestEvaluation`. If routing runs in-transaction and throws, Convex would roll back the whole mutation — contradicting D-54.
    - Recommendation: **This is the key wiring decision.** Two options: (a) routing service swallows its own errors (emits `ApprovalRoutingFailed`, never throws) so the mutation commits — keeps D-54 with in-transaction execution; or (b) schedule routing as a separate Convex action/mutation after submit commits. Option (a) is simpler and matches A3. Flag for the planner: the dispatcher hardening (D-54) + service-level error swallowing together guarantee the evaluation persists. Recommend Option (a).
