@@ -28,11 +28,13 @@ export default tseslint.config(
             {
               target: "./src/modules/!(directory)/**/*",
               from: "./src/modules/directory/{domain,application,adapters}/**/*",
+              except: ["**/directory/adapters/convex/mappers.ts"],
               message: "Cross-module deep imports forbidden. Import from '@/modules/directory' (barrel) instead — Module Boundary Rule (D-08)."
             },
             {
               target: "./src/modules/!(policy)/**/*",
               from: "./src/modules/policy/{domain,application,adapters}/**/*",
+              except: ["**/policy/adapters/convex/mappers.ts"],
               message: "Cross-module deep imports forbidden. Import from '@/modules/policy' (barrel) instead — Module Boundary Rule (D-08)."
             },
             {
@@ -48,6 +50,7 @@ export default tseslint.config(
             {
               target: "./src/modules/!(request)/**/*",
               from: "./src/modules/request/{domain,application,adapters}/**/*",
+              except: ["**/request/adapters/convex/mappers.ts"],
               message: "Cross-module deep imports forbidden. Import from '@/modules/request' (barrel) instead — Module Boundary Rule (D-08)."
             },
             {

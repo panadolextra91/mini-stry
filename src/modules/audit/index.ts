@@ -5,6 +5,7 @@ export { auditLogId } from "./domain/ids.js";
 export type { AuditLogRepositoryPort, CreateAuditLogInput } from "./ports/audit-log-repository.port.js";
 // Application
 export { AuditEventSubscriber } from "./application/audit-event-subscriber.js";
+export { RequestAuditSubscriber } from "./application/request-audit-subscriber.js";
 // Adapters
 export { InMemoryAuditLogRepository } from "./adapters/memory/in-memory-audit-log-repository.js";
 // Convex adapters
