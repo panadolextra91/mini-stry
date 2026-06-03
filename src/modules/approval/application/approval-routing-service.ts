@@ -2,7 +2,6 @@ import type {
   TenantContext,
   TenantId,
   UserId,
-  RoleId,
   UserRepositoryPort,
   RoleRepositoryPort,
 } from "@/modules/directory/index.js";
@@ -24,6 +23,13 @@ import {
   TaskAlreadyResolvedError,
   UnauthorizedApproverError,
 } from "./errors.js";
+
+/**
+ * Defensive depth cap for the manager-chain walk (D-50). This is a safety guard
+ * against corrupted hierarchy data, not a business rule — write-time cycle
+ * prevention (D-11, UserService.setManager) remains the primary protection.
+ */
+const MAX_HIERARCHY_DEPTH = 50;
 
 export class ApprovalRoutingService {
   constructor(
@@ -56,11 +62,7 @@ export class ApprovalRoutingService {
       // 2. Read evaluation
       const evaluation = await this.evalRepo.findById(ctx, event.evaluationRecordId);
       if (!evaluation) {
-        throw new RoutingError(
-          null as unknown as UserId,
-          null as unknown as RoleId,
-          "Evaluation not found",
-        );
+        throw new RoutingError(null, null, "Evaluation not found");
       }
 
       // 3. Ignore non-request-approval decisions
@@ -73,7 +75,7 @@ export class ApprovalRoutingService {
 
       // 4. Null requester guard
       if (requesterId === null) {
-        throw new RoutingError(null as unknown as UserId, decision.targetRoleId, "no requester");
+        throw new RoutingError(null, decision.targetRoleId, "no requester");
       }
 
       // 5. Verify role exists
@@ -93,8 +95,10 @@ export class ApprovalRoutingService {
       let resolvedApproverId: UserId | null = null;
 
       while (currentUserId !== null) {
-        if (depth >= 50) {
-          throw new HierarchyTraversalError("Manager chain exceeds maximum depth of 50");
+        if (depth >= MAX_HIERARCHY_DEPTH) {
+          throw new HierarchyTraversalError(
+            `Manager chain exceeds maximum depth of ${MAX_HIERARCHY_DEPTH}`,
+          );
         }
         const currentUser = await this.userRepo.findById(ctx, currentUserId);
         if (!currentUser) {

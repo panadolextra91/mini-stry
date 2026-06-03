@@ -3,8 +3,8 @@ import type { ApprovalTaskId } from "../domain/ids.js";
 
 export class RoutingError extends Error {
   constructor(
-    public readonly requesterId: UserId,
-    public readonly targetRoleId: RoleId,
+    public readonly requesterId: UserId | null,
+    public readonly targetRoleId: RoleId | null,
     message?: string,
   ) {
     super(
