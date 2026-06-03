@@ -520,7 +520,7 @@ it("replay reproduces the persisted decision from content + input + trace", () =
 | A4 | A separate `EventDispatcher<RequestEventMap>` instance is correct (not reusing policy's). | Standard Stack alternatives | If reused, it couples request + policy event maps. LOW — separate instance matches established per-module ownership. |
 | A5 | Per-request construction of dispatcher + subscriber in `convex/request.ts` is acceptable (stateless, synchronous in-process). | Pitfall 4 | If audit must persist across the request lifecycle differently, wiring changes. LOW — events are synchronous and complete within `submit`. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Partial trace on contract violation (D-40 vs. Phase 2 evaluator contract).**
    - What we know: D-40 says persist "the partial trace up to the failure point." The evaluator builds `trace` locally and discards it when it throws `EvaluationError`; the error carries only `code` + `field`. CONTEXT.md / D-42 forbid modifying the evaluator's trace contract.
