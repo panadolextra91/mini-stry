@@ -139,6 +139,10 @@ describe("approval repository and domain components", () => {
       expect(foundByChain).toHaveLength(1);
       expect(foundByChain[0]).toEqual(created);
 
+      const foundByApprover = await repo.findByApprover(TENANT_A, approver);
+      expect(foundByApprover).toHaveLength(1);
+      expect(foundByApprover[0]).toEqual(created);
+
       const updated = await repo.updateState(TENANT_A, created.id, "APPROVED");
       expect(updated.state).toBe("APPROVED");
 

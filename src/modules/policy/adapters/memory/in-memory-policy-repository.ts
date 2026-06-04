@@ -38,6 +38,12 @@ export class InMemoryPolicyRepository implements PolicyRepositoryPort {
     return null;
   }
 
+  async listByTenant(ctx: TenantContext): Promise<Policy[]> {
+    return [...this.policies.values()]
+      .filter((p) => p.tenantId === ctx.tenantId)
+      .reverse();
+  }
+
   async updateActiveVersion(
     ctx: TenantContext,
     id: PolicyId,

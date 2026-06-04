@@ -1,4 +1,4 @@
-import type { TenantContext } from "@/modules/directory/index.js";
+import type { TenantContext, UserId } from "@/modules/directory/index.js";
 import type { ApprovalTaskId, ApprovalChainId } from "../../domain/ids.js";
 import { approvalTaskId as buildApprovalTaskId } from "../../domain/ids.js";
 import type { ApprovalTask } from "../../domain/approval-task.js";
@@ -39,6 +39,12 @@ export class InMemoryApprovalTaskRepository implements ApprovalTaskRepositoryPor
     return [...this.records.values()].filter(
       (r) => r.tenantId === ctx.tenantId && r.chainId === id,
     );
+  }
+
+  async findByApprover(ctx: TenantContext, approverId: UserId): Promise<ApprovalTask[]> {
+    return [...this.records.values()].filter(
+      (r) => r.tenantId === ctx.tenantId && r.approverId === approverId,
+    ).reverse();
   }
 
   async updateState(

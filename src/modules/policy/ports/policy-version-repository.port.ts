@@ -27,6 +27,7 @@ export interface PolicyVersionRepositoryPort {
   create(ctx: TenantContext, input: CreateDraftInput): Promise<PolicyVersion>;
   findById(ctx: TenantContext, id: PolicyVersionId): Promise<PolicyVersion | null>;
   findDraftByPolicy(ctx: TenantContext, policyId: PolicyId): Promise<PolicyVersion | null>;
+  listByPolicy(ctx: TenantContext, policyId: PolicyId): Promise<PolicyVersion[]>;
   update(ctx: TenantContext, id: PolicyVersionId, patch: UpdateDraftPatch): Promise<PolicyVersion>;
   /**
    * Returns the next available version number for a policy.

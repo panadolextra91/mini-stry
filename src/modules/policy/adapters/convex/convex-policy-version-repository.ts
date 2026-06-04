@@ -59,6 +59,17 @@ export class ConvexPolicyVersionRepository implements PolicyVersionRepositoryPor
     return doc ? toPolicyVersionDomain(doc) : null;
   }
 
+  async listByPolicy(ctx: TenantContext, policyId: PolicyId): Promise<PolicyVersion[]> {
+    const docs = await this.db
+      .query("policyVersions")
+      .withIndex("by_tenant_policy_version", (q) =>
+        q.eq("tenantId", fromTenantId(ctx.tenantId)).eq("policyId", fromPolicyId(policyId)),
+      )
+      .order("desc")
+      .take(100);
+    return docs.map(toPolicyVersionDomain);
+  }
+
   async update(
     ctx: TenantContext,
     id: PolicyVersionId,

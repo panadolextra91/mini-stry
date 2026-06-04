@@ -1,4 +1,4 @@
-import type { TenantContext } from "@/modules/directory/index.js";
+import type { TenantContext, UserId } from "@/modules/directory/index.js";
 import type { ApprovalTaskId, ApprovalChainId } from "../../domain/ids.js";
 import type { ApprovalTask } from "../../domain/approval-task.js";
 import type { TaskState } from "../../domain/approval-task-state.js";
@@ -47,6 +47,17 @@ export class ConvexApprovalTaskRepository implements ApprovalTaskRepositoryPort 
         q.eq("tenantId", fromTenantId(ctx.tenantId)).eq("chainId", fromApprovalChainId(id)),
       )
       .collect();
+    return docs.map(toApprovalTaskDomain);
+  }
+
+  async findByApprover(ctx: TenantContext, approverId: UserId): Promise<ApprovalTask[]> {
+    const docs = await this.db
+      .query("approvalTasks")
+      .withIndex("by_tenant_approver", (q) =>
+        q.eq("tenantId", fromTenantId(ctx.tenantId)).eq("approverId", fromUserId(approverId)),
+      )
+      .order("desc")
+      .take(100);
     return docs.map(toApprovalTaskDomain);
   }
 

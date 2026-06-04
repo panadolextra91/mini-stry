@@ -15,5 +15,6 @@ export interface ApprovalTaskRepositoryPort {
   create(ctx: TenantContext, input: CreateApprovalTaskInput): Promise<ApprovalTask>;
   findById(ctx: TenantContext, id: ApprovalTaskId): Promise<ApprovalTask | null>;
   findByChainId(ctx: TenantContext, id: ApprovalChainId): Promise<ApprovalTask[]>;
+  findByApprover(ctx: TenantContext, approverId: UserId): Promise<ApprovalTask[]>;
   updateState(ctx: TenantContext, id: ApprovalTaskId, state: TaskState): Promise<ApprovalTask>;
 }

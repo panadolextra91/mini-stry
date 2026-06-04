@@ -24,3 +24,4 @@ export { AjvSchemaValidator } from "./adapters/ajv/ajv-schema-validator.js";
 
 export { evaluate } from "./application/evaluator.js";
 export { validateAndEvaluate } from "./application/policy-runtime.js";
+export { default as policyContentSchema } from "./schema/policy-content.schema.json" with { type: "json" };

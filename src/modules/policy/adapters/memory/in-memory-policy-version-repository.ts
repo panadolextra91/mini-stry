@@ -53,6 +53,12 @@ export class InMemoryPolicyVersionRepository implements PolicyVersionRepositoryP
     return null;
   }
 
+  async listByPolicy(ctx: TenantContext, policyId: PolicyId): Promise<PolicyVersion[]> {
+    return [...this.versions.values()]
+      .filter((v) => v.tenantId === ctx.tenantId && v.policyId === policyId)
+      .reverse();
+  }
+
   async update(
     ctx: TenantContext,
     id: PolicyVersionId,
