@@ -519,25 +519,25 @@ export const listAuditLogs = query({
 | A6 | `monaco.languages.json.jsonDefaults.setDiagnosticsOptions({ schemas:[{uri,fileMatch,schema}] })` is the correct current API surface | Pattern 4 | Verified across multiple sources but not against a single official Microsoft doc page in this session; MEDIUM. Confirm signature at implementation time |
 | A7 | No backend Convex version bump is required for Phase 6 (handlers use existing `query`/`mutation`/`internalMutation` builders) | Stack | `internalMutation` is already exported by `_generated/server`; verified |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Exact JSON-schema-into-Monaco import path (barrel vs direct).**
    - What we know: `resolveJsonModule:true`; barrel export is D-59's intent; the schema has a stable `$id`.
    - What's unclear: whether the import-attribute barrel re-export survives the Vite frontend build without friction.
-   - Recommendation: try barrel export first; if the Vite build complains, import the JSON directly in the frontend (parity preserved — same file). Decide in 06-02.
+   - **RESOLVED:** Barrel-export-first, with a direct-import fallback. The public API is the runtime barrel export (`export { default as policyContentSchema } from "./schema/policy-content.schema.json" with { type: "json" }`, D-59). If import-attribute friction surfaces in the Vite frontend build (Assumption A1), the frontend falls back to a direct relative JSON import of the same canonical file (parity preserved). 06-01 ships the barrel export; 06-02 consumes it and applies the fallback only if the build complains.
 
 2. **Frontend directory name + Convex generated-api import strategy.**
    - What we know: `web/` avoids collisions; the frontend needs `convex/_generated/api`.
    - What's unclear: relative import vs a dedicated `@convex` alias (cleaner but more config).
-   - Recommendation: relative import for simplicity; add an alias only if import paths get deep.
+   - **RESOLVED:** Frontend lives in a separate `web/` Vite root (own tsconfig), per Pattern 1. The frontend imports the Convex generated API by relative path to `convex/_generated/api` for simplicity; a dedicated alias is added only if import paths get deep (low-risk follow-up, not required up front). This is the directory + import strategy the plans assume.
 
 3. **Version-diff presentation (UI-04) and execution-trace visualization (UI-02).**
    - What we know: deferred/not deep-dived (CONTEXT discretion); trace already stored on `requestEvaluations.trace`.
-   - Recommendation: standard side-by-side/inline diff and a simple ordered trace list; keep minimal per D-V2.
+   - **RESOLVED:** Minimal/standard presentation per D-V2 discretion. UI-04 version-diff is a standard side-by-side/inline diff; UI-02 execution-trace is a simple ordered trace list rendered from `requestEvaluations.trace`. No bespoke visualization beyond this baseline.
 
 4. **Whether to add `convex-test` handler tests or rely on the existing fake-db unit pattern.**
    - What we know: `tests/_helpers/convex-ctx-fixture.ts` already fakes the db for adapter unit tests; `convex-test` (0.0.53, pre-1.0) would test full handlers.
-   - Recommendation: extend the existing fake-db pattern for new adapter methods; treat `convex-test` as optional. See Validation Architecture.
+   - **RESOLVED:** Fake-db pattern; `convex-test` not used. All new adapter/read-path tests extend the existing fake-db unit pattern (`createFakeMutationDb`/`asQueryDb`). `convex-test` is not adopted in Phase 6. See Validation Architecture.
 
 ## Environment Availability
 
