@@ -161,11 +161,24 @@ The runtime stays domain-neutral. Approval routing is one consumer among many; i
 3. Personal dashboard features active inbox tasks allowing fast Approve/Reject actions.
 4. Governance module visualizes audit trails and comparative policy version lists.
 
-**Plans**: 3 plans
+**Plans**: 5 plans
 
-- [ ] 06-01: Bootstrap modern React routes, visual layouts, and dark mode design HSL variables.
-- [ ] 06-02: Build Admin Policy Portal with autocomplete Monaco JSON Editor and schema check panel.
-- [ ] 06-03: Build Request Logs visualizer, Approver Personal Inbox, and Governance timeline dashboards.
+**Wave 1**
+
+- [ ] 06-01-PLAN.md — Backend read paths (listByTenant/listByPolicy/findByApprover) + runtime schema barrel export (D-59) + Wave 0 tests (schema parity, tenant isolation).
+
+**Wave 2** _(blocked on 06-01)_
+
+- [ ] 06-02-PLAN.md — Thin Convex handlers (policy/approval/audit/request-list) + idempotent demo seed (D-61, D-62).
+
+**Wave 3** _(blocked on 06-02)_
+
+- [ ] 06-03-PLAN.md — Vite + React 19 SPA scaffold, shadcn dark HSL theme, app shell + Demo Context Selector + routing (D-55/56/57, D-V1..3).
+
+**Wave 4** _(blocked on 06-03)_
+
+- [ ] 06-04-PLAN.md — Admin Policy Portal: Monaco editor (canonical-schema autocomplete) + version/lifecycle panel (UI-01, D-58/59/60).
+- [ ] 06-05-PLAN.md — Request Center + Personal Inbox + Governance Viewer + live cross-user reactive flow (UI-02/03/04, D-63).
 
 ---
 
@@ -181,7 +194,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 3. Policy Lifecycle                               | 2/2            | Complete    | 2026-06-02 |
 | 4. Request Runtime                                | 2/2            | Complete    | 2026-06-03 |
 | 5. Approval Routing (Reference Decision Consumer) | 0/2            | Not started | -          |
-| 6. Admin Portal & UI Dashboard                    | 0/3            | Not started | -          |
+| 6. Admin Portal & UI Dashboard                    | 0/5            | Not started | -          |
 
 ---
 
