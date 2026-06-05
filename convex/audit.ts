@@ -1,7 +1,17 @@
 /**
- * Phase 1 has no handlers for Audit.
- * Audit logging wires in Phase 3+ when policy lifecycle events emit.
- * The convex/auditLogs table schema is defined in convex/schema.ts.
- * Per D-16 eventType is an open string and event constants are owned by originating modules.
+ * convex/ HARD RULE:
+ * Allowed: validate input shape, instantiate dependencies, call application services, map responses.
+ * Forbidden: evaluate policies, enforce business rules, perform approval routing, contain domain logic.
  */
-export {};
+import { query } from "./_generated/server.js";
+import { v } from "convex/values";
+import { ConvexAuditLogRepository } from "../src/modules/audit/index.js";
+import { tenantContext, tenantId } from "../src/modules/directory/index.js";
+
+export const listAuditLogs = query({
+  args: { tenantId: v.string() },
+  handler: async (ctx, args) => {
+    const repo = new ConvexAuditLogRepository(ctx.db);
+    return repo.findByTenant(tenantContext(tenantId(args.tenantId)));
+  },
+});

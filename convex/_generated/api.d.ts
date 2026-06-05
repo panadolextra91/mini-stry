@@ -9,10 +9,12 @@
  */
 
 import type * as _branded from "../_branded.js";
+import type * as approval from "../approval.js";
 import type * as audit from "../audit.js";
 import type * as directory from "../directory.js";
 import type * as policy from "../policy.js";
 import type * as request from "../request.js";
+import type * as seed from "../seed.js";
 
 import type {
   ApiFromModules,
@@ -22,10 +24,12 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   _branded: typeof _branded;
+  approval: typeof approval;
   audit: typeof audit;
   directory: typeof directory;
   policy: typeof policy;
   request: typeof request;
+  seed: typeof seed;
 }>;
 
 /**

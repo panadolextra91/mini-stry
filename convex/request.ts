@@ -103,3 +103,14 @@ export const getRequestEvaluation = query({
     return evalRepo.findById(tCtx, requestEvaluationId(args.id));
   },
 });
+
+export const listRequests = query({
+  args: {
+    tenantId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const evalRepo = new ConvexRequestEvaluationRepository(ctx.db);
+    const tCtx = tenantContext(tenantId(args.tenantId));
+    return evalRepo.findByTenant(tCtx);
+  },
+});
