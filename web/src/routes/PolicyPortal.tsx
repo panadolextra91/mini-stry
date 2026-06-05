@@ -25,10 +25,10 @@ export function PolicyPortal() {
       {selectedPolicyId && (
         <div className="flex-1 flex overflow-hidden">
           <div className="w-[65%] shrink-0 border-r border-border flex flex-col bg-background">
-            <PolicyEditor policyId={selectedPolicyId} />
+            <PolicyEditor key={selectedPolicyId} policyId={selectedPolicyId} />
           </div>
           <div className="w-[35%] shrink-0 bg-secondary/20 flex flex-col">
-            <VersionPanel policyId={selectedPolicyId} />
+            <VersionPanel key={selectedPolicyId} policyId={selectedPolicyId} />
           </div>
         </div>
       )}

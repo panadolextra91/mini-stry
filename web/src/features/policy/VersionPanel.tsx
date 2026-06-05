@@ -13,7 +13,7 @@ export function VersionPanel({ policyId }: { policyId: string }) {
   
   const policy = policies?.find(p => p._id === policyId);
   const [isRollbackOpen, setIsRollbackOpen] = useState(false);
-  const [targetVersion, setTargetVersion] = useState<any>(null);
+  const [targetVersion, setTargetVersion] = useState<{ _id: string, versionNumber: number } | null>(null);
 
   if (versions === undefined || policies === undefined) {
     return <div className="p-4 text-sm text-muted-foreground">Loading versions...</div>;
@@ -27,7 +27,7 @@ export function VersionPanel({ policyId }: { policyId: string }) {
     try {
       await createDraftMutation(policyId, { rules: [], defaultDecision: { kind: "auto-reject" } });
       toast.success("Draft created.");
-    } catch (err: any) {
+    } catch {
       toast.error("Failed to create draft.");
     }
   };
@@ -38,7 +38,7 @@ export function VersionPanel({ policyId }: { policyId: string }) {
       await rollbackMutation(policyId, targetVersion._id);
       toast.success(`Rolled back to version ${targetVersion.versionNumber}`);
       setIsRollbackOpen(false);
-    } catch (err: any) {
+    } catch {
       toast.error("Failed to roll back.");
     }
   };

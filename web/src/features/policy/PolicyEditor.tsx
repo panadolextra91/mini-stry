@@ -13,14 +13,21 @@ export function PolicyEditor({ policyId }: { policyId: string }) {
   const draftVersion = versions?.find((v) => v.status === "draft");
   
   const [content, setContent] = useState<string>("");
+  const [initialLoaded, setInitialLoaded] = useState(false);
 
   useEffect(() => {
-    if (draftVersion) {
+    if (draftVersion && !initialLoaded) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setContent(JSON.stringify(draftVersion.content, null, 2));
-    } else {
+       
+      setInitialLoaded(true);
+    } else if (!draftVersion && initialLoaded) {
+       
       setContent("");
+       
+      setInitialLoaded(false);
     }
-  }, [draftVersion]);
+  }, [draftVersion, initialLoaded]);
 
   const handleSave = async () => {
     if (!draftVersion) return;
@@ -28,7 +35,7 @@ export function PolicyEditor({ policyId }: { policyId: string }) {
       const parsed = JSON.parse(content);
       await saveDraftMutation(draftVersion._id, parsed, draftVersion.revision);
       toast.success("Draft saved successfully.");
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (err instanceof SyntaxError) {
         toast.error("Invalid JSON format. Save draft blocked until syntax is fixed.");
       } else {
@@ -42,7 +49,7 @@ export function PolicyEditor({ policyId }: { policyId: string }) {
     try {
       await publishMutation(draftVersion._id);
       toast.success("Version published successfully.");
-    } catch (err: any) {
+    } catch {
       toast.error("Publish blocked: the policy failed server validation.");
     }
   };
