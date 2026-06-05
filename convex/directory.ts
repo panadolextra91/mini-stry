@@ -96,3 +96,20 @@ export const setManager = mutation({
     );
   },
 });
+
+export const listTenants = query({
+  args: {},
+  handler: async (ctx) => {
+    return ctx.db.query("tenants").collect();
+  },
+});
+
+export const listUsersByTenant = query({
+  args: { tenantId: v.id("tenants") },
+  handler: async (ctx, args) => {
+    return ctx.db
+      .query("users")
+      .withIndex("by_tenant_email", (q) => q.eq("tenantId", args.tenantId))
+      .collect();
+  },
+});
