@@ -19,4 +19,20 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  // shadcn/ui components co-export variant helpers alongside components — this
+  // is the upstream convention and doesn't violate HMR in practice.
+  {
+    files: ['src/components/ui/**/*.{ts,tsx}'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+  // DemoContext co-exports the provider + hook from one file — standard React
+  // context pattern, safe for HMR.
+  {
+    files: ['src/app/context/**/*.{ts,tsx}'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
 ])

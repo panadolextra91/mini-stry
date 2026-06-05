@@ -19,7 +19,7 @@ export function useCreateDraft() {
   const { tenantId, actorId } = useDemoContext();
   const createDraft = useMutation(api.policy.createDraft);
   
-  return async (policyId: string, content: any) => {
+  return async (policyId: string, content: unknown) => {
     if (!tenantId || !actorId) throw new Error("Missing context");
     return createDraft({
       tenantId,
@@ -34,7 +34,7 @@ export function useSaveDraft() {
   const { tenantId } = useDemoContext();
   const saveDraft = useMutation(api.policy.saveDraft);
   
-  return async (versionId: string, content: any, expectedRevision: number) => {
+  return async (versionId: string, content: unknown, expectedRevision: number) => {
     if (!tenantId) throw new Error("Missing context");
     return saveDraft({
       tenantId,

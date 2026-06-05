@@ -21,7 +21,7 @@ export function AuditTimeline() {
   return (
     <div className="flex flex-col gap-4 w-full h-full overflow-y-auto pr-2">
       {auditLogs.map(log => (
-        <div key={log._id} className="flex flex-col gap-2 p-3 border border-border rounded-md bg-card">
+        <div key={log.id} className="flex flex-col gap-2 p-3 border border-border rounded-md bg-card">
           <div className="flex items-center justify-between">
             <span className="font-semibold text-primary">{log.eventType}</span>
             <span className="text-xs text-muted-foreground font-mono">
@@ -29,7 +29,7 @@ export function AuditTimeline() {
             </span>
           </div>
           <div className="text-xs font-mono text-muted-foreground bg-secondary/10 p-2 rounded whitespace-pre-wrap">
-            {JSON.stringify(log.details, null, 2)}
+            {JSON.stringify(log.payload, null, 2)}
           </div>
         </div>
       ))}

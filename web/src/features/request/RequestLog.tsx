@@ -22,25 +22,25 @@ export function RequestLog() {
   return (
     <div className="flex flex-col gap-4 w-full h-full overflow-y-auto pr-2">
       {requests.map(req => {
-        const isRejected = req.status === "rejected" || req.status === "auto-rejected";
+        const isRejected = req.status === "failed" || req.decision?.kind === "auto-reject" || req.decision?.kind === "request-approval";
         return (
-          <div key={req._id} className="flex flex-col border border-border rounded-md bg-card overflow-hidden">
+          <div key={req.id} className="flex flex-col border border-border rounded-md bg-card overflow-hidden">
             <div className="p-3 border-b border-border flex items-center justify-between bg-secondary/10">
               <span className="font-semibold text-sm">Type: {req.requestType}</span>
               <span className={cn(
                 "text-xs px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold",
                 isRejected ? "bg-destructive text-destructive-foreground" : "bg-primary text-primary-foreground"
               )}>
-                {req.status}
+                {req.status === "completed" ? (req.decision?.kind || "unknown") : "failed"}
               </span>
             </div>
             <div className="p-3 flex flex-col gap-2 bg-background">
               <div className="text-xs font-semibold text-muted-foreground uppercase">Trace</div>
-              {req.trace.map((entry: Record<string, unknown>, i: number) => (
+              {req.trace.map((entry, i) => (
                 <div key={i} className="text-xs font-mono text-muted-foreground flex flex-col gap-1 border-l-2 border-border pl-2 mb-2">
-                  <div className="font-medium text-foreground">{String(entry.step)}</div>
+                  <div className="font-medium text-foreground">Rule: {String(entry.ruleId)}</div>
                   <pre className="whitespace-pre-wrap overflow-x-auto bg-secondary/20 p-2 rounded">
-                    {JSON.stringify(entry.detail, null, 2)}
+                    {JSON.stringify({ matched: entry.matched }, null, 2)}
                   </pre>
                 </div>
               ))}

@@ -19,7 +19,7 @@ The runtime stays domain-neutral. Approval routing is one consumer among many; i
 - [x] **Phase 3: Policy Lifecycle** - Wrap the runtime in a draft → publish → rollback lifecycle with immutable versioning. Reuse the runtime's JSON Schema validator at lifecycle boundaries.
 - [x] **Phase 4: Request Runtime** - Orchestrate evaluation payloads submitted as EvaluationContexts to active policies, persist decision records, and trace step-by-step execution paths.
 - [x] **Phase 5: Approval Routing (Reference Decision Consumer)** - Ship the first reference Decision Consumer. Resolve supervisor reporting lines (`managerId`) and role registries to generate sequential, multi-stage approval task chains from Request-Approval Decisions.
-- [ ] **Phase 6: Admin Portal & UI Dashboard** - Premium React portal featuring a Monaco-based JSON editor with autocompletion, real-time validation, request logs, and personal approval dashboard.
+- [x] **Phase 6: Admin Portal & UI Dashboard** - Premium React portal featuring a Monaco-based JSON editor with autocompletion, real-time validation, request logs, and personal approval dashboard.
 
 ---
 
@@ -123,8 +123,8 @@ The runtime stays domain-neutral. Approval routing is one consumer among many; i
 
 **Plans**: 2 plans
 
-- [ ] 04-01-PLAN.md — request/ module + PolicyRuntimeService.submit (3 outcome paths) + policies.requestType ripple + requestEvaluations table (DEC-01)
-- [ ] 04-02-PLAN.md — RequestAuditSubscriber (by-reference request.\* audit) + deterministic replay test + thin convex/request.ts handlers (AUD-02)
+- [x] 04-01-PLAN.md — request/ module + PolicyRuntimeService.submit (3 outcome paths) + policies.requestType ripple + requestEvaluations table (DEC-01)
+- [x] 04-02-PLAN.md — RequestAuditSubscriber (by-reference request.\* audit) + deterministic replay test + thin convex/request.ts handlers (AUD-02)
 
 ### Phase 5: Approval Routing (Reference Decision Consumer)
 
@@ -143,11 +143,11 @@ The runtime stays domain-neutral. Approval routing is one consumer among many; i
 
 **Wave 1**
 
-- [ ] 05-01-PLAN.md — approval/ module foundation (branded IDs, entities, pure state machine, events, errors, ports, in-memory fakes, ESLint zone) + additive ripples: EventDispatcher D-54 hardening, TenantContext.actorId, RequestEvaluation.requesterId threading.
+- [x] 05-01-PLAN.md — approval/ module foundation (branded IDs, entities, pure state machine, events, errors, ports, in-memory fakes, ESLint zone) + additive ripples: EventDispatcher D-54 hardening, TenantContext.actorId, RequestEvaluation.requesterId threading.
 
 **Wave 2** _(blocked on Wave 1)_
 
-- [ ] 05-02-PLAN.md — ApprovalRoutingService (manager-walk resolver + materialize + idempotency + failure-swallow + Approve/Reject state machine), approval.\* by-reference audit subscriber, Convex adapters/mappers/schema (approvalChains/approvalTasks + requesterId), thin DI subscription on "RequestEvaluated", and live Convex push.
+- [x] 05-02-PLAN.md — ApprovalRoutingService (manager-walk resolver + materialize + idempotency + failure-swallow + Approve/Reject state machine), approval.\* by-reference audit subscriber, Convex adapters/mappers/schema (approvalChains/approvalTasks + requesterId), thin DI subscription on "RequestEvaluated", and live Convex push.
 
 ### Phase 6: Admin Portal & UI Dashboard
 
@@ -165,20 +165,20 @@ The runtime stays domain-neutral. Approval routing is one consumer among many; i
 
 **Wave 1**
 
-- [ ] 06-01-PLAN.md — Backend read paths (listByTenant/listByPolicy/findByApprover) + runtime schema barrel export (D-59) + Wave 0 tests (schema parity, tenant isolation).
+- [x] 06-01-PLAN.md — Backend read paths (listByTenant/listByPolicy/findByApprover) + runtime schema barrel export (D-59) + Wave 0 tests (schema parity, tenant isolation).
 
 **Wave 2** _(blocked on 06-01)_
 
-- [ ] 06-02-PLAN.md — Thin Convex handlers (policy/approval/audit/request-list) + idempotent demo seed (D-61, D-62).
+- [x] 06-02-PLAN.md — Thin Convex handlers (policy/approval/audit/request-list) + idempotent demo seed (D-61, D-62).
 
 **Wave 3** _(blocked on 06-02)_
 
-- [ ] 06-03-PLAN.md — Vite + React 19 SPA scaffold, shadcn dark HSL theme, app shell + Demo Context Selector + routing (D-55/56/57, D-V1..3).
+- [x] 06-03-PLAN.md — Vite + React 19 SPA scaffold, shadcn dark HSL theme, app shell + Demo Context Selector + routing (D-55/56/57, D-V1..3).
 
 **Wave 4** _(blocked on 06-03)_
 
-- [ ] 06-04-PLAN.md — Admin Policy Portal: Monaco editor (canonical-schema autocomplete) + version/lifecycle panel (UI-01, D-58/59/60).
-- [ ] 06-05-PLAN.md — Request Center + Personal Inbox + Governance Viewer + live cross-user reactive flow (UI-02/03/04, D-63).
+- [x] 06-04-PLAN.md — Admin Policy Portal: Monaco editor (canonical-schema autocomplete) + version/lifecycle panel (UI-01, D-58/59/60).
+- [x] 06-05-PLAN.md — Request Center + Personal Inbox + Governance Viewer + live cross-user reactive flow (UI-02/03/04, D-63).
 
 ---
 
@@ -193,9 +193,9 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 2. Policy Runtime Core                            | 3/3            | Completed   | 2026-06-01 |
 | 3. Policy Lifecycle                               | 2/2            | Complete    | 2026-06-02 |
 | 4. Request Runtime                                | 2/2            | Complete    | 2026-06-03 |
-| 5. Approval Routing (Reference Decision Consumer) | 0/2            | Not started | -          |
-| 6. Admin Portal & UI Dashboard                    | 0/5            | Not started | -          |
+| 5. Approval Routing (Reference Decision Consumer) | 2/2            | Complete    | 2026-06-04 |
+| 6. Admin Portal & UI Dashboard                    | 5/5            | Complete    | 2026-06-05 |
 
 ---
 
-_Last updated: 2026-06-01 — Phase 2 (Policy Runtime Core) closed. 3/3 plans shipped (02-01 schema + Ajv adapter, 02-02 pure-TS evaluator + trace, 02-03 validateAndEvaluate composer + e2e fixtures), 100% test coverage on `src/modules/runtime/\*\*/_.ts`, ~95.69% global. CTX-01, CTX-02, RUN-01, RUN-02, RUN-03, DEC-02 validated. Ready for `/gsd:verify-work 2`then`/gsd:discuss-phase 3` (Policy Lifecycle).\*
+_Last updated: 2026-06-05 — Phase 6 (Admin Portal & UI Dashboard) closed. 5/5 plans shipped (06-01 read paths + schema parity, 06-02 Convex handlers + seed, 06-03 React SPA scaffold, 06-04 Monaco editor + lifecycle panel, 06-05 Request Center + Inbox + Governance). All 6 phases complete. UI-01, UI-02, UI-03, UI-04 validated._

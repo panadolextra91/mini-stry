@@ -33,7 +33,7 @@ export function PolicyEditor({ policyId }: { policyId: string }) {
     if (!draftVersion) return;
     try {
       const parsed = JSON.parse(content);
-      await saveDraftMutation(draftVersion._id, parsed, draftVersion.revision);
+      await saveDraftMutation(draftVersion.id, parsed, draftVersion.revision);
       toast.success("Draft saved successfully.");
     } catch (err: unknown) {
       if (err instanceof SyntaxError) {
@@ -47,7 +47,7 @@ export function PolicyEditor({ policyId }: { policyId: string }) {
   const handlePublish = async () => {
     if (!draftVersion) return;
     try {
-      await publishMutation(draftVersion._id);
+      await publishMutation(draftVersion.id);
       toast.success("Version published successfully.");
     } catch {
       toast.error("Publish blocked: the policy failed server validation.");

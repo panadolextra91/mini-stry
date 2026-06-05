@@ -26,11 +26,11 @@ export function PolicyList({ selectedId, onSelect }: PolicyListProps) {
     <div className="flex flex-col gap-1 w-full max-h-[300px] overflow-y-auto">
       {policies.map((p) => (
         <button
-          key={p._id}
-          onClick={() => onSelect(p._id)}
+          key={p.id}
+          onClick={() => onSelect(p.id)}
           className={cn(
             "flex items-center gap-3 px-3 py-2 text-sm text-left rounded-md transition-colors",
-            selectedId === p._id
+            selectedId === p.id
               ? "bg-primary/10 text-primary font-medium"
               : "text-foreground hover:bg-secondary"
           )}

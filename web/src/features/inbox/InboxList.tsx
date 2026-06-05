@@ -52,11 +52,11 @@ export function InboxList() {
         const isRejected = task.state === "REJECTED";
         
         return (
-          <div key={task._id} className="flex flex-col border border-border rounded-md bg-card p-4">
+          <div key={task.id} className="flex flex-col border border-border rounded-md bg-card p-4">
             <div className="flex items-center justify-between mb-4">
               <div className="flex flex-col gap-1">
-                <span className="font-semibold">Stage: {task.stage}</span>
-                <span className="text-sm text-muted-foreground font-mono">Request Evaluation: {task.requestEvaluationId}</span>
+                <span className="font-semibold">Stage: {task.stageNumber}</span>
+                <span className="text-sm text-muted-foreground font-mono">Chain: {task.chainId}</span>
               </div>
               <span className={cn(
                 "text-xs px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold",
@@ -69,8 +69,8 @@ export function InboxList() {
             
             {isPending && (
               <div className="flex gap-2 justify-end mt-2 pt-4 border-t border-border">
-                <Dialog open={rejectingTaskId === task._id} onOpenChange={(open) => {
-                  if (open) setRejectingTaskId(task._id);
+                <Dialog open={rejectingTaskId === task.id} onOpenChange={(open) => {
+                  if (open) setRejectingTaskId(task.id);
                   else setRejectingTaskId(null);
                 }}>
                   <DialogTrigger asChild>
@@ -85,12 +85,12 @@ export function InboxList() {
                     </DialogHeader>
                     <DialogFooter>
                       <Button variant="outline" onClick={() => setRejectingTaskId(null)}>Cancel</Button>
-                      <Button variant="destructive" onClick={() => handleReject(task._id)}>Reject</Button>
+                      <Button variant="destructive" onClick={() => handleReject(task.id)}>Reject</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
                 
-                <Button onClick={() => handleApprove(task._id)}>Approve</Button>
+                <Button onClick={() => handleApprove(task.id)}>Approve</Button>
               </div>
             )}
           </div>

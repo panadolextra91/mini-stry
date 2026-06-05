@@ -24,7 +24,7 @@ export function VersionHistory() {
           </SelectTrigger>
           <SelectContent>
             {policies.map(p => (
-              <SelectItem key={p._id} value={p._id}>{p.name}</SelectItem>
+              <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -35,26 +35,26 @@ export function VersionHistory() {
           <div className="flex gap-4 shrink-0 mt-4">
             <div className="flex-1 flex flex-col gap-1">
               <label className="text-xs text-muted-foreground font-semibold uppercase">Version A</label>
-              <Select value={v1?._id as string | undefined} onValueChange={(id) => setV1(versions.find(v => v._id === id) as unknown as Record<string, unknown>)}>
+              <Select value={v1?.id as string | undefined} onValueChange={(id) => setV1(versions.find(v => v.id === id) as unknown as Record<string, unknown>)}>
                 <SelectTrigger className="bg-background">
                   <SelectValue placeholder="Select version" />
                 </SelectTrigger>
                 <SelectContent>
                   {versions.map(v => (
-                    <SelectItem key={v._id} value={v._id}>Version {v.versionNumber} ({v.status})</SelectItem>
+                    <SelectItem key={v.id} value={v.id}>Version {v.versionNumber} ({v.status})</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="flex-1 flex flex-col gap-1">
               <label className="text-xs text-muted-foreground font-semibold uppercase">Version B</label>
-              <Select value={v2?._id as string | undefined} onValueChange={(id) => setV2(versions.find(v => v._id === id) as unknown as Record<string, unknown>)}>
+              <Select value={v2?.id as string | undefined} onValueChange={(id) => setV2(versions.find(v => v.id === id) as unknown as Record<string, unknown>)}>
                 <SelectTrigger className="bg-background">
                   <SelectValue placeholder="Select version" />
                 </SelectTrigger>
                 <SelectContent>
                   {versions.map(v => (
-                    <SelectItem key={v._id} value={v._id}>Version {v.versionNumber} ({v.status})</SelectItem>
+                    <SelectItem key={v.id} value={v.id}>Version {v.versionNumber} ({v.status})</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

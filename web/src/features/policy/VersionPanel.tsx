@@ -11,9 +11,9 @@ export function VersionPanel({ policyId }: { policyId: string }) {
   const rollbackMutation = useRollback();
   const createDraftMutation = useCreateDraft();
   
-  const policy = policies?.find(p => p._id === policyId);
+  const policy = policies?.find(p => p.id === policyId);
   const [isRollbackOpen, setIsRollbackOpen] = useState(false);
-  const [targetVersion, setTargetVersion] = useState<{ _id: string, versionNumber: number } | null>(null);
+  const [targetVersion, setTargetVersion] = useState<{ id: string, versionNumber: number } | null>(null);
 
   if (versions === undefined || policies === undefined) {
     return <div className="p-4 text-sm text-muted-foreground">Loading versions...</div>;
@@ -35,7 +35,7 @@ export function VersionPanel({ policyId }: { policyId: string }) {
   const handleRollback = async () => {
     if (!targetVersion) return;
     try {
-      await rollbackMutation(policyId, targetVersion._id);
+      await rollbackMutation(policyId, targetVersion.id);
       toast.success(`Rolled back to version ${targetVersion.versionNumber}`);
       setIsRollbackOpen(false);
     } catch {
@@ -53,12 +53,12 @@ export function VersionPanel({ policyId }: { policyId: string }) {
       </div>
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
         {sortedVersions.map(v => {
-          const isActive = v._id === activeVersionId;
+          const isActive = v.id === activeVersionId;
           const isDraft = v.status === "draft";
           
           return (
             <div 
-              key={v._id} 
+              key={v.id} 
               className={cn(
                 "flex flex-col gap-2 p-3 rounded-md border",
                 isActive ? "border-primary bg-primary/10" : "border-border bg-card",
@@ -83,7 +83,7 @@ export function VersionPanel({ policyId }: { policyId: string }) {
               
               {!isActive && !isDraft && (
                 <div className="mt-2 flex gap-2">
-                  <Dialog open={isRollbackOpen && targetVersion?._id === v._id} onOpenChange={(open) => {
+                  <Dialog open={isRollbackOpen && targetVersion?.id === v.id} onOpenChange={(open) => {
                     if (open) setTargetVersion(v);
                     setIsRollbackOpen(open);
                   }}>
